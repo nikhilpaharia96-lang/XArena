@@ -1,0 +1,360 @@
+// XArena — canonical production data model.
+// This is the Postgres-target schema. Local dev in this sandbox runs on a
+// hand-written SQLite mirror (src/server/db/schema.sql) because the sandbox
+// cannot reach binaries.prisma.sh. On a normal machine or CI runner:
+//   1. `npm install -D prisma && npm install @prisma/client`
+//   2. Set DATABASE_URL to a postgres:// connection string
+//   3. `npx prisma migrate dev --name init`
+// No model changes are required — this file is already Postgres-ready.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role { USER MODERATOR ADMIN SUPER_ADMIN }
+enum AccountStatus { ACTIVE SUSPENDED BANNED PENDING_VERIFICATION }
+enum AuthProvider { EMAIL GOOGLE }
+enum GameMode { SOLO DUO SQUAD ONE_V_ONE TWO_V_TWO FOUR_V_FOUR CLASSIC CLASH_SQUAD CUSTOM }
+enum TournamentFormat { FREE PAID }
+enum TournamentCadence { DAILY WEEKLY MEGA ONE_OFF }
+enum TournamentStatus { DRAFT PUBLISHED REGISTRATION_OPEN REGISTRATION_CLOSED LIVE COMPLETED CANCELLED }
+enum ParticipantStatus { REGISTERED CHECKED_IN DISQUALIFIED WITHDRAWN }
+enum MatchStatus { SCHEDULED ROOM_RELEASED LIVE RESULT_PENDING RESULT_SUBMITTED RESULT_VERIFIED DISPUTED COMPLETED }
+enum TransactionType { DEPOSIT WITHDRAWAL TOURNAMENT_ENTRY TOURNAMENT_PRIZE REFERRAL_BONUS BONUS_CREDIT REFUND ADMIN_ADJUSTMENT }
+enum TransactionStatus { PENDING COMPLETED FAILED REJECTED REVERSED }
+enum WithdrawStatus { PENDING APPROVED PROCESSING PAID REJECTED }
+enum NotificationType { TOURNAMENT_REMINDER ROOM_RELEASED DEPOSIT_SUCCESS WITHDRAW_SUCCESS WITHDRAW_REJECTED RESULT_PUBLISHED WINNER_ANNOUNCEMENT REFERRAL_BONUS ANNOUNCEMENT SYSTEM }
+enum TicketStatus { OPEN IN_PROGRESS RESOLVED CLOSED }
+enum TicketPriority { LOW MEDIUM HIGH URGENT }
+
+model User {
+  id               String        @id @default(cuid())
+  uid              String        @unique @default(cuid())
+  email            String        @unique
+  emailVerified    Boolean       @default(false)
+  passwordHash     String?
+  authProvider     AuthProvider  @default(EMAIL)
+  firebaseUid      String?       @unique
+  username         String        @unique
+  displayName      String?
+  avatarUrl        String?
+  phone            String?
+  role             Role          @default(USER)
+  status           AccountStatus @default(PENDING_VERIFICATION)
+  referralCode     String        @unique
+  referredById     String?
+  referredBy       Referral?     @relation("ReferredUser")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  lastLoginAt      DateTime?
+
+  wallet           Wallet?
+  transactions     Transaction[]
+  deposits         Deposit[]
+  withdrawRequests WithdrawRequest[]
+  participations   TournamentParticipant[]
+  matchResults     MatchResult[]
+  notifications    Notification[]
+  referralsGiven   Referral[]    @relation("ReferrerUser")
+  supportTickets   SupportTicket[]
+  auditLogs        AuditLog[]
+  stats            PlayerStats?
+  sessions         Session[]
+  pushTokens       PushToken[]
+
+  @@index([email])
+  @@index([username])
+  @@index([referralCode])
+}
+
+model Session {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken String    @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PlayerStats {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchesPlayed Int      @default(0)
+  wins          Int      @default(0)
+  losses        Int      @default(0)
+  kills         Int      @default(0)
+  headshots     Int      @default(0)
+  totalEarnings Int      @default(0)
+  currentStreak Int      @default(0)
+  bestRank      Int?
+  updatedAt     DateTime @updatedAt
+}
+
+model Game {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  shortName      String?
+  iconUrl        String?
+  bannerUrl      String?
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  supportedModes String
+  tournaments    Tournament[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model Tournament {
+  id                   String            @id @default(cuid())
+  slug                 String            @unique
+  title                String
+  description          String
+  bannerUrl            String?
+  gameId               String
+  game                 Game              @relation(fields: [gameId], references: [id])
+  mode                 GameMode
+  format               TournamentFormat
+  cadence              TournamentCadence @default(ONE_OFF)
+  status               TournamentStatus  @default(DRAFT)
+  entryFee             Int               @default(0)
+  prizePool            Int
+  prizeDistribution    String
+  maxSlots             Int
+  slotsFilled          Int               @default(0)
+  roomSize             Int               @default(1)
+  map                  String?
+  rules                String
+  scoringSystem        String?
+  registrationStartsAt DateTime
+  registrationEndsAt   DateTime
+  matchStartsAt        DateTime
+  roomId               String?
+  roomPassword         String?
+  roomReleasedAt       DateTime?
+  adminNotes           String?
+  isFeatured           Boolean           @default(false)
+  createdById          String
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  participants TournamentParticipant[]
+  matches      Match[]
+
+  @@index([gameId])
+  @@index([status])
+  @@index([matchStartsAt])
+}
+
+model TournamentParticipant {
+  id           String            @id @default(cuid())
+  tournamentId String
+  tournament   Tournament        @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teamName     String?
+  status       ParticipantStatus @default(REGISTERED)
+  entryTxnId   String?
+  joinedAt     DateTime          @default(now())
+
+  @@unique([tournamentId, userId])
+  @@index([tournamentId])
+  @@index([userId])
+}
+
+model Match {
+  id           String        @id @default(cuid())
+  tournamentId String
+  tournament   Tournament    @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  round        Int           @default(1)
+  status       MatchStatus   @default(SCHEDULED)
+  results      MatchResult[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([tournamentId])
+}
+
+model MatchResult {
+  id                String    @id @default(cuid())
+  matchId           String
+  match             Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+  placement         Int?
+  kills             Int       @default(0)
+  screenshotUrl     String?
+  submittedAt       DateTime  @default(now())
+  verifiedByAdminId String?
+  verifiedAt        DateTime?
+  isDisputed        Boolean   @default(false)
+  disputeReason     String?
+
+  @@index([matchId])
+  @@index([userId])
+}
+
+model Wallet {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  depositBalance Int      @default(0)
+  winningBalance Int      @default(0)
+  bonusBalance   Int      @default(0)
+  lockedBalance  Int      @default(0)
+  updatedAt      DateTime @updatedAt
+}
+
+model Transaction {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         TransactionType
+  status       TransactionStatus @default(PENDING)
+  amount       Int
+  balanceAfter Int
+  referenceId  String            @unique
+  description  String?
+  metadata     String?
+  createdAt    DateTime          @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([referenceId])
+}
+
+model Deposit {
+  id                 String            @id @default(cuid())
+  userId             String
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount             Int
+  status             TransactionStatus @default(PENDING)
+  razorpayOrderId    String            @unique
+  razorpayPaymentId  String?           @unique
+  razorpaySignature  String?
+  createdAt          DateTime          @default(now())
+  verifiedAt         DateTime?
+
+  @@index([userId])
+  @@index([razorpayOrderId])
+}
+
+model WithdrawRequest {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount          Int
+  status          WithdrawStatus @default(PENDING)
+  upiId           String?
+  bankAccount     String?
+  ifsc            String?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  createdAt       DateTime       @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Referral {
+  id             String    @id @default(cuid())
+  referrerId     String
+  referrer       User      @relation("ReferrerUser", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredUserId String    @unique
+  referredUser   User      @relation("ReferredUser", fields: [referredUserId], references: [id], onDelete: Cascade)
+  bonusAmount    Int       @default(0)
+  bonusPaidAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([referrerId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model Banner {
+  id        String    @id @default(cuid())
+  title     String
+  imageUrl  String
+  linkUrl   String?
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model SupportTicket {
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject      String
+  message      String
+  status       TicketStatus   @default(OPEN)
+  priority     TicketPriority @default(MEDIUM)
+  assignedToId String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+}

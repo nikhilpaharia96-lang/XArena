@@ -1,0 +1,12 @@
+{
+  "name": "XArena — Play. Compete. Win.",
+  "short_name": "XArena",
+  "description": "India's premium esports tournament platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090C",
+  "theme_color": "#08090C",
+  "icons": [
+    { "src": "/icon", "sizes": "32x32", "type": "image/png" }
+  ]
+}
