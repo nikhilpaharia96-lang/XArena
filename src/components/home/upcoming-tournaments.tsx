@@ -12,7 +12,7 @@ export function UpcomingTournaments() {
 
   return (
     <section>
-      <SectionHeader title="Upcoming Tournaments" href="/tournaments?status=REGISTRATION_OPEN" />
+      <SectionHeader title="Upcoming Tournaments" href="/tournaments?status=REGISTRATION_OPEN" icon={Trophy} />
 
       {isLoading ? (
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
