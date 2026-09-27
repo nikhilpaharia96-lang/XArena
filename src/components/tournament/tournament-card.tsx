@@ -10,9 +10,19 @@ import { CountdownTimer } from "./countdown-timer";
 import { formatPaise, gameModeLabel } from "@/lib/format";
 import type { TournamentListItem } from "@/hooks/use-tournaments";
 
+const STATUS_META: Record<string, { label: string; tone: "crimson" | "cobalt" | "neutral" | "signal" }> = {
+  LIVE: { label: "LIVE", tone: "crimson" },
+  REGISTRATION_OPEN: { label: "Upcoming", tone: "cobalt" },
+  REGISTRATION_CLOSED: { label: "Starting Soon", tone: "cobalt" },
+  PUBLISHED: { label: "Upcoming", tone: "cobalt" },
+  COMPLETED: { label: "Completed", tone: "neutral" },
+  CANCELLED: { label: "Cancelled", tone: "neutral" },
+};
+
 export function TournamentCard({ tournament }: { tournament: TournamentListItem }) {
   const t = tournament;
   const isFull = t.slotsLeft <= 0;
+  const statusMeta = STATUS_META[t.status];
 
   return (
     <Link href={`/tournaments/${t.slug}`}>
@@ -20,6 +30,14 @@ export function TournamentCard({ tournament }: { tournament: TournamentListItem 
         <Card className="overflow-hidden">
           <div className="relative h-28 gradient-brand flex items-end p-3">
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            {statusMeta && (
+              <span className="absolute top-3 left-3 z-10">
+                <Badge tone={statusMeta.tone}>
+                  {statusMeta.tone === "crimson" && <span className="h-1.5 w-1.5 rounded-full bg-white live-dot" />}
+                  {statusMeta.label}
+                </Badge>
+              </span>
+            )}
             <div className="relative z-10 flex items-center justify-between w-full">
               <Badge tone={t.format === "FREE" ? "signal" : "gold"}>{t.format === "FREE" ? "Free Entry" : formatPaise(t.entryFee)}</Badge>
               {t.isJoined && <Badge tone="cobalt">Joined</Badge>}

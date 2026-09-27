@@ -5,7 +5,7 @@ import { motion, type HTMLMotionProps } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import React from "react";
 
-type Variant = "primary" | "secondary" | "outline" | "ghost" | "danger";
+type Variant = "primary" | "cta" | "secondary" | "outline" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
 interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref" | "children"> {
@@ -17,11 +17,12 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref" | "children"
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: "gradient-brand text-white shadow-[0_8px_24px_-8px_rgba(124,92,246,0.6)]",
+  primary: "gradient-brand text-white shadow-[0_8px_24px_-8px_rgba(37,99,235,0.6)]",
+  cta: "gradient-cta text-white shadow-[0_8px_24px_-8px_rgba(249,115,22,0.6)]",
   secondary: "bg-surface-2 text-white border border-white/10",
   outline: "bg-transparent border border-violet/40 text-violet hover:bg-violet/10",
   ghost: "bg-transparent text-white/70 hover:bg-white/5",
-  danger: "bg-crimson text-white shadow-[0_8px_24px_-8px_rgba(255,59,92,0.6)]",
+  danger: "bg-crimson text-white shadow-[0_8px_24px_-8px_rgba(239,68,68,0.6)]",
 };
 
 const sizeClasses: Record<Size, string> = {
