@@ -148,6 +148,9 @@ model Tournament {
   slotsFilled          Int               @default(0)
   roomSize             Int               @default(1)
   map                  String?
+  // Normalized category (e.g. FF_SURVIVAL, CS_SCRIMS, LONE_WOLF). Free Fire uses this to
+  // route tournaments into /games/free-fire/[category]. See src/lib/free-fire-categories.ts.
+  category             String?
   rules                String
   scoringSystem        String?
   registrationStartsAt DateTime
@@ -168,6 +171,7 @@ model Tournament {
   @@index([gameId])
   @@index([status])
   @@index([matchStartsAt])
+  @@index([category])
 }
 
 model TournamentParticipant {
