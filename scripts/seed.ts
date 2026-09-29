@@ -105,6 +105,7 @@ async function main() {
       slotsFilled: 31,
       roomSize: 4,
       map: "Bermuda",
+      category: "FF_SURVIVAL",
       rules:
         "1. No teaming with rival squads.\n2. No use of hacks, mods, or emulators unless explicitly allowed.\n3. Screenshot proof of final placement required within 10 minutes of match end.\n4. Decisions by admins are final.",
       scoringSystem: "Placement points + 1 point per kill. Booyah = +12 bonus points.",
@@ -185,12 +186,67 @@ async function main() {
       slotsFilled: 8,
       roomSize: 1,
       map: "Purgatory",
+      category: "FF_FULL_MAP",
       rules: "1. Open to all skill levels.\n2. Fair play required — hacking results in ban.\n3. Screenshot proof required.",
       scoringSystem: "Placement based.",
       registrationStartsAt: inHours(-2),
       registrationEndsAt: inHours(6),
       matchStartsAt: inHours(7),
       isFeatured: true,
+    },
+    {
+      slug: "free-fire-cs-scrims-night",
+      title: "Free Fire CS Scrims Night",
+      description: "Practice-style Clash Squad scrims for squads that want competitive reps before the big cups.",
+      gameSlug: "free-fire-max",
+      mode: "CLASH_SQUAD",
+      format: "PAID",
+      cadence: "DAILY",
+      status: "REGISTRATION_OPEN",
+      entryFee: 2000,
+      prizePool: 60000,
+      prizeDistribution: [
+        { position: 1, amount: 36000 },
+        { position: 2, amount: 24000 },
+      ],
+      maxSlots: 16,
+      slotsFilled: 9,
+      roomSize: 4,
+      map: "Bermuda",
+      category: "CS_SCRIMS",
+      rules: "1. Best of 7 Clash Squad rounds.\n2. Squad of 4 required.\n3. Fair play enforced.",
+      scoringSystem: "Round wins decide placement.",
+      registrationStartsAt: inHours(-3),
+      registrationEndsAt: inHours(3),
+      matchStartsAt: inHours(4),
+      isFeatured: false,
+    },
+    {
+      slug: "free-fire-lone-wolf-duel",
+      title: "Free Fire Lone Wolf Duel",
+      description: "1v1 Lone Wolf knockout. Just you, your aim, and one opponent.",
+      gameSlug: "free-fire-max",
+      mode: "SOLO",
+      format: "FREE",
+      cadence: "DAILY",
+      status: "REGISTRATION_OPEN",
+      entryFee: 0,
+      prizePool: 15000,
+      prizeDistribution: [
+        { position: 1, amount: 10000 },
+        { position: 2, amount: 5000 },
+      ],
+      maxSlots: 32,
+      slotsFilled: 14,
+      roomSize: 2,
+      map: "Lone Wolf",
+      category: "LONE_WOLF",
+      rules: "1. Best of 3 rounds.\n2. No emulators.\n3. Screenshot of result required.",
+      scoringSystem: "Single elimination.",
+      registrationStartsAt: inHours(-1),
+      registrationEndsAt: inHours(5),
+      matchStartsAt: inHours(6),
+      isFeatured: false,
     },
     {
       slug: "valorant-squad-clash",
@@ -229,10 +285,10 @@ async function main() {
     db.prepare(
       `INSERT INTO Tournament (
         id, slug, title, description, gameId, mode, format, cadence, status,
-        entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, rules,
+        entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, category, rules,
         scoringSystem, registrationStartsAt, registrationEndsAt, matchStartsAt,
         isFeatured, createdById, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       t.slug,
@@ -250,6 +306,7 @@ async function main() {
       t.slotsFilled,
       t.roomSize,
       t.map,
+      (t as { category?: string }).category ?? null,
       t.rules,
       t.scoringSystem,
       t.registrationStartsAt,
@@ -261,8 +318,14 @@ async function main() {
       now
     );
   }
+  // Backfill categories on rows seeded before the column existed.
+  for (const t of tournaments) {
+    const c = (t as { category?: string }).category;
+    if (c) db.prepare("UPDATE Tournament SET category = ? WHERE slug = ? AND category IS NULL").run(c, t.slug);
+  }
   console.log(`  ✓ ${tournaments.length} sample tournaments`);
 
+  // Completed FF tournament (below) is a survival-style BR, categorized after insert.
   // A couple of completed tournaments + verified results so the leaderboard has data
   const pastGame = gameIds["free-fire-max"];
   const pastId = createId("tourn");
@@ -341,6 +404,7 @@ async function main() {
     extraUserIds[u.username] = row.id;
   }
   console.log(`  ✓ ${extraUsers.length} additional leaderboard demo players`);
+  db.prepare("UPDATE Tournament SET category = 'FF_SURVIVAL' WHERE slug = 'free-fire-max-thursday-throwdown-completed' AND category IS NULL").run();
 
   // ---------------------------------------------------------------------
   // Referral chain: demo user referred by admin (idempotent via UNIQUE
