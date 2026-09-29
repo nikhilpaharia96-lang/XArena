@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS Tournament (
   slotsFilled          INTEGER NOT NULL DEFAULT 0,
   roomSize             INTEGER NOT NULL DEFAULT 1,
   map                  TEXT,
+  category             TEXT,
   rules                TEXT NOT NULL,
   scoringSystem        TEXT,
   registrationStartsAt TEXT NOT NULL,

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FREE_FIRE_CATEGORY_VALUES } from "@/lib/free-fire-categories";
 
 export const createTournamentSchema = z.object({
   title: z.string().trim().min(3).max(120),
@@ -31,6 +32,7 @@ export const createTournamentSchema = z.object({
   maxSlots: z.number().int().min(2).max(1000),
   roomSize: z.number().int().min(1).max(64),
   map: z.string().trim().optional(),
+  category: z.enum(FREE_FIRE_CATEGORY_VALUES).nullable().optional(),
   rules: z.string().trim().min(10),
   scoringSystem: z.string().trim().optional(),
   registrationStartsAt: z.string().datetime(),

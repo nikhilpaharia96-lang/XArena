@@ -30,6 +30,14 @@ function createConnection(): Database.Database {
   const schema = fs.readFileSync(schemaPath, "utf-8");
   db.exec(schema);
 
+  // Lightweight in-place migrations for DB files created before a column existed
+  // (CREATE TABLE IF NOT EXISTS won't add columns to an existing table).
+  const tournamentCols = db.prepare("PRAGMA table_info(Tournament)").all() as { name: string }[];
+  if (!tournamentCols.some((c) => c.name === "category")) {
+    db.exec("ALTER TABLE Tournament ADD COLUMN category TEXT");
+  }
+  db.exec("CREATE INDEX IF NOT EXISTS idx_tournament_category ON Tournament(category)");
+
   return db;
 }
 

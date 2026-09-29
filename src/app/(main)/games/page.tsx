@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
 import { Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { FREE_FIRE_GAME_SLUG, FREE_FIRE_ROUTE } from "@/lib/free-fire-categories";
 
 export default function GamesPage() {
   const { data: games, isLoading } = useGames();
@@ -21,7 +22,7 @@ export default function GamesPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {games.map((g, i) => (
             <motion.div key={g.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-              <Link href={`/tournaments?game=${g.slug}`}>
+              <Link href={g.slug === FREE_FIRE_GAME_SLUG ? FREE_FIRE_ROUTE : `/tournaments?game=${g.slug}`}>
                 <Card className="p-5 flex flex-col items-center gap-3 text-center hover:glow-border transition-shadow">
                   <div className="h-14 w-14 rounded-2xl gradient-brand flex items-center justify-center">
                     <Gamepad2 className="h-7 w-7 text-white" />

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Game } from "@/hooks/use-tournaments";
 import { GameTypeIcon } from "./game-icon";
+import { FREE_FIRE_GAME_SLUG, FREE_FIRE_ROUTE } from "@/lib/free-fire-categories";
 
 /** Deterministic accent per game (hash of id) so the row reads as a varied
  * roster instead of one repeated color, without needing per-game artwork. */
@@ -21,7 +22,7 @@ function accentFor(id: string) {
 
 export function GameCard({ game, tournamentCount }: { game: Game; tournamentCount?: number }) {
   return (
-    <Link href={`/tournaments?game=${game.slug}`} className="shrink-0 w-[116px]" aria-label={`${game.name} tournaments`}>
+    <Link href={game.slug === FREE_FIRE_GAME_SLUG ? FREE_FIRE_ROUTE : `/tournaments?game=${game.slug}`} className="shrink-0 w-[116px]" aria-label={`${game.name} tournaments`}>
       <motion.div whileTap={{ scale: 0.96 }} className="relative h-[136px] rounded-2xl overflow-hidden border border-white/8">
         <div className={`absolute inset-0 bg-gradient-to-br ${accentFor(game.id)}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/30" />

@@ -61,6 +61,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     if (input.maxSlots !== undefined) columnMap.maxSlots = input.maxSlots;
     if (input.roomSize !== undefined) columnMap.roomSize = input.roomSize;
     if (input.map !== undefined) columnMap.map = input.map;
+    if (input.category !== undefined) columnMap.category = input.category;
     if (input.rules !== undefined) columnMap.rules = input.rules;
     if (input.scoringSystem !== undefined) columnMap.scoringSystem = input.scoringSystem;
     if (input.registrationStartsAt !== undefined) columnMap.registrationStartsAt = input.registrationStartsAt;

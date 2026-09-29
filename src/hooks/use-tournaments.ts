@@ -33,6 +33,7 @@ export interface TournamentListItem {
   slotsLeft: number;
   roomSize: number;
   map: string | null;
+  category: string | null;
   registrationStartsAt: string;
   registrationEndsAt: string;
   matchStartsAt: string;
@@ -60,12 +61,13 @@ export function useGames() {
   });
 }
 
-export function useTournaments(filters?: { game?: string; status?: string; format?: string; featured?: boolean }) {
+export function useTournaments(filters?: { game?: string; status?: string; format?: string; featured?: boolean; category?: string }) {
   const params = new URLSearchParams();
   if (filters?.game) params.set("game", filters.game);
   if (filters?.status) params.set("status", filters.status);
   if (filters?.format) params.set("format", filters.format);
   if (filters?.featured) params.set("featured", "1");
+  if (filters?.category) params.set("category", filters.category);
   const qs = params.toString();
 
   return useQuery<TournamentListItem[]>({
@@ -103,5 +105,19 @@ export function useSubmitResult(slug: string) {
     mutationFn: (input: { placement?: number; kills: number; screenshotUrl: string }) =>
       api.post(`/api/tournaments/${slug}/result`, input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tournament", slug] }),
+  });
+}
+
+export interface GameCategorySummary {
+  game: { id: string; slug: string; name: string };
+  totals: { activeCount: number; prizePool: number; players: number };
+  categories: { value: string; activeCount: number; prizePool: number; players: number }[];
+}
+
+export function useGameCategories(gameSlug: string) {
+  return useQuery<GameCategorySummary>({
+    queryKey: ["game-categories", gameSlug],
+    queryFn: () => api.get<GameCategorySummary>(`/api/games/${gameSlug}/categories`),
+    staleTime: 30_000,
   });
 }

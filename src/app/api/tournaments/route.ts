@@ -22,6 +22,7 @@ interface TournamentRow {
   slotsFilled: number;
   roomSize: number;
   map: string | null;
+  category: string | null;
   registrationStartsAt: string;
   registrationEndsAt: string;
   matchStartsAt: string;
@@ -29,7 +30,7 @@ interface TournamentRow {
 }
 
 /**
- * GET /api/tournaments?game=free-fire-max&status=REGISTRATION_OPEN&format=PAID&featured=1
+ * GET /api/tournaments?game=free-fire-max&status=REGISTRATION_OPEN&format=PAID&featured=1&category=FF_SURVIVAL
  *
  * Public endpoint (no auth required to browse). If the caller has a valid
  * session, we additionally annotate each tournament with `isJoined` so the
@@ -42,12 +43,13 @@ export async function GET(req: Request) {
     const status = url.searchParams.get("status");
     const format = url.searchParams.get("format");
     const featured = url.searchParams.get("featured");
+    const category = url.searchParams.get("category");
     const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 100);
 
     let query = `
       SELECT t.id, t.slug, t.title, t.bannerUrl, t.gameId, g.name as gameName, g.slug as gameSlug, g.iconUrl as gameIcon,
              t.mode, t.format, t.cadence, t.status, t.entryFee, t.prizePool, t.maxSlots, t.slotsFilled,
-             t.roomSize, t.map, t.registrationStartsAt, t.registrationEndsAt, t.matchStartsAt, t.isFeatured
+             t.roomSize, t.map, t.category, t.registrationStartsAt, t.registrationEndsAt, t.matchStartsAt, t.isFeatured
       FROM Tournament t
       JOIN Game g ON g.id = t.gameId
       WHERE t.status NOT IN ('DRAFT', 'CANCELLED')
@@ -65,6 +67,10 @@ export async function GET(req: Request) {
     if (format) {
       query += " AND t.format = ?";
       params.push(format);
+    }
+    if (category) {
+      query += " AND t.category = ?";
+      params.push(category);
     }
     if (featured === "1") {
       query += " AND t.isFeatured = 1";

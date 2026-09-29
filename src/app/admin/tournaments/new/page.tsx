@@ -11,6 +11,7 @@ import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { FREE_FIRE_CATEGORIES, FREE_FIRE_GAME_SLUG } from "@/lib/free-fire-categories";
 
 const MODES = ["SOLO", "DUO", "SQUAD", "ONE_V_ONE", "TWO_V_TWO", "FOUR_V_FOUR", "CLASSIC", "CLASH_SQUAD", "CUSTOM"];
 
@@ -31,6 +32,7 @@ export default function NewTournamentPage() {
     maxSlots: 48,
     roomSize: 1,
     map: "",
+    category: "",
     rules: "",
     registrationStartsAt: "",
     registrationEndsAt: "",
@@ -48,6 +50,12 @@ export default function NewTournamentPage() {
       return;
     }
 
+    const isFreeFire = games?.find((g) => g.id === form.gameId)?.slug === FREE_FIRE_GAME_SLUG;
+    if (isFreeFire && !form.category) {
+      toast({ title: "Select a Free Fire category", tone: "error" });
+      return;
+    }
+
     const prizeDistribution = [
       { position: 1, amountRupees: firstPrize },
       ...(secondPrize > 0 ? [{ position: 2, amountRupees: secondPrize }] : []),
@@ -57,6 +65,7 @@ export default function NewTournamentPage() {
     createTournament.mutate(
       {
         ...form,
+        category: isFreeFire ? form.category : null,
         registrationStartsAt: new Date(form.registrationStartsAt).toISOString(),
         registrationEndsAt: new Date(form.registrationEndsAt).toISOString(),
         matchStartsAt: new Date(form.matchStartsAt).toISOString(),
@@ -105,6 +114,17 @@ export default function NewTournamentPage() {
             ))}
           </select>
         </Field>
+
+        {games?.find((g) => g.id === form.gameId)?.slug === FREE_FIRE_GAME_SLUG && (
+          <Field label="Category (decides where it appears on the Free Fire page)">
+            <select value={form.category} onChange={(e) => update("category", e.target.value)} className="w-full h-12 rounded-xl bg-surface-2 border border-white/10 px-4 text-sm text-white outline-none">
+              <option value="">Select a category</option>
+              {FREE_FIRE_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </Field>
+        )}
 
         <Field label="Mode">
           <select value={form.mode} onChange={(e) => update("mode", e.target.value)} className="w-full h-12 rounded-xl bg-surface-2 border border-white/10 px-4 text-sm text-white outline-none">

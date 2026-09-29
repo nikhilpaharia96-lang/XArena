@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 
     let query = `
       SELECT t.id, t.slug, t.title, t.status, t.format, t.mode, t.entryFee, t.prizePool,
-             t.maxSlots, t.slotsFilled, t.matchStartsAt, t.registrationEndsAt, t.createdAt, g.name as gameName
+             t.maxSlots, t.slotsFilled, t.category, t.matchStartsAt, t.registrationEndsAt, t.createdAt, g.name as gameName
       FROM Tournament t JOIN Game g ON g.id = t.gameId
     `;
     const params: (string | number)[] = [];
@@ -59,10 +59,10 @@ export async function POST(req: Request) {
     db.prepare(
       `INSERT INTO Tournament (
         id, slug, title, description, bannerUrl, gameId, mode, format, cadence, status,
-        entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, rules,
+        entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, category, rules,
         scoringSystem, registrationStartsAt, registrationEndsAt, matchStartsAt, adminNotes,
         isFeatured, createdById, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       input.slug,
@@ -81,6 +81,7 @@ export async function POST(req: Request) {
       input.maxSlots,
       input.roomSize,
       input.map ?? null,
+      input.category ?? null,
       input.rules,
       input.scoringSystem ?? null,
       input.registrationStartsAt,
