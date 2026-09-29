@@ -24,10 +24,10 @@ export function PopularGames() {
 
   return (
     <section>
-      <SectionHeader title="Popular Games" href="/games" icon={Gamepad2} />
+      <SectionHeader title="Popular Games" href="/games" />
       <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
         {isLoading ? (
-          Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[136px] w-[116px] shrink-0 rounded-2xl" />)
+          Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[92px] w-[84px] shrink-0 rounded-2xl" />)
         ) : games && games.length > 0 ? (
           games.map((g) => <GameCard key={g.id} game={g} tournamentCount={countsByGame.get(g.id) ?? 0} />)
         ) : (

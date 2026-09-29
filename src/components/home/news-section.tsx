@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Megaphone } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -22,32 +21,29 @@ export function NewsSection() {
 
   return (
     <section>
-      <SectionHeader title="Latest News & Updates" href={me ? "/notifications" : undefined} icon={Megaphone} />
+      <SectionHeader title="News & Updates" href={me ? "/notifications" : undefined} />
 
       {!me ? (
         <EmptyState icon={Megaphone} title="Log in for the latest updates" description="Tournament announcements and platform news will show up here." className="py-8" />
       ) : isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-2xl" />
+        <div className="space-y-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-2xl" />
           ))}
         </div>
       ) : announcements.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="space-y-2">
           {announcements.map((n) => (
-            <Link
-              key={n.id}
-              href="/notifications"
-              className="rounded-2xl bg-surface border border-white/8 overflow-hidden flex flex-col"
-            >
-              <div className="h-16 gradient-brand flex items-center justify-center">
-                <Megaphone className="h-6 w-6 text-white/80" />
+            <div key={n.id} className="rounded-2xl bg-surface border border-white/8 p-3.5 flex gap-3">
+              <div className="h-9 w-9 rounded-xl bg-violet/15 flex items-center justify-center shrink-0">
+                <Megaphone className="h-4 w-4 text-violet" />
               </div>
-              <div className="p-3.5">
-                <p className="text-sm font-bold text-white leading-snug line-clamp-2">{n.title}</p>
-                <p className="text-[10px] text-white/40 mt-1.5">{formatRelativeTime(n.createdAt)}</p>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white truncate">{n.title}</p>
+                <p className="text-xs text-white/50 line-clamp-1">{n.body}</p>
+                <p className="text-[10px] text-white/35 mt-0.5">{formatRelativeTime(n.createdAt)}</p>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       ) : (

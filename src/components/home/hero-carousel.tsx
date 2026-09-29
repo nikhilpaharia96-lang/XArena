@@ -3,19 +3,12 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Plus, ShieldCheck, Sparkles, Trophy, Users, Gift } from "lucide-react";
+import { ArrowRight, Plus, Sparkles } from "lucide-react";
 import { useTournaments } from "@/hooks/use-tournaments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPaise } from "@/lib/format";
 
-const TAGLINE = "THE ULTIMATE GAMING ARENA";
-
-/** Static trust badges — brand promises, not measured data, so no API call. */
-const TRUST_POINTS = [
-  { icon: Users, label: "Real Players" },
-  { icon: ShieldCheck, label: "Secure Payments" },
-  { icon: Gift, label: "Exciting Rewards" },
-];
+const TAGLINE = "THE ULTIMATE TOURNAMENT";
 
 /**
  * Swipeable hero. Slide 1 is always the XArena brand intro (static copy,
@@ -36,7 +29,7 @@ export function HeroCarousel() {
   }
 
   if (isLoading) {
-    return <Skeleton className="h-[26rem] sm:h-[30rem] rounded-3xl -mx-4 sm:mx-0 sm:rounded-3xl" />;
+    return <Skeleton className="h-56 sm:h-64 rounded-3xl -mx-4 sm:mx-0 sm:rounded-3xl" />;
   }
 
   return (
@@ -51,53 +44,33 @@ export function HeroCarousel() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25 }}
-          className="relative shrink-0 w-full sm:w-[92%] h-[26rem] sm:h-[30rem] rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-8 gradient-brand"
+          className="relative shrink-0 w-full sm:w-[92%] h-56 sm:h-64 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7 gradient-brand"
         >
           <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-gold/20 blur-3xl" />
-
-          <div className="relative flex items-start justify-between gap-3 mb-auto">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/25 border border-white/15 px-3 py-1.5 text-[11px] font-bold tracking-wide text-gold">
-              <Trophy className="h-3.5 w-3.5" /> {TAGLINE}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-black/25 border border-white/15 px-3 py-1.5 text-[11px] font-semibold text-white/80 shrink-0">
-              <ShieldCheck className="h-3.5 w-3.5 text-signal" /> Trusted by Gamers
-            </span>
-          </div>
-
           <span className="relative inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-gold mb-2">
-            <Sparkles className="h-3.5 w-3.5" /> India&apos;s Home For Esports
+            <Sparkles className="h-3.5 w-3.5" /> {TAGLINE}
           </span>
-          <h1 className="relative text-white font-display font-black text-4xl sm:text-5xl leading-[1.02] mb-2">
+          <h1 className="relative text-white font-display font-black text-3xl sm:text-4xl leading-[1.05] mb-2">
             Play.
             <br />
             Compete.
             <br />
-            Win Big.
+            Become a Champion.
           </h1>
           <p className="relative text-white/80 text-sm max-w-sm mb-4">
-            Join exciting tournaments, build your team and compete with players across India.
+            Discover tournaments, build your team and compete for glory.
           </p>
-
-          <div className="relative flex items-center gap-2 mb-4">
-            {TRUST_POINTS.map((p) => (
-              <div key={p.label} className="flex-1 rounded-xl bg-black/25 border border-white/15 py-2.5 px-2 text-center">
-                <p.icon className="h-4 w-4 mx-auto mb-1 text-gold" />
-                <span className="text-[10px] font-semibold text-white/85 leading-tight block">{p.label}</span>
-              </div>
-            ))}
-          </div>
-
           <div className="relative flex items-center gap-2">
             <Link
               href="/tournaments"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white text-violet-dim px-4 h-11 text-sm font-bold"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white text-violet-dim px-4 h-10 text-sm font-bold"
             >
               Explore Tournaments <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/admin/tournaments/new"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-black/25 border border-white/25 text-white px-4 h-11 text-sm font-semibold"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-black/25 border border-white/25 text-white px-4 h-10 text-sm font-semibold"
             >
               <Plus className="h-3.5 w-3.5" /> Create Tournament
             </Link>
@@ -111,7 +84,7 @@ export function HeroCarousel() {
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.25, delay: i * 0.05 }}
-            className="relative shrink-0 w-full sm:w-[92%] h-[26rem] sm:h-[30rem] rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
+            className="relative shrink-0 w-full sm:w-[92%] h-56 sm:h-64 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
           >
             <div
               className="absolute inset-0"

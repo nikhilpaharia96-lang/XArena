@@ -27,12 +27,12 @@ export function TopBar() {
               <Menu className="h-5 w-5" />
             </button>
             <Link href="/" className="flex items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo.png"
-                alt="XArena"
-                className="h-8 sm:h-9 w-auto shrink-0"
-              />
+              <div className="h-8 w-8 rounded-xl gradient-brand flex items-center justify-center font-display font-black text-white text-sm shrink-0">
+                X
+              </div>
+              <span className="font-display font-extrabold text-lg tracking-tight text-white hidden xs:inline">
+                XArena
+              </span>
             </Link>
           </div>
 
