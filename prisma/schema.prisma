@@ -27,8 +27,9 @@ enum ParticipantStatus { REGISTERED CHECKED_IN DISQUALIFIED WITHDRAWN }
 enum MatchStatus { SCHEDULED ROOM_RELEASED LIVE RESULT_PENDING RESULT_SUBMITTED RESULT_VERIFIED DISPUTED COMPLETED }
 enum TransactionType { DEPOSIT WITHDRAWAL TOURNAMENT_ENTRY TOURNAMENT_PRIZE REFERRAL_BONUS BONUS_CREDIT REFUND ADMIN_ADJUSTMENT }
 enum TransactionStatus { PENDING COMPLETED FAILED REJECTED REVERSED }
+enum DepositRequestStatus { PENDING APPROVED REJECTED }
 enum WithdrawStatus { PENDING APPROVED PROCESSING PAID REJECTED }
-enum NotificationType { TOURNAMENT_REMINDER ROOM_RELEASED DEPOSIT_SUCCESS WITHDRAW_SUCCESS WITHDRAW_REJECTED RESULT_PUBLISHED WINNER_ANNOUNCEMENT REFERRAL_BONUS ANNOUNCEMENT SYSTEM }
+enum NotificationType { TOURNAMENT_REMINDER ROOM_RELEASED DEPOSIT_PENDING DEPOSIT_SUCCESS DEPOSIT_REJECTED WITHDRAW_SUCCESS WITHDRAW_REJECTED RESULT_PUBLISHED WINNER_ANNOUNCEMENT REFERRAL_BONUS ANNOUNCEMENT SYSTEM }
 enum TicketStatus { OPEN IN_PROGRESS RESOLVED CLOSED }
 enum TicketPriority { LOW MEDIUM HIGH URGENT }
 
@@ -56,6 +57,8 @@ model User {
   wallet           Wallet?
   transactions     Transaction[]
   deposits         Deposit[]
+  depositRequests  DepositRequest[] @relation("DepositRequestUser")
+  reviewedDepositRequests DepositRequest[] @relation("DepositRequestReviewer")
   withdrawRequests WithdrawRequest[]
   participations   TournamentParticipant[]
   matchResults     MatchResult[]
@@ -266,6 +269,29 @@ model Deposit {
 
   @@index([userId])
   @@index([razorpayOrderId])
+}
+
+model DepositRequest {
+  id            String               @id @default(cuid())
+  code          String?              @unique
+  userId        String
+  user          User                 @relation("DepositRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  amount        Int
+  utr           String               @unique
+  screenshotUrl String
+  paymentMethod String               @default("UPI")
+  status        DepositRequestStatus @default(PENDING)
+  adminNote     String?
+  reviewedById  String?
+  reviewedBy    User?                @relation("DepositRequestReviewer", fields: [reviewedById], references: [id])
+  reviewedAt    DateTime?
+  transactionId String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model WithdrawRequest {
