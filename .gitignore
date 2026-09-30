@@ -32,3 +32,6 @@ Thumbs.db
 # Editor
 .vscode/*
 !.vscode/extensions.json
+
+# Uploaded files (payment screenshots / QR) - private, served via authorised API routes
+/data/uploads/

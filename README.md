@@ -244,3 +244,15 @@ xarena/
 ├── .env.example                 # Environment variable template — copy to .env
 └── package.json
 ```
+
+## Manual UPI deposits (QR + UTR + admin verification)
+
+Users: **Wallet → Add Money** → pick amount → scan admin-configured QR → enter UTR + upload screenshot → request is `PENDING`.
+The wallet is credited **only** when an admin approves it at **Admin → Deposit Requests** (single atomic DB transaction:
+status → `APPROVED`, wallet +amount, `DEPOSIT` ledger row `UPI-<UTR>`, user notification, audit log).
+
+**Required one-time setup:** log in as admin → **Admin → Payment Settings** and set the UPI ID and/or upload the QR.
+Until then users see "Deposits aren't set up yet". Nothing payment-related is hardcoded.
+
+Uploads are stored privately in `data/uploads/` (not `/public`) and served only via authorised API routes. For production,
+swap `src/server/lib/uploads.ts` for S3/R2/Cloudinary. The Razorpay routes (`/api/wallet/deposit*`, webhook) are untouched.
