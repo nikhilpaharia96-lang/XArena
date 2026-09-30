@@ -9,6 +9,10 @@ import { TrendingTournaments } from "@/components/home/trending-tournaments";
 import { ReferEarnBanner } from "@/components/home/refer-earn-banner";
 import { LeaderboardPreview } from "@/components/home/leaderboard-preview";
 import { NewsSection } from "@/components/home/news-section";
+import { CommunityBanner } from "@/components/home/community-banner";
+import { Testimonials } from "@/components/home/testimonials";
+import { FaqSection } from "@/components/home/faq-section";
+import { AppDownloadBanner } from "@/components/home/app-download-banner";
 import { SupportCta } from "@/components/home/support-cta";
 
 export default function HomePage() {
@@ -23,6 +27,10 @@ export default function HomePage() {
       <ReferEarnBanner />
       <LeaderboardPreview />
       <NewsSection />
+      <CommunityBanner />
+      <Testimonials />
+      <FaqSection />
+      <AppDownloadBanner />
       <SupportCta />
     </div>
   );
