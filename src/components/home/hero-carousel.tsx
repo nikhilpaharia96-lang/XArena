@@ -3,12 +3,10 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Plus, Sparkles } from "lucide-react";
+import { ArrowRight, Trophy, ShieldCheck, Zap } from "lucide-react";
 import { useTournaments } from "@/hooks/use-tournaments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPaise } from "@/lib/format";
-
-const TAGLINE = "THE ULTIMATE TOURNAMENT";
 
 /**
  * Swipeable hero. Slide 1 is always the XArena brand intro (static copy,
@@ -29,7 +27,7 @@ export function HeroCarousel() {
   }
 
   if (isLoading) {
-    return <Skeleton className="h-56 sm:h-64 rounded-3xl -mx-4 sm:mx-0 sm:rounded-3xl" />;
+    return <Skeleton className="h-72 sm:h-80 rounded-3xl -mx-4 sm:mx-0 sm:rounded-3xl" />;
   }
 
   return (
@@ -44,22 +42,44 @@ export function HeroCarousel() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25 }}
-          className="relative shrink-0 w-full sm:w-[92%] h-56 sm:h-64 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7 gradient-brand"
+          className="relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
         >
-          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-gold/20 blur-3xl" />
-          <span className="relative inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-gold mb-2">
-            <Sparkles className="h-3.5 w-3.5" /> {TAGLINE}
+          {/* Squad artwork */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url(/images/hero-squad.webp)",
+              backgroundSize: "cover",
+              backgroundPosition: "78% 12%",
+            }}
+          />
+          {/* Readability overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-void via-void/85 to-void/10 sm:from-void sm:via-void/75 sm:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-void via-void/10 to-transparent" />
+
+          {/* Badge row */}
+          <div className="relative flex flex-wrap items-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-gold">
+              <Trophy className="h-3 w-3" /> The Ultimate Gaming Arena
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-signal/40 bg-signal/10 px-3 py-1 text-[10px] font-bold text-signal">
+              <ShieldCheck className="h-3 w-3" /> Trusted by Gamers
+            </span>
+          </div>
+
+          <span className="relative inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-gold/90 mb-2">
+            <Zap className="h-3.5 w-3.5" /> INDIA&apos;S HOME FOR ESPORTS
           </span>
-          <h1 className="relative text-white font-display font-black text-3xl sm:text-4xl leading-[1.05] mb-2">
+
+          <h1 className="relative text-white font-display font-black text-3xl sm:text-5xl leading-[1.05] mb-2">
             Play.
             <br />
             Compete.
             <br />
-            Become a Champion.
+            <span className="bg-gradient-to-r from-sky-300 to-blue-500 bg-clip-text text-transparent">Win Big.</span>
           </h1>
           <p className="relative text-white/80 text-sm max-w-sm mb-4">
-            Discover tournaments, build your team and compete for glory.
+            Join exciting tournaments, build your team and compete with players across India.
           </p>
           <div className="relative flex items-center gap-2">
             <Link
@@ -69,10 +89,10 @@ export function HeroCarousel() {
               Explore Tournaments <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
-              href="/admin/tournaments/new"
+              href="/signup"
               className="inline-flex items-center gap-1.5 rounded-xl bg-black/25 border border-white/25 text-white px-4 h-10 text-sm font-semibold"
             >
-              <Plus className="h-3.5 w-3.5" /> Create Tournament
+              Register Now <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </motion.div>
@@ -84,7 +104,7 @@ export function HeroCarousel() {
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.25, delay: i * 0.05 }}
-            className="relative shrink-0 w-full sm:w-[92%] h-56 sm:h-64 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
+            className="relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
           >
             <div
               className="absolute inset-0"
