@@ -514,6 +514,10 @@ async function main() {
     ["min_withdraw_rupees", 100],
     ["support_email", "support@xarena.app"],
     ["platform_commission_percent", 10],
+    // Manual UPI deposits — admin fills in UPI ID / QR at /admin/payment-settings.
+    ["payment.min_deposit_rupees", 50],
+    ["payment.max_deposit_rupees", 10000],
+    ["payment.deposit_enabled", true],
   ];
   for (const [key, value] of settings) {
     const exists = db.prepare("SELECT key FROM Setting WHERE key = ?").get(key);
