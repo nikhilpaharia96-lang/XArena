@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Bell, Search, Menu, Wallet as WalletIcon } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
@@ -26,13 +27,8 @@ export function TopBar() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl gradient-brand flex items-center justify-center font-display font-black text-white text-sm shrink-0">
-                X
-              </div>
-              <span className="font-display font-extrabold text-lg tracking-tight text-white hidden xs:inline">
-                XArena
-              </span>
+            <Link href="/" aria-label="XArena home" className="flex items-center">
+              <Image src="/images/xarena-logo.webp" alt="XArena" width={360} height={106} priority className="h-8 w-auto sm:h-9" />
             </Link>
           </div>
 
@@ -61,9 +57,10 @@ export function TopBar() {
               <>
                 <Link
                   href="/wallet"
-                  className="hidden sm:flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-3 h-9 text-sm font-mono font-semibold text-signal"
+                  aria-label="Wallet balance"
+                  className="flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 px-2 sm:px-3 h-9 text-xs sm:text-sm font-mono font-semibold text-signal"
                 >
-                  <WalletIcon className="h-3.5 w-3.5" />
+                  <WalletIcon className="hidden sm:block h-3.5 w-3.5" />
                   {formatPaise(me.wallet.depositBalance + me.wallet.winningBalance + me.wallet.bonusBalance)}
                 </Link>
                 <Link

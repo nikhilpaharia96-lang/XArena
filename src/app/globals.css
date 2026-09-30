@@ -13,6 +13,7 @@
   --color-void: #020617;       /* app background, deep navy (was near-black) */
   --color-surface: #0F172A;    /* card / raised surface navy */
   --color-surface-2: #16213A;
+  --color-elevated: #111A31;   /* raised cards on top of surface */
   --color-border-glow: rgba(37, 99, 235, 0.28);
 
   --color-violet: #2563EB;     /* primary brand blue (was violet #7C5CF6) */
@@ -82,6 +83,16 @@ html, body {
 }
 @media (prefers-reduced-motion: reduce) {
   .live-dot { animation: none; }
+}
+
+/* Free Fire category cards: soft neon edge driven by --accent (rgb triplet) */
+.neon-card {
+  border: 1px solid rgba(var(--accent), 0.35);
+  box-shadow: 0 0 0 1px rgba(var(--accent), 0.08), 0 10px 28px -14px rgba(var(--accent), 0.55);
+}
+.gradient-cta-blue {
+  background: linear-gradient(135deg, #2563FF 0%, #1D4ED8 100%);
+  box-shadow: 0 6px 18px -8px rgba(37, 99, 255, 0.85);
 }
 
 /* safe-area helpers for the fixed bottom nav */

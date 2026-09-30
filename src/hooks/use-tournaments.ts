@@ -61,7 +61,10 @@ export function useGames() {
   });
 }
 
-export function useTournaments(filters?: { game?: string; status?: string; format?: string; featured?: boolean; category?: string }) {
+export function useTournaments(
+  filters?: { game?: string; status?: string; format?: string; featured?: boolean; category?: string },
+  options?: { enabled?: boolean }
+) {
   const params = new URLSearchParams();
   if (filters?.game) params.set("game", filters.game);
   if (filters?.status) params.set("status", filters.status);
@@ -74,6 +77,7 @@ export function useTournaments(filters?: { game?: string; status?: string; forma
     queryKey: ["tournaments", filters],
     queryFn: () => api.get<TournamentListItem[]>(`/api/tournaments${qs ? `?${qs}` : ""}`),
     staleTime: 15_000,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -111,7 +115,7 @@ export function useSubmitResult(slug: string) {
 export interface GameCategorySummary {
   game: { id: string; slug: string; name: string };
   totals: { activeCount: number; prizePool: number; players: number };
-  categories: { value: string; activeCount: number; prizePool: number; players: number }[];
+  categories: { value: string; activeCount: number; prizePool: number; players: number; upcomingCount: number }[];
 }
 
 export function useGameCategories(gameSlug: string) {

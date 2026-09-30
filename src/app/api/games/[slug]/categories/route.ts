@@ -6,7 +6,8 @@ import { FREE_FIRE_CATEGORIES } from "@/lib/free-fire-categories";
  * GET /api/games/free-fire-max/categories
  *
  * Real aggregates per category, computed from Tournament rows: "active"
- * means currently joinable or running (REGISTRATION_OPEN / LIVE). Players
+ * means currently joinable or running (REGISTRATION_OPEN / LIVE);
+ * "upcoming" is the REGISTRATION_OPEN subset. Players
  * is the sum of slotsFilled, same method as the homepage stats.
  */
 export async function GET(_req: Request, context: { params: Promise<{ slug: string }> }) {
@@ -19,17 +20,18 @@ export async function GET(_req: Request, context: { params: Promise<{ slug: stri
 
     const rows = db
       .prepare(
-        `SELECT category, COUNT(*) AS activeCount, COALESCE(SUM(prizePool), 0) AS prizePool, COALESCE(SUM(slotsFilled), 0) AS players
+        `SELECT category, COUNT(*) AS activeCount, COALESCE(SUM(prizePool), 0) AS prizePool, COALESCE(SUM(slotsFilled), 0) AS players,
+                SUM(CASE WHEN status = 'REGISTRATION_OPEN' THEN 1 ELSE 0 END) AS upcomingCount
          FROM Tournament
          WHERE gameId = ? AND status IN ('REGISTRATION_OPEN', 'LIVE')
          GROUP BY category`
       )
-      .all(game.id) as { category: string | null; activeCount: number; prizePool: number; players: number }[];
+      .all(game.id) as { category: string | null; activeCount: number; prizePool: number; players: number; upcomingCount: number }[];
 
     const byCategory = new Map(rows.map((r) => [r.category, r]));
     const categories = FREE_FIRE_CATEGORIES.map((c) => {
       const r = byCategory.get(c.value);
-      return { value: c.value, activeCount: r?.activeCount ?? 0, prizePool: r?.prizePool ?? 0, players: r?.players ?? 0 };
+      return { value: c.value, activeCount: r?.activeCount ?? 0, prizePool: r?.prizePool ?? 0, players: r?.players ?? 0, upcomingCount: r?.upcomingCount ?? 0 };
     });
 
     return ok({
