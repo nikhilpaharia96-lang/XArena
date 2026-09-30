@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { formatPaise } from "@/lib/format";
+import { formatPaiseExact as formatPaise } from "@/lib/format";
 import { Wallet as WalletIcon, TrendingUp, Gift, Lock } from "lucide-react";
 
 export function WalletCard({

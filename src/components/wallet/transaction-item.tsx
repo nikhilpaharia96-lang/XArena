@@ -1,6 +1,6 @@
 "use client";
 import { ArrowDownLeft, ArrowUpRight, Trophy, Gift, Undo2, Settings2 } from "lucide-react";
-import { formatPaise, formatDateTime } from "@/lib/format";
+import { formatPaiseExact as formatPaise, formatDateTime } from "@/lib/format";
 import type { TransactionRow } from "@/hooks/use-wallet";
 import { Badge } from "@/components/ui/badge";
 
@@ -33,7 +33,7 @@ export function TransactionItem({ txn }: { txn: TransactionRow }) {
         <Icon className={`h-4 w-4 ${meta.credit ? "text-signal" : "text-crimson"}`} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white">{meta.label}</p>
+        <p className="text-sm font-semibold text-white">{txn.type === "DEPOSIT" && txn.description ? txn.description : meta.label}</p>
         <p className="text-xs text-white/40 font-mono truncate">{txn.referenceId} • {formatDateTime(txn.createdAt)}</p>
       </div>
       <div className="text-right shrink-0">

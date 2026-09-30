@@ -9,6 +9,26 @@ export function formatPaise(paise: number): string {
   }).format(paise / 100);
 }
 
+/** Like formatPaise but keeps paise — for wallet balances where ₹0.11 must not display as ₹0. */
+export function formatPaiseExact(paise: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: paise % 100 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(paise / 100);
+}
+
+export function formatDateTimeFull(iso: string): string {
+  return new Date(iso).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function paiseToRupees(paise: number): number {
   return paise / 100;
 }

@@ -1,19 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useWallet, useTransactions } from "@/hooks/use-wallet";
+import { useWallet, useTransactions, useMyDeposits } from "@/hooks/use-wallet";
+import { DepositRequestRow } from "@/components/wallet/deposit-request-item";
 import { WalletCard } from "@/components/wallet/wallet-card";
 import { TransactionItem } from "@/components/wallet/transaction-item";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Card } from "@/components/ui/card";
-import { ArrowDownCircle, ArrowUpCircle, History, Receipt } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Clock, History, Receipt } from "lucide-react";
 
 export default function WalletPage() {
   const { data: me } = useRequireAuth();
   const { data: wallet, isLoading: walletLoading } = useWallet();
   const { data: txnData, isLoading: txnLoading } = useTransactions({ page: 1 });
+  const { data: deposits } = useMyDeposits();
+  const qc = useQueryClient();
+
+  // When a pending deposit gets reviewed by an admin, pull the fresh (server-authoritative) balance + ledger.
+  const pendingCount = deposits?.filter((d) => d.status === "PENDING").length ?? 0;
+  const prevPending = useRef(pendingCount);
+  useEffect(() => {
+    if (pendingCount < prevPending.current) {
+      qc.invalidateQueries({ queryKey: ["wallet"] });
+      qc.invalidateQueries({ queryKey: ["transactions"] });
+    }
+    prevPending.current = pendingCount;
+  }, [pendingCount, qc]);
 
   if (me === undefined || walletLoading) {
     return (
@@ -45,8 +61,8 @@ export default function WalletPage() {
               <ArrowDownCircle className="h-5 w-5 text-signal" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm">Deposit</p>
-              <p className="text-[11px] text-white/40">Add money</p>
+              <p className="font-bold text-white text-sm">Add Money</p>
+              <p className="text-[11px] text-white/40">Deposit via UPI</p>
             </div>
           </Card>
         </Link>
@@ -62,6 +78,20 @@ export default function WalletPage() {
           </Card>
         </Link>
       </div>
+
+      {deposits && deposits.length > 0 && (
+        <div>
+          <h2 className="font-bold text-white text-sm flex items-center gap-1.5 mb-2">
+            <Clock className="h-4 w-4 text-white/40" /> Deposit Requests
+            {pendingCount > 0 && <span className="text-[11px] font-semibold text-gold">· {pendingCount} pending</span>}
+          </h2>
+          <Card className="p-4 divide-y divide-white/5">
+            {deposits.slice(0, 5).map((d) => (
+              <DepositRequestRow key={d.id} deposit={d} />
+            ))}
+          </Card>
+        </div>
+      )}
 
       <div>
         <div className="flex items-center justify-between mb-2">

@@ -27,10 +27,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
+    // FormData needs the browser to set the multipart boundary itself.
+    headers:
+      init?.body instanceof FormData
+        ? { ...init?.headers }
+        : {
+            "Content-Type": "application/json",
+            ...init?.headers,
+          },
   });
 
   // CSV/report endpoints return a raw file, not the JSON envelope.
@@ -54,4 +58,6 @@ export const api = {
   patch: <T,>(path: string, body?: unknown) =>
     request<T>(path, { method: "PATCH", body: body ? JSON.stringify(body) : undefined }),
   delete: <T,>(path: string) => request<T>(path, { method: "DELETE" }),
+  postForm: <T,>(path: string, body: FormData) => request<T>(path, { method: "POST", body }),
+  putForm: <T,>(path: string, body: FormData) => request<T>(path, { method: "PUT", body }),
 };

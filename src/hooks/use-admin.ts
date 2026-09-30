@@ -197,3 +197,57 @@ export function useUpdateTicket(id: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "support-tickets"] }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Manual UPI deposit requests + payment settings
+// ---------------------------------------------------------------------------
+
+export interface AdminDepositRequestRow {
+  id: string; code: string | null; userId: string; username: string; email: string;
+  amount: number; utr: string; paymentMethod: string; status: "PENDING" | "APPROVED" | "REJECTED";
+  adminNote: string | null; reviewedById: string | null; reviewedAt: string | null;
+  createdAt: string; updatedAt: string;
+}
+
+export interface AdminPaymentSettings {
+  upiId: string; accountName: string; instructions: string;
+  minDepositRupees: number; maxDepositRupees: number; depositEnabled: boolean; hasQr: boolean;
+}
+
+export function useAdminDepositRequests(status: "PENDING" | "APPROVED" | "REJECTED") {
+  return useQuery<{ requests: AdminDepositRequestRow[]; counts: Record<string, number> }>({
+    queryKey: ["admin", "deposit-requests", status],
+    queryFn: () => api.get(`/api/admin/deposit-requests?status=${status}`),
+    refetchInterval: status === "PENDING" ? 20_000 : false,
+  });
+}
+
+export function useDepositRequestAction(id: string, action: "approve" | "reject") {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body?: { reason?: string }) => api.post(`/api/admin/deposit-requests/${id}/${action}`, body ?? {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "deposit-requests"] });
+      qc.invalidateQueries({ queryKey: ["admin", "analytics"] });
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+  });
+}
+
+export function useAdminPaymentSettings() {
+  return useQuery<AdminPaymentSettings>({
+    queryKey: ["admin", "payment-settings"],
+    queryFn: () => api.get("/api/admin/payment-settings"),
+  });
+}
+
+export function useSavePaymentSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (form: FormData) => api.putForm<AdminPaymentSettings>("/api/admin/payment-settings", form),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "payment-settings"] });
+      qc.invalidateQueries({ queryKey: ["payment-info"] });
+    },
+  });
+}

@@ -76,3 +76,64 @@ export function useRequestWithdraw() {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Manual UPI deposits (QR + UTR + screenshot → admin verification)
+// ---------------------------------------------------------------------------
+
+export interface PaymentInfo {
+  upiId: string;
+  accountName: string;
+  instructions: string;
+  minDepositRupees: number;
+  maxDepositRupees: number;
+  depositEnabled: boolean;
+  configured: boolean;
+  hasQr: boolean;
+}
+
+export interface DepositRequestItem {
+  id: string;
+  code: string | null;
+  amount: number;
+  utr: string;
+  paymentMethod: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  adminNote: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+export function usePaymentInfo() {
+  return useQuery<PaymentInfo>({
+    queryKey: ["payment-info"],
+    queryFn: () => api.get<PaymentInfo>("/api/payment-settings"),
+    staleTime: 30_000,
+  });
+}
+
+export function useMyDeposits() {
+  return useQuery<DepositRequestItem[]>({
+    queryKey: ["my-deposits"],
+    queryFn: () => api.get<DepositRequestItem[]>("/api/wallet/deposits"),
+    // Keep polling while something is awaiting admin review so approval shows up without a manual refresh.
+    refetchInterval: (query) => (query.state.data?.some((d) => d.status === "PENDING") ? 15_000 : false),
+  });
+}
+
+export function useSubmitDepositRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { amountRupees: number; utr: string; screenshot: File }) => {
+      const form = new FormData();
+      form.set("amountRupees", String(input.amountRupees));
+      form.set("utr", input.utr);
+      form.set("screenshot", input.screenshot);
+      return api.postForm<{ id: string; code: string; status: string }>("/api/wallet/deposits", form);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-deposits"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}

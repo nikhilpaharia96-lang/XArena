@@ -198,6 +198,31 @@ CREATE TABLE IF NOT EXISTS Deposit (
 CREATE INDEX IF NOT EXISTS idx_deposit_userId ON Deposit(userId);
 CREATE INDEX IF NOT EXISTS idx_deposit_orderId ON Deposit(razorpayOrderId);
 
+-- Manual UPI deposits (QR + UTR + screenshot, verified by an admin).
+-- Distinct from Deposit above, which is the Razorpay-gateway flow.
+-- amount is integer paise like every other money column. utr is stored
+-- upper-cased and is UNIQUE so the same payment reference can never be
+-- submitted (or credited) twice.
+CREATE TABLE IF NOT EXISTS DepositRequest (
+  id            TEXT PRIMARY KEY,
+  code          TEXT UNIQUE,
+  userId        TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  amount        INTEGER NOT NULL CHECK (amount > 0),
+  utr           TEXT UNIQUE NOT NULL,
+  screenshotUrl TEXT NOT NULL,
+  paymentMethod TEXT NOT NULL DEFAULT 'UPI',
+  status        TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED')),
+  adminNote     TEXT,
+  reviewedById  TEXT REFERENCES User(id),
+  reviewedAt    TEXT,
+  transactionId TEXT REFERENCES "Transaction"(id),
+  createdAt     TEXT NOT NULL DEFAULT (datetime('now')),
+  updatedAt     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_depreq_userId ON DepositRequest(userId);
+CREATE INDEX IF NOT EXISTS idx_depreq_status ON DepositRequest(status);
+CREATE INDEX IF NOT EXISTS idx_depreq_createdAt ON DepositRequest(createdAt);
+
 CREATE TABLE IF NOT EXISTS WithdrawRequest (
   id               TEXT PRIMARY KEY,
   userId           TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
