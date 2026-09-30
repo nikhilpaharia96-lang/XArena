@@ -7,8 +7,7 @@ const STEPS = [
   { icon: Zap, title: "Play & Win", desc: "Compete and earn rewards" },
 ];
 
-/** Static onboarding steps — this is app chrome, not data, so it doesn't
- * fetch anything. Genuinely a sequence, which is why it's numbered. */
+/** Static onboarding steps — app chrome, not data, so nothing is fetched. */
 export function HowItWorks() {
   return (
     <section className="rounded-3xl bg-surface border border-white/8 p-5">
@@ -32,9 +31,7 @@ export function HowItWorks() {
                 <p className="text-[10px] text-white/45 leading-tight mt-0.5">{s.desc}</p>
               </div>
             </div>
-            {i < STEPS.length - 1 && (
-              <ChevronRight className="h-4 w-4 text-white/20 mt-3 shrink-0 -mx-1" />
-            )}
+            {i < STEPS.length - 1 && <ChevronRight className="h-4 w-4 text-white/20 mt-3 shrink-0 -mx-1" />}
           </div>
         ))}
       </div>

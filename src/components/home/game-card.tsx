@@ -21,8 +21,10 @@ function accentFor(id: string) {
 }
 
 /** Static poster artwork per game slug. Falls back to game.bannerUrl (from
- * the DB) and finally to a plain gradient + icon when neither is set. */
-const GAME_POSTERS: Record<string, string> = {
+ * the DB) and finally to a plain gradient + icon when neither is set.
+ * Exported so other homepage cards (Featured/Trending) can show the same
+ * real artwork instead of a plain gradient. */
+export const GAME_POSTERS: Record<string, string> = {
   "free-fire-max": "/games/free-fire-max.jpg",
   "bgmi": "/games/bgmi.jpg",
   "pubg-mobile": "/games/pubg-mobile.jpg",
@@ -31,6 +33,10 @@ const GAME_POSTERS: Record<string, string> = {
   "efootball": "/games/efootball.jpg",
   "cricket-league": "/games/cricket-league.jpg",
 };
+
+export function posterForGame(gameSlug: string, bannerUrl?: string | null) {
+  return GAME_POSTERS[gameSlug] ?? bannerUrl ?? null;
+}
 
 export function GameCard({ game, tournamentCount }: { game: Game; tournamentCount?: number }) {
   const poster = GAME_POSTERS[game.slug] ?? game.bannerUrl ?? null;

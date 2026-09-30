@@ -7,21 +7,29 @@ import { useTournaments } from "@/hooks/use-tournaments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPaise, formatDateTime, gameModeLabel } from "@/lib/format";
 import { SectionHeader } from "./section-header";
+import { posterForGame } from "./game-card";
 
 /**
  * One large "hero card" for a single real featured tournament
- * (Tournament.isFeatured, same flag the hero carousel's promo slides use).
- * Renders nothing when there isn't one instead of inventing a placeholder.
+ * (Tournament.isFeatured — the same flag the hero carousel's promo slides
+ * already use). Renders nothing when there isn't one, instead of a
+ * placeholder.
  */
 export function FeaturedTournament() {
   const { data: featured, isLoading } = useTournaments({ featured: true });
   const t = featured?.[0];
 
   if (isLoading) {
-    return <Skeleton className="h-64 rounded-3xl" />;
+    return (
+      <section>
+        <SectionHeader title="Featured Tournament" href="/tournaments?featured=1" icon={Flame} />
+        <Skeleton className="h-64 rounded-3xl" />
+      </section>
+    );
   }
-
   if (!t) return null;
+
+  const poster = posterForGame(t.gameSlug, t.bannerUrl);
 
   return (
     <section>
@@ -31,8 +39,8 @@ export function FeaturedTournament() {
           <div
             className="absolute inset-0"
             style={
-              t.bannerUrl
-                ? { backgroundImage: `url(${t.bannerUrl})`, backgroundSize: "cover", backgroundPosition: "center" }
+              poster
+                ? { backgroundImage: `url(${poster})`, backgroundSize: "cover", backgroundPosition: "50% 20%" }
                 : { background: "linear-gradient(135deg, var(--color-violet-dim), var(--color-void))" }
             }
           />

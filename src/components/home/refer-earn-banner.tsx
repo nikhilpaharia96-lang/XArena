@@ -8,7 +8,7 @@ import { formatPaise } from "@/lib/format";
 
 /** ₹50 is the platform's real signup referral bonus (see
  * SIGNUP_REFERRAL_BONUS_PAISE in /api/auth/signup) — shown as a static
- * constant here since there's no public "config" endpoint for it yet. */
+ * constant since there's no public "config" endpoint for it yet. */
 const REFERRAL_BONUS_PAISE = 5000;
 
 export function ReferEarnBanner() {
@@ -16,10 +16,14 @@ export function ReferEarnBanner() {
   const { data: referral } = useReferral();
 
   return (
-    <section className="relative rounded-3xl overflow-hidden border border-gold/20 p-5 sm:p-6" style={{ background: "linear-gradient(135deg, var(--color-violet-dim) 0%, #4C1D95 55%, var(--color-gold) 140%)" }}>
-      <div className="absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
+    <section className="relative rounded-3xl overflow-hidden border border-gold/20">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/images/refer-earn-banner.jpg)" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-void via-void/80 to-void/10" />
 
-      <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
+      <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-5">
         <div className="flex-1 min-w-0">
           <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest text-gold mb-2">
             <Gift className="h-3.5 w-3.5" /> REFER &amp; EARN
@@ -46,18 +50,18 @@ export function ReferEarnBanner() {
         </div>
 
         <div className="flex sm:flex-col gap-2 shrink-0">
-          <div className="flex-1 sm:flex-none flex items-center gap-2 rounded-xl bg-black/25 border border-white/15 px-3 py-2">
+          <div className="flex-1 sm:flex-none flex items-center gap-2 rounded-xl bg-black/40 border border-white/15 px-3 py-2 backdrop-blur-sm">
             <Users className="h-4 w-4 text-gold shrink-0" />
             <div className="min-w-0">
               <p className="text-sm font-bold text-white leading-none">{formatPaise(REFERRAL_BONUS_PAISE)}</p>
               <p className="text-[10px] text-white/60 mt-0.5">Per Friend</p>
             </div>
           </div>
-          <div className="flex-1 sm:flex-none flex items-center gap-2 rounded-xl bg-black/25 border border-white/15 px-3 py-2">
+          <div className="flex-1 sm:flex-none flex items-center gap-2 rounded-xl bg-black/40 border border-white/15 px-3 py-2 backdrop-blur-sm">
             <Ticket className="h-4 w-4 text-cobalt shrink-0" />
             <p className="text-xs font-semibold text-white/85">Exclusive Tournaments</p>
           </div>
-          <div className="flex-1 sm:flex-none flex items-center gap-2 rounded-xl bg-black/25 border border-white/15 px-3 py-2">
+          <div className="flex-1 sm:flex-none flex items-center gap-2 rounded-xl bg-black/40 border border-white/15 px-3 py-2 backdrop-blur-sm">
             <Crown className="h-4 w-4 text-gold shrink-0" />
             <p className="text-xs font-semibold text-white/85">Special Rewards</p>
           </div>
