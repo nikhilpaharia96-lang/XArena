@@ -2,15 +2,15 @@ import { z } from "zod";
 import { FREE_FIRE_CATEGORY_VALUES } from "@/lib/free-fire-categories";
 
 export const createTournamentSchema = z.object({
-  title: z.string().trim().min(3).max(120),
+  title: z.string().trim().min(3, "Title must be at least 3 characters").max(120, "Title must be 120 characters or fewer"),
   slug: z
     .string()
     .trim()
     .toLowerCase()
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers, and hyphens only"),
-  description: z.string().trim().min(10),
+  description: z.string().trim().min(10, "Description must be at least 10 characters"),
   bannerUrl: z.string().url().optional(),
-  gameId: z.string().min(1),
+  gameId: z.string().min(1, "Select a game"),
   mode: z.enum([
     "SOLO",
     "DUO",
@@ -29,11 +29,11 @@ export const createTournamentSchema = z.object({
   prizeDistribution: z
     .array(z.object({ position: z.number().int().min(1), amountRupees: z.number().int().min(0) }))
     .min(1),
-  maxSlots: z.number().int().min(2).max(1000),
-  roomSize: z.number().int().min(1).max(64),
+  maxSlots: z.number().int().min(2, "Max slots must be at least 2").max(1000, "Max slots can't exceed 1000"),
+  roomSize: z.number().int().min(1, "Room size must be at least 1").max(64, "Room size can't exceed 64"),
   map: z.string().trim().optional(),
   category: z.enum(FREE_FIRE_CATEGORY_VALUES).nullable().optional(),
-  rules: z.string().trim().min(10),
+  rules: z.string().trim().min(10, "Rules must be at least 10 characters"),
   scoringSystem: z.string().trim().optional(),
   registrationStartsAt: z.string().datetime(),
   registrationEndsAt: z.string().datetime(),
@@ -43,7 +43,12 @@ export const createTournamentSchema = z.object({
 });
 export type CreateTournamentInput = z.infer<typeof createTournamentSchema>;
 
-export const updateTournamentSchema = createTournamentSchema.partial();
+// .partial() alone keeps the create-schema defaults (cadence, isFeatured), which would
+// silently reset those fields on every PATCH. Override them as plain optionals.
+export const updateTournamentSchema = createTournamentSchema.partial().extend({
+  cadence: z.enum(["DAILY", "WEEKLY", "MEGA", "ONE_OFF"]).optional(),
+  isFeatured: z.boolean().optional(),
+});
 
 export const releaseRoomSchema = z.object({
   roomId: z.string().trim().min(1),

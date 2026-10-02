@@ -29,7 +29,7 @@ export async function GET() {
 
     const tournamentHistory = db
       .prepare(
-        `SELECT t.id, t.slug, t.title, t.bannerUrl, t.status, t.matchStartsAt, tp.status as participantStatus, tp.joinedAt
+        `SELECT t.id, t.slug, t.title, t.bannerUrl, t.status, t.matchStartsAt, t.gameId, tp.status as participantStatus, tp.joinedAt, tp.teamName
          FROM TournamentParticipant tp JOIN Tournament t ON t.id = tp.tournamentId
          WHERE tp.userId = ? ORDER BY tp.joinedAt DESC LIMIT 20`
       )

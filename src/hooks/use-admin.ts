@@ -17,6 +17,7 @@ export interface AdminTournamentRow {
   id: string; slug: string; title: string; status: string; format: string; mode: string;
   entryFee: number; prizePool: number; maxSlots: number; slotsFilled: number;
   matchStartsAt: string; registrationEndsAt: string; createdAt: string; gameName: string;
+  isFeatured?: number | boolean; category?: string | null;
 }
 
 export interface AdminUserRow {
@@ -61,7 +62,24 @@ export function useAdminAnalytics() {
 export function useAdminTournaments(status?: string) {
   return useQuery<AdminTournamentRow[]>({
     queryKey: ["admin", "tournaments", status],
-    queryFn: () => api.get(`/api/admin/tournaments${status ? `?status=${status}` : ""}`),
+    queryFn: () => api.get(`/api/admin/tournaments?limit=200${status ? `&status=${status}` : ""}`),
+  });
+}
+
+export function useDeleteTournament() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/admin/tournaments/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tournaments"] }),
+  });
+}
+
+export function useToggleFeatured() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, isFeatured }: { id: string; isFeatured: boolean }) =>
+      api.patch(`/api/admin/tournaments/${id}`, { isFeatured }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tournaments"] }),
   });
 }
 
