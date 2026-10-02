@@ -22,6 +22,10 @@
   --color-crimson: #EF4444;    /* error / live-red (unchanged role) */
   --color-gold: #F97316;       /* secondary brand orange (was gold #FFB020) — CTAs, live badges, highlights */
 
+  --color-nav-active: #60A5FA;        /* floating bottom-nav: active icon */
+  --color-nav-active-label: #93C5FD;  /* floating bottom-nav: active label (slightly softer than the icon) */
+  --color-nav-inactive: #64748B;      /* floating bottom-nav: inactive icon + label */
+
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -81,6 +85,23 @@ html, body {
 }
 @media (prefers-reduced-motion: reduce) {
   .live-dot { animation: none; }
+}
+
+/* Floating pill background for the mobile bottom nav. Layered like the
+   rest of the premium/cinematic surfaces in the app: a dark glass blur,
+   a faint top-down sheen, a hairline border and a lifted shadow so the
+   bar reads as "floating" above the page rather than flush with the
+   bottom of the screen. */
+.nav-float {
+  background:
+    linear-gradient(180deg, rgba(22, 33, 58, 0.92) 0%, rgba(8, 13, 26, 0.96) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 -1px 0 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 32px -8px rgba(2, 6, 23, 0.65),
+    0 0 0 1px rgba(37, 99, 235, 0.12);
 }
 
 /* safe-area helpers for the fixed bottom nav */

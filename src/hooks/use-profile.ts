@@ -14,7 +14,8 @@ export interface ProfileData {
   };
   tournamentHistory: {
     id: string; slug: string; title: string; bannerUrl: string | null; status: string;
-    matchStartsAt: string; participantStatus: string; joinedAt: string;
+    matchStartsAt: string; gameId: string; participantStatus: string; joinedAt: string;
+    teamName: string | null;
   }[];
 }
 
