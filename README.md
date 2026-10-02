@@ -256,3 +256,9 @@ Until then users see "Deposits aren't set up yet". Nothing payment-related is ha
 
 Uploads are stored privately in `data/uploads/` (not `/public`) and served only via authorised API routes. For production,
 swap `src/server/lib/uploads.ts` for S3/R2/Cloudinary. The Razorpay routes (`/api/wallet/deposit*`, webhook) are untouched.
+
+
+
+git add .
+git commit -m "Describe your changes"
+git push origin main

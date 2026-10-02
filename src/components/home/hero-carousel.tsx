@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Trophy, ShieldCheck, Zap, Users, Wallet, IndianRupee, Play } from "lucide-react";
+import { ArrowRight, Trophy, ShieldCheck, Zap, Users, Wallet, IndianRupee, Play, Crown, UsersRound } from "lucide-react";
 import { useTournaments } from "@/hooks/use-tournaments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPaise } from "@/lib/format";
@@ -12,7 +12,7 @@ import { posterForGame } from "./game-card";
 import { toast } from "@/lib/toast-store";
 
 /**
- * Swipeable hero. Slides 1 and 2 are always the XArena brand intro (static
+ * Swipeable hero. Slides 1–3 are always the XArena brand intro (static
  * copy, like an app tagline/promo poster — not data). Any remaining slides
  * are built from real featured tournaments so the hero never shows
  * fabricated tournament promos.
@@ -21,7 +21,7 @@ export function HeroCarousel() {
   const { data: featured, isLoading } = useTournaments({ featured: true });
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const slideCount = 2 + Math.min(featured?.length ?? 0, 4);
+  const slideCount = 3 + Math.min(featured?.length ?? 0, 4);
 
   function onScroll() {
     const el = scrollerRef.current;
@@ -223,6 +223,70 @@ export function HeroCarousel() {
           </div>
         </motion.div>
 
+        {/* Brand slide 3 — "Real Players, Real Rewards" poster banner. Also
+            static marketing copy, not tournament data. */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.25, delay: 0.1 }}
+          className="relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
+        >
+          {/* Stadium/soldier artwork */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url(/images/hero-real-rewards-bg.webp)",
+              backgroundSize: "cover",
+              backgroundPosition: "68% center",
+            }}
+          />
+          {/* Readability overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-void via-void/85 sm:via-void/75 to-void/10 sm:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-void via-void/15 to-transparent" />
+
+          <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[10px] font-bold tracking-widest text-gold mb-2">
+            <Crown className="h-3 w-3" /> BIGGEST GAMING TOURNAMENTS
+          </span>
+
+          <Image
+            src="/images/real-players-real-rewards.webp"
+            alt="Real Players. Real Rewards."
+            width={2436}
+            height={662}
+            className="h-16 sm:h-20 w-auto drop-shadow-[0_4px_14px_rgba(0,0,0,0.55)] mb-2 -ml-1"
+          />
+
+          <p className="relative text-white/75 text-xs sm:text-sm max-w-xs sm:max-w-sm mb-3 line-clamp-2">
+            Join top tournaments, compete with the best and win exciting cash prizes.
+          </p>
+
+          <div className="relative flex items-center gap-3 sm:gap-5 mb-3">
+            <span className="flex items-center gap-1.5">
+              <Trophy className="h-3.5 w-3.5 text-gold" />
+              <span className="text-[11px] text-white/70 font-semibold">Cash Prizes</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <UsersRound className="h-3.5 w-3.5 text-cobalt" />
+              <span className="text-[11px] text-white/70 font-semibold">Fair Matches</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-signal" />
+              <span className="text-[11px] text-white/70 font-semibold">Secure Platform</span>
+            </span>
+            <span className="hidden sm:flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-cobalt" />
+              <span className="text-[11px] text-white/70 font-semibold">Instant Withdrawals</span>
+            </span>
+          </div>
+
+          <Link
+            href="/tournaments"
+            className="relative inline-flex items-center gap-1.5 w-fit rounded-xl gradient-cta px-5 h-11 text-sm font-bold text-white shadow-[0_8px_24px_-6px_rgba(249,115,22,0.5)]"
+          >
+            Explore Tournaments <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </motion.div>
+
         {/* Real featured-tournament slides — same premium poster treatment as
             the brand slides, but every word is live tournament data. Uses the
             same posterForGame() artwork as the game cards / tournament
@@ -235,7 +299,7 @@ export function HeroCarousel() {
               key={t.id}
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.25, delay: 0.1 + i * 0.05 }}
+              transition={{ duration: 0.25, delay: 0.15 + i * 0.05 }}
               className="relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
             >
               <div
