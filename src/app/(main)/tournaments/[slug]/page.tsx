@@ -94,7 +94,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
   const { matchStarted, registrationOpen, isCancelled, isCompleted, isLive, isFull } = deriveTournamentState(t);
   const totalBalance = me ? me.wallet.depositBalance + me.wallet.winningBalance + me.wallet.bonusBalance : 0;
   const insufficientBalance = Boolean(me) && t.format !== "FREE" && totalBalance < t.entryFee;
-  const poster = posterForGame(t.gameSlug, t.bannerUrl);
+  const poster = t.bannerUrl || posterForGame(t.gameSlug, null);
 
   const statusBadge = isCancelled
     ? { label: "Cancelled", tone: "crimson" as const }

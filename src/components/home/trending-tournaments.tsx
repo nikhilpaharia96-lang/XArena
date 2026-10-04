@@ -53,7 +53,7 @@ export function TrendingTournaments() {
       ) : items.length > 0 ? (
         <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-4 px-4 md:grid md:grid-cols-3 md:overflow-visible">
           {items.map(({ tournament: t, label, tone }) => {
-            const poster = posterForGame(t.gameSlug, t.bannerUrl);
+            const poster = t.thumbnailUrl || t.bannerUrl || posterForGame(t.gameSlug, null);
             return (
               <Link key={t.id} href={`/tournaments/${t.slug}`} className="shrink-0 w-[240px] md:w-auto snap-center">
                 <motion.div whileTap={{ scale: 0.98 }}>

@@ -293,7 +293,7 @@ export function HeroCarousel() {
             detail page so each game gets its correct branded art (never a
             generic or mismatched character image). */}
         {featured?.slice(0, 4).map((t, i) => {
-          const poster = posterForGame(t.gameSlug, t.bannerUrl);
+          const poster = t.bannerUrl || posterForGame(t.gameSlug, null);
           return (
             <motion.div
               key={t.id}

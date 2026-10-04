@@ -36,6 +36,12 @@ function createConnection(): Database.Database {
   if (!tournamentCols.some((c) => c.name === "category")) {
     db.exec("ALTER TABLE Tournament ADD COLUMN category TEXT");
   }
+  if (!tournamentCols.some((c) => c.name === "thumbnailUrl")) {
+    db.exec("ALTER TABLE Tournament ADD COLUMN thumbnailUrl TEXT");
+  }
+  if (!tournamentCols.some((c) => c.name === "matchEndsAt")) {
+    db.exec("ALTER TABLE Tournament ADD COLUMN matchEndsAt TEXT");
+  }
   db.exec("CREATE INDEX IF NOT EXISTS idx_tournament_category ON Tournament(category)");
 
   return db;

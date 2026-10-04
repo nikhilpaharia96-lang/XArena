@@ -39,7 +39,9 @@ function sniffImageType(buf: Buffer): keyof typeof ALLOWED | null {
   return null;
 }
 
-export type UploadFolder = "deposits" | "payment";
+// "images" holds admin-managed marketing art (tournament banners etc.) and is the ONLY
+// folder served publicly (see /api/uploads/images/[name]); deposits/payment stay private.
+export type UploadFolder = "deposits" | "payment" | "images";
 
 /** Validates (size, MIME, extension, magic bytes) and stores an uploaded image. Returns the storage key. */
 export async function saveImageUpload(file: File, folder: UploadFolder, maxBytes = MAX_IMAGE_BYTES): Promise<string> {
@@ -73,7 +75,7 @@ export async function saveImageUpload(file: File, folder: UploadFolder, maxBytes
 
 /** Reads a stored upload by key. Rejects any key that could escape the upload root. */
 export function readUpload(key: string): { data: Buffer; contentType: string } | null {
-  if (!/^(deposits|payment)\/[\w.-]+$/.test(key) || key.includes("..")) return null;
+  if (!/^(deposits|payment|images)\/[\w.-]+$/.test(key) || key.includes("..")) return null;
   const full = path.join(UPLOAD_ROOT, key);
   if (!full.startsWith(UPLOAD_ROOT + path.sep) || !fs.existsSync(full)) return null;
 
@@ -83,7 +85,7 @@ export function readUpload(key: string): { data: Buffer; contentType: string } |
 }
 
 export function deleteUpload(key: string | null | undefined) {
-  if (!key || !/^(deposits|payment)\/[\w.-]+$/.test(key) || key.includes("..")) return;
+  if (!key || !/^(deposits|payment|images)\/[\w.-]+$/.test(key) || key.includes("..")) return;
   const full = path.join(UPLOAD_ROOT, key);
   if (full.startsWith(UPLOAD_ROOT + path.sep)) fs.rmSync(full, { force: true });
 }

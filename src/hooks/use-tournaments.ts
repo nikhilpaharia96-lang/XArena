@@ -14,6 +14,7 @@ export interface Game {
 }
 
 export interface TournamentListItem {
+  thumbnailUrl?: string | null;
   id: string;
   slug: string;
   title: string;
