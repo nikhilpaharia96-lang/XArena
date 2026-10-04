@@ -9,6 +9,7 @@ import { SlotMeter } from "./slot-meter";
 import { CountdownTimer } from "./countdown-timer";
 import { formatPaise, gameModeLabel } from "@/lib/format";
 import type { TournamentListItem } from "@/hooks/use-tournaments";
+import { posterForGame } from "@/components/home/game-card";
 
 const STATUS_META: Record<string, { label: string; tone: "crimson" | "cobalt" | "neutral" | "signal" }> = {
   LIVE: { label: "LIVE", tone: "crimson" },
@@ -23,13 +24,19 @@ export function TournamentCard({ tournament }: { tournament: TournamentListItem 
   const t = tournament;
   const isFull = t.slotsLeft <= 0;
   const statusMeta = STATUS_META[t.status];
+  // Admin-set card image wins, then banner, then the game's poster; gradient if none exist.
+  const art = t.thumbnailUrl || t.bannerUrl || posterForGame(t.gameSlug, null);
 
   return (
     <Link href={`/tournaments/${t.slug}`}>
       <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.15 }}>
         <Card className="overflow-hidden">
           <div className="relative h-28 gradient-brand flex items-end p-3">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            {art && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={art} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/35" />
             {statusMeta && (
               <span className="absolute top-3 left-3 z-10">
                 <Badge tone={statusMeta.tone}>

@@ -5,6 +5,7 @@ import { cn } from "@/lib/cn";
 
 function getRemaining(target: string) {
   const diff = new Date(target).getTime() - Date.now();
+  if (Number.isNaN(diff)) return undefined; // missing/invalid date: show a dash, not "NaN"
   if (diff <= 0) return null;
   const totalSeconds = Math.floor(diff / 1000);
   const days = Math.floor(totalSeconds / 86400);
@@ -21,6 +22,10 @@ export function CountdownTimer({ target, className, label }: { target: string; c
     const interval = setInterval(() => setRemaining(getRemaining(target)), 1000);
     return () => clearInterval(interval);
   }, [target]);
+
+  if (remaining === undefined) {
+    return <span className={cn("text-xs font-mono font-semibold text-white/40", className)}>—</span>;
+  }
 
   if (!remaining) {
     return <span className={cn("text-xs font-mono font-semibold text-crimson", className)}>{label ?? "Started"}</span>;

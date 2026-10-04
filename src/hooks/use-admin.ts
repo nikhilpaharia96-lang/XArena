@@ -17,7 +17,7 @@ export interface AdminTournamentRow {
   id: string; slug: string; title: string; status: string; format: string; mode: string;
   entryFee: number; prizePool: number; maxSlots: number; slotsFilled: number;
   matchStartsAt: string; registrationEndsAt: string; createdAt: string; gameName: string;
-  isFeatured?: number | boolean; category?: string | null;
+  isFeatured?: number | boolean; category?: string | null; bannerUrl?: string | null; thumbnailUrl?: string | null;
 }
 
 export interface AdminUserRow {

@@ -19,7 +19,10 @@ import { ErrorState } from "@/components/ui/error-state";
 import { StatCard } from "@/components/ui/stat-card";
 import { formatPaise, formatDateTime, formatRelativeTime, statusLabel } from "@/lib/format";
 import { toast } from "@/lib/toast-store";
-import { Plus, Trophy, Copy, Ban, Send, Search, Star, Trash2, Pencil, RefreshCw, Users, Wallet, Radio, FileText } from "lucide-react";
+import { ImageInput } from "@/components/admin/image-input";
+import { api } from "@/lib/api-client";
+import { useQueryClient } from "@tanstack/react-query";
+import { ImageIcon, Plus, Trophy, Copy, Ban, Send, Search, Star, Trash2, Pencil, RefreshCw, Users, Wallet, Radio, FileText } from "lucide-react";
 
 type Tone = "signal" | "gold" | "crimson" | "violet" | "neutral";
 
@@ -146,6 +149,63 @@ function CancelDialog({ t, onClose }: { t: AdminTournamentRow | null; onClose: (
   );
 }
 
+function ImageDialog({ t, onClose }: { t: AdminTournamentRow | null; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [thumb, setThumb] = useState<string | null>(null);
+  const [banner, setBanner] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  // Re-seed the fields whenever a different tournament is opened.
+  const [seededFor, setSeededFor] = useState<string | null>(null);
+  if (t && seededFor !== t.id) {
+    setSeededFor(t.id);
+    setThumb(t.thumbnailUrl ?? null);
+    setBanner(t.bannerUrl ?? null);
+  }
+
+  const save = async () => {
+    if (!t) return;
+    setSaving(true);
+    try {
+      await api.patch(`/api/admin/tournaments/${t.id}`, { thumbnailUrl: thumb, bannerUrl: banner });
+      await qc.invalidateQueries({ queryKey: ["admin", "tournaments"] });
+      toast({ title: "Images updated", tone: "success" });
+      setSeededFor(null);
+      onClose();
+    } catch (e) {
+      toast({ title: errMsg(e), tone: "error" });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const close = () => {
+    setSeededFor(null);
+    onClose();
+  };
+
+  return (
+    <Dialog open={Boolean(t)} onClose={close} title="Tournament images">
+      {t && (
+        <div className="space-y-5 max-h-[70vh] overflow-y-auto pr-1">
+          <p className="text-sm text-white/60">
+            <span className="font-semibold text-white">{t.title}</span> — upload an image or paste a URL. The card image is shown on listings; the banner on the detail page.
+          </p>
+          <ImageInput label="Card image (thumbnail)" hint="Shown on tournament cards" aspect="aspect-[16/9]" value={thumb} onChange={setThumb} />
+          <ImageInput label="Banner" hint="Detail page & hero" value={banner} onChange={setBanner} />
+          <div className="flex gap-2 justify-end">
+            <Button variant="ghost" size="sm" onClick={close}>
+              Cancel
+            </Button>
+            <Button size="sm" loading={saving} onClick={save}>
+              Save images
+            </Button>
+          </div>
+        </div>
+      )}
+    </Dialog>
+  );
+}
+
 function DeleteDialog({ t, onClose }: { t: AdminTournamentRow | null; onClose: () => void }) {
   const del = useDeleteTournament();
   return (
@@ -186,10 +246,12 @@ function TournamentRowActions({
   t,
   onCancel,
   onDelete,
+  onImage,
 }: {
   t: AdminTournamentRow;
   onCancel: (t: AdminTournamentRow) => void;
   onDelete: (t: AdminTournamentRow) => void;
+  onImage: (t: AdminTournamentRow) => void;
 }) {
   const publish = useTournamentAction(t.id, "publish");
   const clone = useTournamentAction(t.id, "clone");
@@ -234,9 +296,12 @@ function TournamentRowActions({
       >
         <Star className={`h-3.5 w-3.5 ${featured ? "fill-gold text-gold" : ""}`} />
       </Button>
+      <Button size="sm" variant="ghost" aria-label="Set images" title="Set card / banner image" onClick={() => onImage(t)}>
+        <ImageIcon className={`h-3.5 w-3.5 ${t.thumbnailUrl || t.bannerUrl ? "text-signal" : ""}`} />
+      </Button>
       {editable && (
-        <Link href={`/admin/tournaments/${t.id}`} aria-label="Edit / manage" title="Manage">
-          <Button size="sm" variant="ghost" aria-label="Manage">
+        <Link href={`/admin/tournaments/${t.id}/edit`} aria-label="Edit tournament" title="Edit">
+          <Button size="sm" variant="ghost" aria-label="Edit">
             <Pencil className="h-3.5 w-3.5" />
           </Button>
         </Link>
@@ -277,6 +342,7 @@ export default function AdminTournamentsPage() {
   const [sort, setSort] = useState<SortKey>("newest");
   const [cancelTarget, setCancelTarget] = useState<AdminTournamentRow | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AdminTournamentRow | null>(null);
+  const [imageTarget, setImageTarget] = useState<AdminTournamentRow | null>(null);
 
   // Fetch everything once; status counts, search, game filter and sort all run client-side.
   const { data, isLoading, isError, error, refetch, isFetching } = useAdminTournaments();
@@ -421,6 +487,21 @@ export default function AdminTournamentsPage() {
           </p>
           {rows.map((t) => (
             <Card key={t.id} className="p-4 flex flex-col lg:flex-row lg:items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setImageTarget(t)}
+                aria-label={`Set image for ${t.title}`}
+                className="relative h-14 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-surface-2 grid place-items-center hover:border-violet/50"
+              >
+                {t.thumbnailUrl || t.bannerUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={(t.thumbnailUrl || t.bannerUrl) as string} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="flex flex-col items-center gap-0.5 text-[10px] text-white/35">
+                    <ImageIcon className="h-4 w-4" /> Add image
+                  </span>
+                )}
+              </button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   {Boolean(t.isFeatured) && <Star className="h-3.5 w-3.5 fill-gold text-gold shrink-0" />}
@@ -442,7 +523,7 @@ export default function AdminTournamentsPage() {
                 </p>
               </div>
               <FillBar filled={t.slotsFilled} max={t.maxSlots} />
-              <TournamentRowActions t={t} onCancel={setCancelTarget} onDelete={setDeleteTarget} />
+              <TournamentRowActions t={t} onCancel={setCancelTarget} onDelete={setDeleteTarget} onImage={setImageTarget} />
             </Card>
           ))}
         </div>
@@ -469,6 +550,7 @@ export default function AdminTournamentsPage() {
 
       <CancelDialog t={cancelTarget} onClose={() => setCancelTarget(null)} />
       <DeleteDialog t={deleteTarget} onClose={() => setDeleteTarget(null)} />
+      <ImageDialog t={imageTarget} onClose={() => setImageTarget(null)} />
     </div>
   );
 }

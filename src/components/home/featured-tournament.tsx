@@ -60,7 +60,7 @@ function FeaturedCard({ t }: { t: TournamentListItem }) {
   const art = FEATURED_ART[t.slug];
   const ModeIcon = t.mode === "SOLO" || t.mode === "ONE_V_ONE" ? User : Users;
   const date = formatDateTime(t.matchStartsAt).replace(/\b(am|pm)\b/i, (m) => m.toUpperCase());
-  const bgSrc = art?.bg ?? t.bannerUrl;
+  const bgSrc = t.bannerUrl ?? art?.bg;
 
   return (
     <Link href={`/tournaments/${t.slug}`} className="block">
