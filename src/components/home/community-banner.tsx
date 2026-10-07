@@ -1,12 +1,12 @@
 "use client";
 
-import { MessageCircle, MessagesSquare, Send } from "lucide-react";
+import { WhatsAppIcon, YouTubeIcon, TelegramIcon } from "@/components/icons/brand-icons";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 
 const LINKS = [
-  { href: SOCIAL_LINKS.discord, label: "Discord", icon: MessagesSquare, color: "#5865F2" },
-  { href: SOCIAL_LINKS.whatsapp, label: "WhatsApp", icon: MessageCircle, color: "#25D366" },
-  { href: SOCIAL_LINKS.telegram, label: "Telegram", icon: Send, color: "#0088cc" },
+  { href: SOCIAL_LINKS.whatsapp, label: "WhatsApp", icon: WhatsAppIcon, color: "#25D366" },
+  { href: SOCIAL_LINKS.youtube, label: "YouTube", icon: YouTubeIcon, color: "#FF0000" },
+  { href: SOCIAL_LINKS.telegram, label: "Telegram", icon: TelegramIcon, color: "#0088cc" },
 ];
 
 export function CommunityBanner() {
