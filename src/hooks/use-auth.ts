@@ -55,7 +55,7 @@ export function useCurrentUser() {
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { identifier: string; password: string }) =>
+    mutationFn: (input: { email: string; password: string }) =>
       api.post("/api/auth/login", input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["me"] }),
   });

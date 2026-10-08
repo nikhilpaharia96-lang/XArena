@@ -11,6 +11,7 @@ import {
 import { createId } from "@/server/lib/ids";
 import { checkRateLimit, getClientKey } from "@/server/lib/rate-limit";
 import { loginSchema } from "@/types/schemas";
+import { phoneLoginCandidates } from "@/lib/phone";
 import { cookies } from "next/headers";
 
 interface UserRow {
@@ -33,21 +34,29 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const input = loginSchema.parse(body);
+    // `email` is still accepted for older clients.
+    const input = loginSchema.parse({ identifier: body.identifier ?? body.email, password: body.password });
 
-    const user = db
-      .prepare("SELECT id, email, username, passwordHash, role, status, avatarUrl FROM User WHERE email = ?")
-      .get(input.email) as UserRow | undefined;
+    const cols = "id, email, username, passwordHash, role, status, avatarUrl";
+    let user: UserRow | undefined;
+    if (input.identifier.includes("@")) {
+      user = db.prepare(`SELECT ${cols} FROM User WHERE email = ?`).get(input.identifier.toLowerCase()) as UserRow | undefined;
+    } else {
+      for (const phone of phoneLoginCandidates(input.identifier)) {
+        user = db.prepare(`SELECT ${cols} FROM User WHERE phone = ?`).get(phone) as UserRow | undefined;
+        if (user) break;
+      }
+    }
 
-    // Constant-shape response whether the email exists or not, to avoid
-    // leaking which emails are registered via response-time / message diffs.
+    // Constant-shape response whether the account exists or not, to avoid
+    // leaking which emails/phones are registered via response-time / message diffs.
     if (!user || !user.passwordHash) {
-      throw new ApiError(401, "Incorrect email or password.", "INVALID_CREDENTIALS");
+      throw new ApiError(401, "Incorrect email/phone or password.", "INVALID_CREDENTIALS");
     }
 
     const valid = await verifyPassword(input.password, user.passwordHash);
     if (!valid) {
-      throw new ApiError(401, "Incorrect email or password.", "INVALID_CREDENTIALS");
+      throw new ApiError(401, "Incorrect email/phone or password.", "INVALID_CREDENTIALS");
     }
 
     if (user.status === "BANNED") {
