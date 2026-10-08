@@ -13,7 +13,7 @@ import { ApiClientError } from "@/lib/api-client";
 import { motion } from "framer-motion";
 
 const schema = z.object({
-  email: z.string().email("Enter a valid email"),
+  identifier: z.string().trim().min(1, "Enter your email or phone number"),
   password: z.string().min(1, "Password is required"),
 });
 type FormValues = z.infer<typeof schema>;
@@ -55,8 +55,16 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="text-xs font-semibold text-white/60 mb-1.5 block">Email</label>
-          <Input type="email" placeholder="you@example.com" {...register("email")} error={errors.email?.message} />
+          <label className="text-xs font-semibold text-white/60 mb-1.5 block">Email or Phone no.</label>
+          <Input
+            type="text"
+            inputMode="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            placeholder="you@example.com or 9876543210"
+            {...register("identifier")}
+            error={errors.identifier?.message}
+          />
         </div>
         <div>
           <label className="text-xs font-semibold text-white/60 mb-1.5 block">Password</label>

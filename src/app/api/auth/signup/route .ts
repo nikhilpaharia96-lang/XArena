@@ -22,6 +22,14 @@ export async function POST(req: Request) {
     if (existingEmail) {
       throw new ApiError(409, "An account with this email already exists.", "EMAIL_TAKEN");
     }
+    const fullPhone = `${input.countryCode}${input.phone}`;
+    if (db.prepare("SELECT id FROM User WHERE phone = ?").get(fullPhone)) {
+      throw new ApiError(409, "An account with this phone number already exists.", "PHONE_TAKEN");
+    }
+    const validCodes = (process.env.SIGNUP_CODES ?? "").split(",").map((c) => c.trim().toUpperCase()).filter(Boolean);
+    if (validCodes.length > 0 && !validCodes.includes(input.signupCode.toUpperCase())) {
+      throw new ApiError(400, "Invalid signup code.", "INVALID_SIGNUP_CODE");
+    }
     const existingUsername = db.prepare("SELECT id FROM User WHERE username = ?").get(input.username);
     if (existingUsername) {
       throw new ApiError(409, "That username is already taken.", "USERNAME_TAKEN");
@@ -43,14 +51,15 @@ export async function POST(req: Request) {
 
     const tx = db.transaction(() => {
       db.prepare(
-        `INSERT INTO User (id, uid, email, emailVerified, passwordHash, authProvider, username, role, status, referralCode, referredById, createdAt, updatedAt)
-         VALUES (@id, @uid, @email, 0, @passwordHash, 'EMAIL', @username, 'USER', 'ACTIVE', @referralCode, @referredById, @now, @now)`
+        `INSERT INTO User (id, uid, email, emailVerified, passwordHash, authProvider, username, phone, role, status, referralCode, referredById, createdAt, updatedAt)
+         VALUES (@id, @uid, @email, 0, @passwordHash, 'EMAIL', @username, @phone, 'USER', 'ACTIVE', @referralCode, @referredById, @now, @now)`
       ).run({
         id: userId,
         uid: createId(),
         email: input.email,
         passwordHash,
         username: input.username,
+        phone: fullPhone,
         referralCode: createReferralCode(),
         referredById: referrer?.id ?? null,
         now,

@@ -55,7 +55,7 @@ export function useCurrentUser() {
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { email: string; password: string }) =>
+    mutationFn: (input: { identifier: string; password: string }) =>
       api.post("/api/auth/login", input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["me"] }),
   });
@@ -64,7 +64,16 @@ export function useLogin() {
 export function useSignup() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { email: string; username: string; password: string; referralCode?: string }) =>
+    mutationFn: (input: {
+      email: string;
+      countryCode: string;
+      phone: string;
+      username: string;
+      password: string;
+      confirmPassword: string;
+      signupCode: string;
+      referralCode?: string;
+    }) =>
       api.post("/api/auth/signup", input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["me"] }),
   });

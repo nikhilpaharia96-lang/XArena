@@ -3,6 +3,7 @@ import { ApiError, fail } from "@/server/lib/api-response";
 import { getCurrentUser, requireRole } from "@/server/lib/current-user";
 import { writeAuditLog } from "@/server/lib/audit";
 import { NextResponse } from "next/server";
+import { formatPhoneForExport } from "@/lib/phone";
 
 type Row = Record<string, unknown>;
 
@@ -55,7 +56,7 @@ export async function GET(req: Request) {
       case "users":
         rows = db
           .prepare(
-            `SELECT u.uid, u.username, u.email, u.status, u.role, u.createdAt, u.lastLoginAt,
+            `SELECT u.uid, u.username, u.email, u.phone, u.status, u.role, u.createdAt, u.lastLoginAt,
                     w.depositBalance, w.winningBalance, w.bonusBalance,
                     ps.matchesPlayed, ps.wins, ps.totalEarnings
              FROM User u
@@ -64,6 +65,7 @@ export async function GET(req: Request) {
              ORDER BY u.createdAt DESC`
           )
           .all() as Row[];
+        rows = rows.map((r) => ({ ...r, phone: formatPhoneForExport(r.phone as string | null) }));
         break;
       case "referrals":
         rows = db
@@ -79,10 +81,11 @@ export async function GET(req: Request) {
       case "payments":
         rows = db
           .prepare(
-            `SELECT d.createdAt, u.username, u.email, d.amount, d.status, d.razorpayOrderId, d.razorpayPaymentId
+            `SELECT d.createdAt, u.username, u.email, u.phone, d.amount, d.status, d.razorpayOrderId, d.razorpayPaymentId
              FROM Deposit d JOIN User u ON u.id = d.userId ORDER BY d.createdAt DESC`
           )
           .all() as Row[];
+        rows = rows.map((r) => ({ ...r, phone: formatPhoneForExport(r.phone as string | null) }));
         break;
       default:
         throw new ApiError(400, "Invalid report type. Use revenue, tournaments, users, referrals, or payments.", "INVALID_TYPE");
