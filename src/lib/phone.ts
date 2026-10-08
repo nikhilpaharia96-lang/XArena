@@ -21,3 +21,23 @@ export function validatePhone(dial: string, phone: string): string | null {
   if (c.iso === "IN" && !/^[6-9]/.test(phone)) return "Indian numbers start with 6, 7, 8 or 9";
   return null;
 }
+
+/**
+ * Candidate stored values for a phone number typed at login. Numbers are stored
+ * as "<dial><national>" (e.g. +919876543210). A number typed without a "+" is
+ * tried as an Indian number first, then as a full international number.
+ */
+export function phoneLoginCandidates(input: string): string[] {
+  const cleaned = input.replace(/[\s\-()]/g, "");
+  if (!/^\+?\d{6,15}$/.test(cleaned)) return [];
+  if (cleaned.startsWith("+")) return [cleaned];
+  const digits = cleaned.replace(/^0+/, "");
+  return [`+91${digits}`, `+${digits}`];
+}
+
+/** "+919876543210" -> "+91 9876543210" (the space keeps Excel from turning it into a number). */
+export function formatPhoneForExport(phone: string | null | undefined): string {
+  if (!phone) return "";
+  const dial = [...COUNTRY_CODES].map((c) => c.dial).sort((a, b) => b.length - a.length).find((d) => phone.startsWith(d));
+  return dial ? `${dial} ${phone.slice(dial.length)}` : phone;
+}

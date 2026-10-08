@@ -29,7 +29,8 @@ export const signupSchema = z
 export type SignupInput = z.infer<typeof signupSchema>;
 
 export const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
+  /** Email address or phone number (e.g. 9876543210 or +919876543210). */
+  identifier: z.string().trim().min(1, "Enter your email or phone number").max(254),
   password: z.string().min(1, "Password is required"),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
