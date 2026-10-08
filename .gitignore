@@ -35,3 +35,6 @@ Thumbs.db
 
 # Uploaded files (payment screenshots / QR) - private, served via authorised API routes
 /data/uploads/
+
+data/*.db-shm
+data/*.db-wal
