@@ -4,10 +4,11 @@ import { getCurrentUser, requireRole } from "@/server/lib/current-user";
 import { createId } from "@/server/lib/ids";
 import { writeAuditLog } from "@/server/lib/audit";
 import { z } from "zod";
+import { imageRefSchema } from "@/server/lib/admin-schemas";
 
 const bannerSchema = z.object({
   title: z.string().trim().min(1).max(120),
-  imageUrl: z.string().url(),
+  imageUrl: imageRefSchema,
   linkUrl: z.string().url().optional(),
   sortOrder: z.number().int().default(0),
   startsAt: z.string().datetime().optional(),

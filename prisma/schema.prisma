@@ -138,6 +138,7 @@ model Tournament {
   title                String
   description          String
   bannerUrl            String?
+  thumbnailUrl         String?
   gameId               String
   game                 Game              @relation(fields: [gameId], references: [id])
   mode                 GameMode
@@ -159,11 +160,14 @@ model Tournament {
   registrationStartsAt DateTime
   registrationEndsAt   DateTime
   matchStartsAt        DateTime
+  matchEndsAt          DateTime?
   roomId               String?
   roomPassword         String?
   roomReleasedAt       DateTime?
   adminNotes           String?
   isFeatured           Boolean           @default(false)
+  slotSelection        Boolean           @default(true)
+  slotLocks            TournamentSlotLock[]
   createdById          String
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
@@ -186,11 +190,26 @@ model TournamentParticipant {
   teamName     String?
   status       ParticipantStatus @default(REGISTERED)
   entryTxnId   String?
+  slotNumber   Int?
+  position     Int?
+  ign          String?
+  gameUid      String?
   joinedAt     DateTime          @default(now())
 
   @@unique([tournamentId, userId])
+  @@unique([tournamentId, slotNumber, position])
   @@index([tournamentId])
   @@index([userId])
+}
+
+model TournamentSlotLock {
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  slotNumber   Int
+  lockedById   String
+  createdAt    DateTime   @default(now())
+
+  @@id([tournamentId, slotNumber])
 }
 
 model Match {

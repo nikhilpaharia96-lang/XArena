@@ -8,6 +8,7 @@ interface TournamentRow {
   slug: string;
   title: string;
   bannerUrl: string | null;
+  thumbnailUrl: string | null;
   gameId: string;
   gameName: string;
   gameSlug: string;
@@ -47,7 +48,7 @@ export async function GET(req: Request) {
     const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 100);
 
     let query = `
-      SELECT t.id, t.slug, t.title, t.bannerUrl, t.gameId, g.name as gameName, g.slug as gameSlug, g.iconUrl as gameIcon,
+      SELECT t.id, t.slug, t.title, t.bannerUrl, t.thumbnailUrl, t.gameId, g.name as gameName, g.slug as gameSlug, g.iconUrl as gameIcon,
              t.mode, t.format, t.cadence, t.status, t.entryFee, t.prizePool, t.maxSlots, t.slotsFilled,
              t.roomSize, t.map, t.category, t.registrationStartsAt, t.registrationEndsAt, t.matchStartsAt, t.isFeatured
       FROM Tournament t

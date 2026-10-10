@@ -42,6 +42,7 @@ export function rowToFields(row: TournamentRow) {
     matchStartsAt: row.matchStartsAt as string,
     matchEndsAt: (row.matchEndsAt as string | null) || null,
     isFeatured: Boolean(row.isFeatured),
+    slotSelection: row.slotSelection === undefined ? true : Boolean(row.slotSelection),
     adminNotes: (row.adminNotes as string | null) ?? null,
   };
 }

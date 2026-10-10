@@ -63,6 +63,7 @@ const tournamentBase = z.object({
   matchStartsAt: z.string().datetime(),
   matchEndsAt: z.string().datetime().nullable().optional(),
   isFeatured: z.boolean().default(false),
+  slotSelection: z.boolean().default(true),
   adminNotes: z.string().trim().max(1000).nullable().optional(),
 });
 
@@ -118,6 +119,7 @@ export const draftTournamentSchema = tournamentBase.partial().extend({
   prizeDistribution: tournamentBase.shape.prizeDistribution.or(z.array(z.never()).length(0)).optional(),
   cadence: cadenceEnum.optional(),
   isFeatured: z.boolean().optional(),
+  slotSelection: z.boolean().optional(),
 });
 export type DraftTournamentInput = z.infer<typeof draftTournamentSchema>;
 
@@ -126,6 +128,7 @@ export type DraftTournamentInput = z.infer<typeof draftTournamentSchema>;
 export const updateTournamentSchema = tournamentBase.partial().extend({
   cadence: cadenceEnum.optional(),
   isFeatured: z.boolean().optional(),
+  slotSelection: z.boolean().optional(),
 });
 
 export const releaseRoomSchema = z.object({

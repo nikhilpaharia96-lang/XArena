@@ -269,3 +269,67 @@ export function useSavePaymentSettings() {
     },
   });
 }
+
+// ---- Registrations & slot management (same board the players see, admin view) ----
+export interface AdminOccupant {
+  participantId: string;
+  username: string;
+  userId: string;
+  ign: string | null;
+  gameUid: string | null;
+  teamName: string | null;
+  joinedAt: string;
+  status: string;
+  entryFee: number;
+  paymentStatus: "PAID" | "UNPAID" | "FREE";
+}
+export interface AdminBoardPosition {
+  position: number;
+  label: string;
+  state: "AVAILABLE" | "OCCUPIED" | "LOCKED";
+  occupant: AdminOccupant | null;
+}
+export interface AdminBoardSlot {
+  slotNumber: number;
+  label: string;
+  locked: boolean;
+  positions: AdminBoardPosition[];
+}
+export interface AdminRegistrationBoard {
+  tournament: { id: string; slug: string; title: string; status: string; mode: string; entryFee: number };
+  slotSelection: boolean;
+  registrationOpen: boolean;
+  canAcceptNow: boolean;
+  editable: boolean;
+  layout: { teamSize: number; teamCount: number; maxSlots: number };
+  slots: AdminBoardSlot[];
+  counts: { capacity: number; registered: number; available: number; locked: number; unassigned: number };
+  unseated: { participantId: string; userId: string; username: string; ign: string | null; gameUid: string | null; joinedAt: string; status: string }[];
+}
+
+export function useAdminRegistrations(id: string) {
+  return useQuery<AdminRegistrationBoard>({
+    queryKey: ["admin", "registrations", id],
+    queryFn: () => api.get<AdminRegistrationBoard>(`/api/admin/tournaments/${id}/registrations`),
+    enabled: Boolean(id),
+    refetchInterval: 10_000,
+  });
+}
+
+export type RegistrationAction =
+  | { action: "lock" | "unlock"; slotNumber: number }
+  | { action: "move"; participantId: string; slotNumber: number; position: number }
+  | { action: "remove"; participantId: string; refund: boolean }
+  | { action: "registration"; open: boolean };
+
+export function useRegistrationAction(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RegistrationAction) => api.post<{ refunded?: number }>(`/api/admin/tournaments/${id}/registrations`, input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin"] });
+      qc.invalidateQueries({ queryKey: ["tournament-slots"] });
+      qc.invalidateQueries({ queryKey: ["tournaments"] });
+    },
+  });
+}

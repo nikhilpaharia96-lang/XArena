@@ -19,7 +19,7 @@ import { FREE_FIRE_CATEGORIES, FREE_FIRE_GAME_SLUG } from "@/lib/free-fire-categ
 import { ImageInput } from "./image-input";
 import { TournamentPreview } from "./tournament-preview";
 import {
-  ALL_MODES, CUSTOM_CATEGORY_VALUES, FF_MAPS, MODE_TEAM_SIZE, STEPS, STEP_OF_FIELD, buildPayload, emptyForm, localInputToIso,
+  ALL_MODES, CUSTOM_CATEGORY_VALUES, FF_MAPS, FIXED_MODES, MODE_TEAM_SIZE, STEPS, STEP_OF_FIELD, buildPayload, emptyForm, localInputToIso,
   ordinal, slugify, validateDraft, validateFull, type StepId, type TournamentForm,
 } from "./tournament-form-model";
 
@@ -120,7 +120,7 @@ export function TournamentWizard({ initial, tournamentId, status, slotsFilled = 
 
   const onMode = (m: string) => {
     set("mode", m);
-    if (!roomSizeTouched && MODE_TEAM_SIZE[m]) set("roomSize", MODE_TEAM_SIZE[m]);
+    if ((FIXED_MODES.includes(m) || !roomSizeTouched) && MODE_TEAM_SIZE[m]) set("roomSize", MODE_TEAM_SIZE[m]);
   };
 
   // ---- derived -----------------------------------------------------------
@@ -380,10 +380,25 @@ export function TournamentWizard({ initial, tournamentId, status, slotsFilled = 
                       ))}
                     </div>
                   </Field>
-                  <Field id="t-team" label="Team Size" error={errors.roomSize} hint="Players per team/room. Auto-set from the type; change it for custom formats.">
-                    <input id="t-team" type="number" min={1} max={64} className={inputCls(errors.roomSize)} value={form.roomSize}
+                  <Field id="t-team" label="Players per team" error={errors.roomSize}
+                    hint={FIXED_MODES.includes(form.mode)
+                      ? `Fixed by the ${gameModeLabel(form.mode)} type. Teams: ${Math.ceil((form.maxSlots || 0) / (MODE_TEAM_SIZE[form.mode] || 1))}.`
+                      : `Used for the slot/team layout. Teams: ${Math.ceil((form.maxSlots || 0) / Math.max(1, form.roomSize || 1))}.`}>
+                    <input id="t-team" type="number" min={1} max={64} className={inputCls(errors.roomSize)}
+                      value={FIXED_MODES.includes(form.mode) ? MODE_TEAM_SIZE[form.mode] : form.roomSize}
+                      disabled={FIXED_MODES.includes(form.mode)}
                       onChange={(e) => { setRoomSizeTouched(true); set("roomSize", Number(e.target.value)); }} />
                   </Field>
+                  <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div>
+                      <p id="slotsel-label" className="text-sm font-semibold text-white">Players choose their slot</p>
+                      <p className="text-xs text-white/40">{form.slotSelection ? "Players pick a slot/position while registering." : "Slots are assigned automatically in join order."}</p>
+                    </div>
+                    <button type="button" role="switch" aria-checked={form.slotSelection} aria-labelledby="slotsel-label" onClick={() => set("slotSelection", !form.slotSelection)}
+                      className={cn("relative h-7 w-12 shrink-0 rounded-full transition-colors", form.slotSelection ? "bg-gold" : "bg-white/15")}>
+                      <span className={cn("absolute top-0.5 h-6 w-6 rounded-full bg-white transition-all", form.slotSelection ? "left-[22px]" : "left-0.5")} />
+                    </button>
+                  </div>
                   <Field id="t-map" label="Map (optional)" hint={isFF ? "Pick a preset or type a custom map name." : undefined}>
                     {isFF && (
                       <div className="mb-2 flex flex-wrap gap-1.5">

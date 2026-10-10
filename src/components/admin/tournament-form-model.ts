@@ -33,6 +33,7 @@ export interface TournamentForm {
   matchEnds: string;
   cadence: string;
   isFeatured: boolean;
+  slotSelection: boolean;
   scoringSystem: string;
   adminNotes: string;
 }
@@ -60,11 +61,14 @@ export const emptyForm: TournamentForm = {
   matchEnds: "",
   cadence: "ONE_OFF",
   isFeatured: false,
+  slotSelection: true,
   scoringSystem: "",
   adminNotes: "",
 };
 
 export const MODE_TEAM_SIZE: Record<string, number> = { SOLO: 1, DUO: 2, SQUAD: 4, ONE_V_ONE: 1, TWO_V_TWO: 2, FOUR_V_FOUR: 4 };
+// For these modes the team size is fixed by the mode itself (matches src/lib/slot-layout.ts).
+export const FIXED_MODES = ["SOLO", "DUO", "SQUAD", "ONE_V_ONE"];
 export const ALL_MODES = ["SOLO", "DUO", "SQUAD", "ONE_V_ONE", "TWO_V_TWO", "FOUR_V_FOUR", "CLASSIC", "CLASH_SQUAD", "CUSTOM"];
 export const FF_MAPS = ["Bermuda", "Kalahari", "Alpine", "NexTerra", "Purgatory"];
 // Categories that are XArena's own, not official in-game modes (shown differently in the UI).
@@ -176,6 +180,7 @@ export function buildPayload(f: TournamentForm, opts: { draft: boolean; ffCatego
     prizePoolRupees: f.prizePool,
     prizeDistribution: f.prizes.map((amountRupees, i) => ({ position: i + 1, amountRupees })),
     isFeatured: f.isFeatured,
+    slotSelection: f.slotSelection,
     scoringSystem: f.scoringSystem.trim() || null,
     adminNotes: f.adminNotes.trim() || null,
     matchEndsAt: dateOrUndef(f.matchEnds) ?? null,

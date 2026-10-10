@@ -1,8 +1,8 @@
 import { db } from "@/server/db/client";
-import { ApiError, fail, ok } from "@/server/lib/api-response";
+import { ApiError, fail, ok, validationError } from "@/server/lib/api-response";
 import { getCurrentUser, requireRole } from "@/server/lib/current-user";
 import { createId } from "@/server/lib/ids";
-import { createTournamentSchema } from "@/server/lib/admin-schemas";
+import { createTournamentSchema, crossFieldIssues, draftTournamentSchema } from "@/server/lib/admin-schemas";
 import { rupeesToPaise } from "@/server/lib/money";
 import { writeAuditLog } from "@/server/lib/audit";
 
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 
     let query = `
       SELECT t.id, t.slug, t.title, t.status, t.format, t.mode, t.entryFee, t.prizePool,
-             t.maxSlots, t.slotsFilled, t.category, t.matchStartsAt, t.registrationEndsAt, t.createdAt, g.name as gameName
+             t.maxSlots, t.slotsFilled, t.category, t.isFeatured, t.bannerUrl, t.thumbnailUrl, t.matchStartsAt, t.registrationEndsAt, t.createdAt, g.name as gameName
       FROM Tournament t JOIN Game g ON g.id = t.gameId
     `;
     const params: (string | number)[] = [];
@@ -41,7 +41,14 @@ export async function POST(req: Request) {
     requireRole(user, "ADMIN", "SUPER_ADMIN");
 
     const body = await req.json();
-    const input = createTournamentSchema.parse(body);
+    const isDraft = body?.saveAsDraft === true;
+
+    // Drafts only need title + slug + game; the publish route enforces completeness.
+    const input = isDraft ? draftTournamentSchema.parse(body) : createTournamentSchema.parse(body);
+    if (isDraft) {
+      const issue = crossFieldIssues(input, { draft: true })[0];
+      if (issue) throw new ApiError(400, issue.message, "VALIDATION_ERROR");
+    }
 
     const existingSlug = db.prepare("SELECT id FROM Tournament WHERE slug = ?").get(input.slug);
     if (existingSlug) {
@@ -55,52 +62,54 @@ export async function POST(req: Request) {
 
     const id = createId("tourn");
     const now = new Date().toISOString();
+    const dist = (input.prizeDistribution ?? []) as { position: number; amountRupees: number }[];
 
     db.prepare(
       `INSERT INTO Tournament (
-        id, slug, title, description, bannerUrl, gameId, mode, format, cadence, status,
-        entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, category, rules,
-        scoringSystem, registrationStartsAt, registrationEndsAt, matchStartsAt, adminNotes,
-        isFeatured, createdById, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        id, slug, title, description, bannerUrl, thumbnailUrl, gameId, mode, format, cadence, status, entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, category, rules, scoringSystem, registrationStartsAt, registrationEndsAt, matchStartsAt, matchEndsAt, adminNotes, isFeatured, slotSelection, createdById, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       input.slug,
       input.title,
-      input.description,
+      input.description ?? "",
       input.bannerUrl ?? null,
+      input.thumbnailUrl ?? null,
       input.gameId,
-      input.mode,
-      input.format,
-      input.cadence,
-      rupeesToPaise(input.entryFeeRupees),
-      rupeesToPaise(input.prizePoolRupees),
-      JSON.stringify(
-        input.prizeDistribution.map((p) => ({ position: p.position, amount: rupeesToPaise(p.amountRupees) }))
-      ),
-      input.maxSlots,
-      input.roomSize,
-      input.map ?? null,
+      input.mode ?? "SOLO",
+      input.format ?? "FREE",
+      input.cadence ?? "ONE_OFF",
+      rupeesToPaise(input.entryFeeRupees ?? 0),
+      rupeesToPaise(input.prizePoolRupees ?? 0),
+      JSON.stringify(dist.map((p) => ({ position: p.position, amount: rupeesToPaise(p.amountRupees) }))),
+      input.maxSlots ?? 2,
+      input.roomSize ?? 1,
+      input.map || null,
       input.category ?? null,
-      input.rules,
+      input.rules ?? "",
       input.scoringSystem ?? null,
-      input.registrationStartsAt,
-      input.registrationEndsAt,
-      input.matchStartsAt,
+      input.registrationStartsAt ?? "",
+      input.registrationEndsAt ?? "",
+      input.matchStartsAt ?? "",
+      input.matchEndsAt ?? null,
       input.adminNotes ?? null,
       input.isFeatured ? 1 : 0,
+      input.slotSelection === false ? 0 : 1,
       user.id,
       now,
       now
     );
 
-    writeAuditLog({ actorId: user.id, action: "TOURNAMENT_CREATED", targetType: "Tournament", targetId: id });
+    writeAuditLog({
+      actorId: user.id,
+      action: "TOURNAMENT_CREATED",
+      targetType: "Tournament",
+      targetId: id,
+      metadata: { draft: isDraft },
+    });
 
     return ok({ id, slug: input.slug, status: "DRAFT" }, 201);
   } catch (error) {
-    if (error instanceof Error && error.name === "ZodError") {
-      return fail(new ApiError(400, "Invalid input.", "VALIDATION_ERROR"));
-    }
-    return fail(error);
+    return fail(validationError(error) ?? error);
   }
 }

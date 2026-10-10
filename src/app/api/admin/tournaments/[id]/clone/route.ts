@@ -19,17 +19,18 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 
     db.prepare(
       `INSERT INTO Tournament (
-        id, slug, title, description, bannerUrl, gameId, mode, format, cadence, status,
-        entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, rules,
-        scoringSystem, registrationStartsAt, registrationEndsAt, matchStartsAt, adminNotes,
+        id, slug, title, description, bannerUrl, thumbnailUrl, gameId, mode, format, cadence, status,
+        entryFee, prizePool, prizeDistribution, maxSlots, slotsFilled, roomSize, map, category, rules,
+        scoringSystem, slotSelection, registrationStartsAt, registrationEndsAt, matchStartsAt, matchEndsAt, adminNotes,
         isFeatured, createdById, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT', ?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       newId,
       newSlug,
       `${source.title} (Copy)`,
       source.description,
       source.bannerUrl,
+      source.thumbnailUrl ?? null,
       source.gameId,
       source.mode,
       source.format,
@@ -40,11 +41,14 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       source.maxSlots,
       source.roomSize,
       source.map,
+      source.category ?? null,
       source.rules,
       source.scoringSystem,
+      source.slotSelection ?? 1,
       source.registrationStartsAt,
       source.registrationEndsAt,
       source.matchStartsAt,
+      source.matchEndsAt ?? null,
       source.adminNotes,
       0,
       user.id,

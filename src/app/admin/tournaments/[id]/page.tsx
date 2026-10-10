@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RegistrationManager } from "@/components/admin/registration-manager";
 import { formatPaise, formatDateTime, statusLabel } from "@/lib/format";
 import { toast } from "@/lib/toast-store";
-import { ArrowLeft, KeyRound } from "lucide-react";
+import { ArrowLeft, KeyRound, Pencil } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -69,9 +70,18 @@ export default function AdminTournamentDetailPage({ params }: { params: Promise<
             <Badge tone="violet">{statusLabel(t.status)}</Badge>
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <KeyRound className="h-4 w-4" /> {t.roomId ? "Update Room" : "Release Room"}
-        </Button>
+        <div className="flex gap-2">
+          {!["LIVE", "COMPLETED", "CANCELLED"].includes(t.status) && (
+            <Link href={`/admin/tournaments/${id}/edit`}>
+              <Button variant="secondary">
+                <Pencil className="h-4 w-4" /> Edit
+              </Button>
+            </Link>
+          )}
+          <Button onClick={() => setDialogOpen(true)}>
+            <KeyRound className="h-4 w-4" /> {t.roomId ? "Update Room" : "Release Room"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -96,24 +106,7 @@ export default function AdminTournamentDetailPage({ params }: { params: Promise<
         </Card>
       )}
 
-      <div>
-        <h2 className="font-bold text-white text-sm mb-3">Participants ({t.participants.length})</h2>
-        <Card className="divide-y divide-white/5">
-          {t.participants.length === 0 ? (
-            <p className="text-sm text-white/40 p-4">No one has joined yet.</p>
-          ) : (
-            t.participants.map((p) => (
-              <div key={p.id} className="p-3.5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-white">{p.username}</p>
-                  <p className="text-xs text-white/40">{p.email}</p>
-                </div>
-                <span className="text-xs text-white/30">{formatDateTime(p.joinedAt)}</span>
-              </div>
-            ))
-          )}
-        </Card>
-      </div>
+      <RegistrationManager id={id} />
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} title="Release Room Details">
         <div className="space-y-3">

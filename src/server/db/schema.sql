@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS Tournament (
   roomReleasedAt       TEXT,
   adminNotes           TEXT,
   isFeatured           INTEGER NOT NULL DEFAULT 0,
+  slotSelection        INTEGER NOT NULL DEFAULT 1,
   createdById          TEXT NOT NULL,
   createdAt            TEXT NOT NULL DEFAULT (datetime('now')),
   updatedAt            TEXT NOT NULL DEFAULT (datetime('now'))
@@ -127,11 +128,24 @@ CREATE TABLE IF NOT EXISTS TournamentParticipant (
   teamName     TEXT,
   status       TEXT NOT NULL DEFAULT 'REGISTERED',
   entryTxnId   TEXT,
+  slotNumber   INTEGER,
+  position     INTEGER,
+  ign          TEXT,
+  gameUid      TEXT,
   joinedAt     TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(tournamentId, userId)
 );
 CREATE INDEX IF NOT EXISTS idx_participant_tournamentId ON TournamentParticipant(tournamentId);
 CREATE INDEX IF NOT EXISTS idx_participant_userId ON TournamentParticipant(userId);
+
+-- Admin-locked slots/teams. A locked slot can't be picked by players.
+CREATE TABLE IF NOT EXISTS TournamentSlotLock (
+  tournamentId TEXT NOT NULL REFERENCES Tournament(id) ON DELETE CASCADE,
+  slotNumber   INTEGER NOT NULL,
+  lockedById   TEXT NOT NULL,
+  createdAt    TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (tournamentId, slotNumber)
+);
 
 CREATE TABLE IF NOT EXISTS Match (
   id           TEXT PRIMARY KEY,

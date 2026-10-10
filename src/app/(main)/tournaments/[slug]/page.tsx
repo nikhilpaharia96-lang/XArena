@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
-import { useTournamentDetail, useJoinTournament, useSubmitResult, type TournamentDetail } from "@/hooks/use-tournaments";
+import { useTournamentDetail, useSubmitResult, type TournamentDetail } from "@/hooks/use-tournaments";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useFavoriteTournament } from "@/hooks/use-favorite-tournament";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -60,11 +60,9 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
   const router = useRouter();
   const { data: me } = useCurrentUser();
   const { data: t, isLoading, isError, refetch } = useTournamentDetail(slug);
-  const join = useJoinTournament(slug);
   const submitResult = useSubmitResult(slug);
   const favorite = useFavoriteTournament(t?.id);
 
-  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [resultDialogOpen, setResultDialogOpen] = useState(false);
   const [placement, setPlacement] = useState("");
   const [kills, setKills] = useState("");
@@ -130,7 +128,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
     if (!registrationOpen) return { label: "Registration Closed", disabled: true, kind: "none" as const };
     if (insufficientBalance) return { label: "Add Money to Join", disabled: false, kind: "addMoney" as const };
     return {
-      label: `Join Tournament — ${t.format === "FREE" ? "Free" : formatPaise(t.entryFee)}`,
+      label: `Join Now — ${t.format === "FREE" ? "Free" : formatPaise(t.entryFee)}`,
       disabled: false,
       kind: "join" as const,
     };
@@ -139,28 +137,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
   const handleCtaClick = () => {
     if (cta.kind === "login") router.push("/login");
     else if (cta.kind === "addMoney") router.push("/wallet/deposit");
-    else if (cta.kind === "join") setJoinDialogOpen(true);
-  };
-
-  const handleJoin = () => {
-    if (!me) {
-      router.push("/login");
-      return;
-    }
-    join.mutate(undefined, {
-      onSuccess: () => {
-        toast({ title: "You're in! 🎮", description: "Room details will appear here closer to match time.", tone: "success" });
-        setJoinDialogOpen(false);
-      },
-      onError: (err) => {
-        toast({
-          title: "Couldn't join",
-          description: err instanceof ApiClientError ? err.message : "Please try again.",
-          tone: "error",
-        });
-        setJoinDialogOpen(false);
-      },
-    });
+    else if (cta.kind === "join") router.push(`/tournaments/${slug}/register`); // registration screen: pick slot, accept rules, confirm
   };
 
   const handleSubmitResult = () => {
@@ -380,6 +357,19 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
         </Card>
       )}
 
+      {me && t.isJoined && t.mySlot && (
+        <Card className="p-4 flex items-center justify-between gap-3 border-signal/30">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-signal">You&apos;re registered</p>
+            <p className="text-sm font-bold text-white mt-0.5">
+              {t.mySlot.slotLabel}
+              {t.mySlot.teamSize > 1 ? ` · Player ${t.mySlot.positionLabel}` : ""}
+            </p>
+          </div>
+          <Badge tone="signal">Slot confirmed</Badge>
+        </Card>
+      )}
+
       {/* Primary CTA (desktop / inline; mobile also gets the sticky bar below) */}
       {me && t.isJoined && matchStarted && !isCompleted && (
         <Button fullWidth size="lg" variant="secondary" onClick={() => setResultDialogOpen(true)}>
@@ -399,7 +389,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
           <span className="flex items-center gap-2">
             <span className="font-mono">{formatPaise(t.entryFee)}</span>
             <span className="opacity-50">|</span>
-            <span>Join Tournament →</span>
+            <span>Join Now →</span>
           </span>
         ) : (
           cta.label
@@ -491,7 +481,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
               <span className="flex items-center gap-2">
                 <span className="font-mono">{formatPaise(t.entryFee)}</span>
                 <span className="opacity-50">|</span>
-                <span>Join Tournament →</span>
+                <span>Join Now →</span>
               </span>
             ) : (
               cta.label
@@ -499,18 +489,6 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
           </Button>
         </motion.div>
       </div>
-
-      {/* Join confirmation dialog */}
-      <Dialog open={joinDialogOpen} onClose={() => setJoinDialogOpen(false)} title="Confirm Join">
-        <p className="text-sm text-white/60 mb-4">
-          {t.format === "FREE"
-            ? "This tournament is free to join."
-            : `Joining will deduct ${formatPaise(t.entryFee)} from your wallet.`}
-        </p>
-        <Button fullWidth loading={join.isPending} onClick={handleJoin}>
-          Confirm & Join
-        </Button>
-      </Dialog>
 
       {/* Result submission dialog */}
       <Dialog open={resultDialogOpen} onClose={() => setResultDialogOpen(false)} title="Submit Result">

@@ -13,7 +13,7 @@ interface Row {
   bannerUrl: string | null; thumbnailUrl: string | null; mode: string; roomSize: number; map: string | null;
   format: "FREE" | "PAID"; entryFee: number; maxSlots: number; prizePool: number; prizeDistribution: string;
   registrationStartsAt: string; registrationEndsAt: string; matchStartsAt: string; matchEndsAt: string | null;
-  cadence: string; isFeatured: number; scoringSystem: string | null; adminNotes: string | null;
+  cadence: string; isFeatured: number; slotSelection?: number; scoringSystem: string | null; adminNotes: string | null;
   status: string; slotsFilled: number;
 }
 
@@ -50,7 +50,7 @@ export default function EditTournamentPage({ params }: { params: Promise<{ id: s
     maxSlots: t.maxSlots, prizePool: t.prizePool / 100, prizes: prizes.length ? prizes : [0],
     regStarts: isoToLocalInput(t.registrationStartsAt), regEnds: isoToLocalInput(t.registrationEndsAt),
     matchStarts: isoToLocalInput(t.matchStartsAt), matchEnds: isoToLocalInput(t.matchEndsAt),
-    cadence: t.cadence, isFeatured: Boolean(t.isFeatured), scoringSystem: t.scoringSystem ?? "", adminNotes: t.adminNotes ?? "",
+    cadence: t.cadence, isFeatured: Boolean(t.isFeatured), slotSelection: t.slotSelection === undefined ? true : Boolean(t.slotSelection), scoringSystem: t.scoringSystem ?? "", adminNotes: t.adminNotes ?? "",
   };
 
   return <TournamentWizard key={id} initial={initial} tournamentId={id} status={t.status} slotsFilled={t.slotsFilled} />;

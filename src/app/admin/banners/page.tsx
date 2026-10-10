@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ImageInput } from "@/components/admin/image-input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "@/lib/toast-store";
@@ -19,7 +20,7 @@ export default function AdminBannersPage() {
 
   const handleCreate = () => {
     if (!title || !imageUrl) {
-      toast({ title: "Title and image URL are required", tone: "error" });
+      toast({ title: "Title and a banner image are required", tone: "error" });
       return;
     }
     createBanner.mutate(
@@ -41,7 +42,7 @@ export default function AdminBannersPage() {
       <Card className="p-5 space-y-3">
         <h2 className="font-bold text-white text-sm flex items-center gap-1.5"><Plus className="h-4 w-4" /> Add Banner</h2>
         <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <Input placeholder="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+        <ImageInput label="Banner image" value={imageUrl || null} onChange={(v) => setImageUrl(v ?? "")} aspect="aspect-[16/6]" />
         <Input placeholder="Link URL (optional)" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
         <Button loading={createBanner.isPending} onClick={handleCreate}>Create Banner</Button>
       </Card>

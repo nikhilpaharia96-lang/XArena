@@ -40,6 +40,7 @@ export interface TournamentListItem {
   matchStartsAt: string;
   isFeatured: boolean;
   isJoined: boolean;
+  mySlot?: { slotNumber: number; position: number; slotLabel: string; positionLabel: string; teamSize: number } | null;
 }
 
 export interface TournamentDetail extends Omit<TournamentListItem, "isFeatured"> {
@@ -91,10 +92,73 @@ export function useTournamentDetail(slug: string) {
   });
 }
 
+export type SlotState = "AVAILABLE" | "OCCUPIED" | "SELECTED" | "LOCKED" | "UNAVAILABLE";
+
+export interface SlotBoardPosition {
+  position: number;
+  label: string;
+  state: Exclude<SlotState, "SELECTED">;
+  occupant: { participantId: string; username: string; mine: boolean } | null;
+}
+export interface SlotBoardSlot {
+  slotNumber: number;
+  label: string;
+  locked: boolean;
+  positions: SlotBoardPosition[];
+}
+export interface SlotBoard {
+  tournamentId: string;
+  slotSelection: boolean;
+  layout: { teamSize: number; teamCount: number; maxSlots: number };
+  slots: SlotBoardSlot[];
+  counts: { capacity: number; registered: number; available: number; locked: number; unassigned: number };
+  registration: {
+    open: boolean;
+    blockCode: string | null;
+    blockMessage: string | null;
+    mySlot: { slotNumber: number; position: number | null; slotLabel: string; positionLabel: string | null } | null;
+  };
+  profile: { ign: string | null; gameUid: string | null };
+}
+
+/** Live slot board. Polls while the registration screen is open so slots taken by others appear. */
+export function useSlotBoard(slug: string, enabled = true) {
+  return useQuery<SlotBoard>({
+    queryKey: ["tournament-slots", slug],
+    queryFn: () => api.get<SlotBoard>(`/api/tournaments/${slug}/slots`),
+    enabled: Boolean(slug) && enabled,
+    refetchInterval: 8_000,
+    staleTime: 0,
+  });
+}
+
+export interface JoinPayload {
+  slotNumber?: number;
+  position?: number;
+  ign: string;
+  gameUid: string;
+  teamName?: string;
+  acceptRules: boolean;
+}
+export interface JoinResult {
+  joined: boolean;
+  participantId: string;
+  tournamentId: string;
+  tournamentTitle: string;
+  entryFee: number;
+  slotNumber: number;
+  position: number;
+  slotLabel: string;
+  positionLabel: string;
+  teamSize: number;
+  status: string;
+}
+
 export function useJoinTournament(slug: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (teamName?: string) => api.post(`/api/tournaments/${slug}/join`, { teamName }),
+    mutationFn: (payload: JoinPayload) => api.post<JoinResult>(`/api/tournaments/${slug}/join`, payload),
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tournament-slots", slug] }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tournament", slug] });
       qc.invalidateQueries({ queryKey: ["tournaments"] });

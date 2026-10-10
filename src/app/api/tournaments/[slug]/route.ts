@@ -2,6 +2,7 @@ import { db } from "@/server/db/client";
 import { ApiError, fail, ok } from "@/server/lib/api-response";
 import { verifyAccessToken, ACCESS_COOKIE_NAME } from "@/server/lib/auth";
 import { cookies } from "next/headers";
+import { buildLayout, positionLabel, slotLabel } from "@/lib/slot-layout";
 
 interface TournamentDetailRow {
   id: string;
@@ -56,6 +57,7 @@ export async function GET(req: Request, context: { params: Promise<{ slug: strin
     // Determine viewer join status (if authenticated) — room credentials are
     // only ever returned to participants, and only once released by an admin.
     let isJoined = false;
+    let mySlot: { slotNumber: number; position: number; slotLabel: string; positionLabel: string; teamSize: number } | null = null;
     let userId: string | null = null;
     const cookieStore = await cookies();
     const token = cookieStore.get(ACCESS_COOKIE_NAME)?.value;
@@ -64,9 +66,19 @@ export async function GET(req: Request, context: { params: Promise<{ slug: strin
       if (payload) {
         userId = payload.sub;
         const p = db
-          .prepare("SELECT id FROM TournamentParticipant WHERE tournamentId = ? AND userId = ?")
-          .get(t.id, payload.sub);
+          .prepare("SELECT id, slotNumber, position FROM TournamentParticipant WHERE tournamentId = ? AND userId = ?")
+          .get(t.id, payload.sub) as { id: string; slotNumber: number | null; position: number | null } | undefined;
         isJoined = Boolean(p);
+        if (p?.slotNumber && p.position) {
+          const layout = buildLayout(t.mode, t.roomSize, t.maxSlots);
+          mySlot = {
+            slotNumber: p.slotNumber,
+            position: p.position,
+            slotLabel: slotLabel(layout, p.slotNumber),
+            positionLabel: positionLabel(p.position),
+            teamSize: layout.teamSize,
+          };
+        }
       }
     }
 
@@ -86,6 +98,7 @@ export async function GET(req: Request, context: { params: Promise<{ slug: strin
       prizeDistribution: JSON.parse(t.prizeDistribution),
       slotsLeft: t.maxSlots - t.slotsFilled,
       isJoined,
+      mySlot,
       participants,
       // Never leak room credentials to non-participants or before release,
       // regardless of what the client requests.
