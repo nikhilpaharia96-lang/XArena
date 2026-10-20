@@ -54,7 +54,7 @@ function SignupForm() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { countryCode: "+91", referralCode: searchParams.get("ref") ?? "" },
+    defaultValues: { countryCode: "+91", signupCode: searchParams.get("ref") ?? "" },
   });
 
   const onSubmit = (values: FormValues) => {
@@ -138,13 +138,8 @@ function SignupForm() {
         </div>
 
         <div>
-          <label className={label}>Signup Code</label>
+          <label className={label}>Signup Code (optional)</label>
           <Input placeholder="Enter Signup Code" autoCapitalize="characters" {...register("signupCode")} error={errors.signupCode?.message} />
-        </div>
-
-        <div>
-          <label className={label}>Referral code (optional)</label>
-          <Input placeholder="XA7K2P" {...register("referralCode")} error={errors.referralCode?.message} />
         </div>
 
         <p className="text-xs leading-relaxed text-white/60">

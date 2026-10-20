@@ -71,8 +71,7 @@ export function useSignup() {
       username: string;
       password: string;
       confirmPassword: string;
-      signupCode: string;
-      referralCode?: string;
+      signupCode?: string;
     }) =>
       api.post("/api/auth/signup", input),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["me"] }),

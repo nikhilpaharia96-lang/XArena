@@ -26,22 +26,18 @@ export async function POST(req: Request) {
     if (db.prepare("SELECT id FROM User WHERE phone = ?").get(fullPhone)) {
       throw new ApiError(409, "An account with this phone number already exists.", "PHONE_TAKEN");
     }
-    const validCodes = (process.env.SIGNUP_CODES ?? "").split(",").map((c) => c.trim().toUpperCase()).filter(Boolean);
-    if (validCodes.length > 0 && !validCodes.includes(input.signupCode.toUpperCase())) {
-      throw new ApiError(400, "Invalid signup code.", "INVALID_SIGNUP_CODE");
-    }
     const existingUsername = db.prepare("SELECT id FROM User WHERE username = ?").get(input.username);
     if (existingUsername) {
       throw new ApiError(409, "That username is already taken.", "USERNAME_TAKEN");
     }
 
     let referrer: { id: string } | undefined;
-    if (input.referralCode) {
+    if (input.signupCode) {
       referrer = db
         .prepare("SELECT id FROM User WHERE referralCode = ?")
-        .get(input.referralCode) as { id: string } | undefined;
+        .get(input.signupCode) as { id: string } | undefined;
       if (!referrer) {
-        throw new ApiError(400, "That referral code doesn't exist.", "INVALID_REFERRAL");
+        throw new ApiError(400, "Invalid signup code.", "INVALID_SIGNUP_CODE");
       }
     }
 
