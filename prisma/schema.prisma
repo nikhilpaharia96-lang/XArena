@@ -407,3 +407,107 @@ model AuditLog {
   @@index([actorId])
   @@index([action])
 }
+
+// ---------------------------------------------------------------------------
+// Game-provider integration (AS Tech). Mirrors the ProviderXxx tables in
+// src/server/db/schema.sql. Provider-agnostic via the `provider` column.
+// Money is integer paise, like the rest of the schema.
+// ---------------------------------------------------------------------------
+
+model ProviderGame {
+  id             String   @id @default(cuid())
+  provider       String
+  providerGameId String
+  title          String
+  providerName   String
+  category       String
+  imageUrl       String?
+  currencies     String   @default("[]")
+  isEnabled      Boolean  @default(true)
+  isAvailable    Boolean  @default(true)
+  raw            String?
+  lastSyncedAt   DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([provider, providerGameId])
+  @@index([provider])
+  @@index([category])
+  @@index([isEnabled, isAvailable])
+}
+
+model ProviderGameSession {
+  id                String   @id @default(cuid())
+  provider          String
+  userId            String
+  providerGameId    String
+  providerSessionId String?
+  currency          String
+  mode              String?
+  demo              Boolean  @default(false)
+  embeddable        Boolean  @default(false)
+  singleUse         Boolean  @default(false)
+  expiresIn         Int?
+  providerRequestId String?
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@index([provider, providerSessionId])
+}
+
+model ProviderTransaction {
+  id                    String    @id @default(cuid())
+  provider              String
+  providerTransactionId String
+  userId                String
+  providerGameId        String?
+  roundId               String?
+  betAmount             Int       @default(0)
+  winAmount             Int       @default(0)
+  currency              String
+  status                String
+  roundFinished         Boolean   @default(false)
+  balanceAfter          Int?
+  metadata              String?
+  createdAt             DateTime  @default(now())
+  processedAt           DateTime?
+
+  @@unique([provider, providerTransactionId])
+  @@index([userId])
+  @@index([status])
+  @@index([provider, roundId])
+  @@index([createdAt])
+}
+
+model ProviderCallbackLog {
+  id                    String   @id @default(cuid())
+  provider              String
+  method                String?
+  providerTransactionId String?
+  signatureValid        Boolean  @default(false)
+  httpStatus            Int
+  outcome               String
+  error                 String?
+  bodyExcerpt           String?
+  createdAt             DateTime @default(now())
+
+  @@index([provider, createdAt])
+  @@index([providerTransactionId])
+  @@index([outcome])
+}
+
+model ProviderRequestLog {
+  id                String   @id @default(cuid())
+  provider          String
+  endpoint          String
+  ok                Boolean
+  httpStatus        Int?
+  attempts          Int      @default(1)
+  durationMs        Int      @default(0)
+  providerRequestId String?
+  errorKind         String?
+  createdAt         DateTime @default(now())
+
+  @@index([provider, createdAt])
+  @@index([ok])
+}

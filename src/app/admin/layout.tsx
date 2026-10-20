@@ -17,6 +17,7 @@ import {
   LifeBuoy,
   ScrollText,
   FileDown,
+  Dices,
   Menu,
 } from "lucide-react";
 import { useState } from "react";
@@ -30,6 +31,7 @@ const NAV = [
   { href: "/admin/payment-settings", label: "Payment Settings", icon: QrCode },
   { href: "/admin/deposits", label: "Razorpay Deposits", icon: ArrowDownCircle },
   { href: "/admin/withdrawals", label: "Withdrawals", icon: ArrowUpCircle },
+  { href: "/admin/providers", label: "Game Provider", icon: Dices },
   { href: "/admin/results", label: "Result Verification", icon: ShieldCheck },
   { href: "/admin/banners", label: "Banners", icon: ImageIcon },
   { href: "/admin/notifications", label: "Broadcast", icon: Megaphone },

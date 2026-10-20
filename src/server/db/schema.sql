@@ -322,3 +322,106 @@ CREATE TABLE IF NOT EXISTS AuditLog (
 );
 CREATE INDEX IF NOT EXISTS idx_audit_actorId ON AuditLog(actorId);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON AuditLog(action);
+
+-- ============================================================================
+-- Game-provider integration (AS Tech). Provider-agnostic: every row carries a
+-- `provider` column so a second provider can reuse the same tables.
+-- Wallet balances stay in Wallet / "Transaction" (single source of truth).
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS ProviderGame (
+  id             TEXT PRIMARY KEY,
+  provider       TEXT NOT NULL,
+  providerGameId TEXT NOT NULL,
+  title          TEXT NOT NULL,
+  providerName   TEXT NOT NULL,
+  category       TEXT NOT NULL,
+  imageUrl       TEXT,
+  currencies     TEXT NOT NULL DEFAULT '[]',
+  isEnabled      INTEGER NOT NULL DEFAULT 1,
+  isAvailable    INTEGER NOT NULL DEFAULT 1,
+  raw            TEXT,
+  lastSyncedAt   TEXT NOT NULL,
+  createdAt      TEXT NOT NULL,
+  updatedAt      TEXT NOT NULL,
+  UNIQUE (provider, providerGameId)
+);
+CREATE INDEX IF NOT EXISTS idx_pgame_provider ON ProviderGame(provider);
+CREATE INDEX IF NOT EXISTS idx_pgame_category ON ProviderGame(category);
+CREATE INDEX IF NOT EXISTS idx_pgame_enabled ON ProviderGame(isEnabled, isAvailable);
+
+-- Launch history. The provider's gameUrl is single-use/temporary and is
+-- intentionally NOT stored.
+CREATE TABLE IF NOT EXISTS ProviderGameSession (
+  id                TEXT PRIMARY KEY,
+  provider          TEXT NOT NULL,
+  userId            TEXT NOT NULL REFERENCES User(id),
+  providerGameId    TEXT NOT NULL,
+  providerSessionId TEXT,
+  currency          TEXT NOT NULL,
+  mode              TEXT,
+  demo              INTEGER NOT NULL DEFAULT 0,
+  embeddable        INTEGER NOT NULL DEFAULT 0,
+  singleUse         INTEGER NOT NULL DEFAULT 0,
+  expiresIn         INTEGER,
+  providerRequestId TEXT,
+  createdAt         TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_psession_user ON ProviderGameSession(userId);
+CREATE INDEX IF NOT EXISTS idx_psession_provider_session ON ProviderGameSession(provider, providerSessionId);
+
+-- One row per provider settlement. UNIQUE(provider, providerTransactionId) is
+-- the hard idempotency backstop: the same callback can never apply twice.
+CREATE TABLE IF NOT EXISTS ProviderTransaction (
+  id                    TEXT PRIMARY KEY,
+  provider              TEXT NOT NULL,
+  providerTransactionId TEXT NOT NULL,
+  userId                TEXT NOT NULL REFERENCES User(id),
+  providerGameId        TEXT,
+  roundId               TEXT,
+  betAmount             INTEGER NOT NULL DEFAULT 0,
+  winAmount             INTEGER NOT NULL DEFAULT 0,
+  currency              TEXT NOT NULL,
+  status                TEXT NOT NULL,
+  roundFinished         INTEGER NOT NULL DEFAULT 0,
+  balanceAfter          INTEGER,
+  metadata              TEXT,
+  createdAt             TEXT NOT NULL,
+  processedAt           TEXT,
+  UNIQUE (provider, providerTransactionId)
+);
+CREATE INDEX IF NOT EXISTS idx_ptxn_user ON ProviderTransaction(userId);
+CREATE INDEX IF NOT EXISTS idx_ptxn_status ON ProviderTransaction(status);
+CREATE INDEX IF NOT EXISTS idx_ptxn_round ON ProviderTransaction(provider, roundId);
+CREATE INDEX IF NOT EXISTS idx_ptxn_created ON ProviderTransaction(createdAt);
+
+CREATE TABLE IF NOT EXISTS ProviderCallbackLog (
+  id                    TEXT PRIMARY KEY,
+  provider              TEXT NOT NULL,
+  method                TEXT,
+  providerTransactionId TEXT,
+  signatureValid        INTEGER NOT NULL DEFAULT 0,
+  httpStatus            INTEGER NOT NULL,
+  outcome               TEXT NOT NULL,
+  error                 TEXT,
+  bodyExcerpt           TEXT,
+  createdAt             TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_pcb_provider_created ON ProviderCallbackLog(provider, createdAt);
+CREATE INDEX IF NOT EXISTS idx_pcb_txn ON ProviderCallbackLog(providerTransactionId);
+CREATE INDEX IF NOT EXISTS idx_pcb_outcome ON ProviderCallbackLog(outcome);
+
+CREATE TABLE IF NOT EXISTS ProviderRequestLog (
+  id                TEXT PRIMARY KEY,
+  provider          TEXT NOT NULL,
+  endpoint          TEXT NOT NULL,
+  ok                INTEGER NOT NULL,
+  httpStatus        INTEGER,
+  attempts          INTEGER NOT NULL DEFAULT 1,
+  durationMs        INTEGER NOT NULL DEFAULT 0,
+  providerRequestId TEXT,
+  errorKind         TEXT,
+  createdAt         TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_preq_provider_created ON ProviderRequestLog(provider, createdAt);
+CREATE INDEX IF NOT EXISTS idx_preq_ok ON ProviderRequestLog(ok);

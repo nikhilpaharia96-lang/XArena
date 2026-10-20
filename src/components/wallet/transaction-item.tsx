@@ -1,5 +1,5 @@
 "use client";
-import { ArrowDownLeft, ArrowUpRight, Trophy, Gift, Undo2, Settings2 } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Trophy, Gift, Undo2, Settings2, Dices } from "lucide-react";
 import { formatPaiseExact as formatPaise, formatDateTime } from "@/lib/format";
 import type { TransactionRow } from "@/hooks/use-wallet";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,10 @@ const typeMeta: Record<string, { icon: typeof ArrowDownLeft; label: string; cred
   BONUS_CREDIT: { icon: Gift, label: "Bonus", credit: true },
   REFUND: { icon: Undo2, label: "Refund", credit: true },
   ADMIN_ADJUSTMENT: { icon: Settings2, label: "Adjustment", credit: true },
+  GAME_BET: { icon: Dices, label: "Casino Bet", credit: false },
+  GAME_WIN: { icon: Dices, label: "Casino Win", credit: true },
+  GAME_ROLLBACK: { icon: Undo2, label: "Casino Refund", credit: true },
+  GAME_WIN_REVERSAL: { icon: Undo2, label: "Casino Win Reversed", credit: false },
 };
 
 const statusTone: Record<string, "signal" | "gold" | "crimson" | "neutral"> = {
