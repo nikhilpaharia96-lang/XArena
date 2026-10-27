@@ -287,7 +287,15 @@ CREATE TABLE IF NOT EXISTS Banner (
   isActive  INTEGER NOT NULL DEFAULT 1,
   startsAt  TEXT,
   endsAt    TEXT,
-  createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+  createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+  -- Hero-slide content (all optional, managed from Admin > Hero Banners)
+  badgeText         TEXT,
+  subtitle          TEXT,
+  ctaLabel          TEXT,
+  secondaryCtaLabel TEXT,
+  secondaryCtaUrl   TEXT,
+  mobileImageUrl    TEXT,
+  updatedAt         TEXT
 );
 
 CREATE TABLE IF NOT EXISTS SupportTicket (

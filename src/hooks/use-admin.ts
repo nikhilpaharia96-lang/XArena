@@ -42,7 +42,11 @@ export interface AdminResultRow {
 }
 
 export interface AdminBannerRow {
-  id: string; title: string; imageUrl: string; linkUrl: string | null; sortOrder: number; isActive: boolean; createdAt: string;
+  id: string; title: string; subtitle: string | null; badgeText: string | null;
+  imageUrl: string; mobileImageUrl: string | null; linkUrl: string | null;
+  ctaLabel: string | null; secondaryCtaLabel: string | null; secondaryCtaUrl: string | null;
+  sortOrder: number; isActive: boolean; startsAt: string | null; endsAt: string | null;
+  createdAt: string; updatedAt: string | null;
 }
 
 export interface AdminAuditLogRow {
@@ -180,11 +184,44 @@ export function useAdminBanners() {
   return useQuery<AdminBannerRow[]>({ queryKey: ["admin", "banners"], queryFn: () => api.get("/api/admin/banners") });
 }
 
-export function useCreateBanner() {
+function useBannerInvalidate() {
   const qc = useQueryClient();
+  // Admin list and the public hero both read banners, so refresh both.
+  return () => {
+    qc.invalidateQueries({ queryKey: ["admin", "banners"] });
+    qc.invalidateQueries({ queryKey: ["banners"] });
+  };
+}
+
+export function useCreateBanner() {
+  const refresh = useBannerInvalidate();
   return useMutation({
     mutationFn: (input: unknown) => api.post("/api/admin/banners", input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "banners"] }),
+    onSuccess: refresh,
+  });
+}
+
+export function useUpdateBanner() {
+  const refresh = useBannerInvalidate();
+  return useMutation({
+    mutationFn: ({ id, ...input }: { id: string } & Record<string, unknown>) => api.patch(`/api/admin/banners/${id}`, input),
+    onSuccess: refresh,
+  });
+}
+
+export function useDeleteBanner() {
+  const refresh = useBannerInvalidate();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/admin/banners/${id}`),
+    onSuccess: refresh,
+  });
+}
+
+export function useReorderBanners() {
+  const refresh = useBannerInvalidate();
+  return useMutation({
+    mutationFn: (ids: string[]) => api.post("/api/admin/banners/reorder", { ids }),
+    onSuccess: refresh,
   });
 }
 

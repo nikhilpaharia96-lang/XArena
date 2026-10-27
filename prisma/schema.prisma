@@ -470,6 +470,15 @@ model Banner {
   startsAt  DateTime?
   endsAt    DateTime?
   createdAt DateTime  @default(now())
+
+  // Hero-slide content (optional, managed from Admin > Hero Banners)
+  badgeText         String?
+  subtitle          String?
+  ctaLabel          String?
+  secondaryCtaLabel String?
+  secondaryCtaUrl   String?
+  mobileImageUrl    String?
+  updatedAt         DateTime?
 }
 
 model SupportTicket {

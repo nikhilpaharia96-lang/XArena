@@ -33,7 +33,7 @@ const NAV = [
   { href: "/admin/withdrawals", label: "Withdrawals", icon: ArrowUpCircle },
   { href: "/admin/providers", label: "Game Provider", icon: Dices },
   { href: "/admin/results", label: "Result Verification", icon: ShieldCheck },
-  { href: "/admin/banners", label: "Banners", icon: ImageIcon },
+  { href: "/admin/banners", label: "Hero Banners", icon: ImageIcon },
   { href: "/admin/notifications", label: "Broadcast", icon: Megaphone },
   { href: "/admin/tickets", label: "Support Tickets", icon: LifeBuoy },
   { href: "/admin/audit-logs", label: "Audit Logs", icon: ScrollText },

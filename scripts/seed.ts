@@ -492,15 +492,17 @@ async function main() {
   // ---------------------------------------------------------------------
   const bannerCount = (db.prepare("SELECT COUNT(*) as c FROM Banner").get() as { c: number }).c;
   if (bannerCount === 0) {
+    // Starter hero slides use the bundled brand artwork; admins edit/replace them in Admin > Banners.
     const banners = [
-      { title: "Mega Friday — ₹5 Lakh Prize Pool", imageUrl: "https://placehold.co/1200x500/6C4CF5/white?text=Mega+Friday", linkUrl: "/tournaments/free-fire-max-mega-friday", sortOrder: 0 },
-      { title: "Refer & Earn ₹50 Per Friend", imageUrl: "https://placehold.co/1200x500/2E7BFF/white?text=Refer+%26+Earn", linkUrl: "/referral", sortOrder: 1 },
-      { title: "New: BGMI Daily Tournaments", imageUrl: "https://placehold.co/1200x500/00E5A0/black?text=BGMI+Daily", linkUrl: "/tournaments?game=bgmi", sortOrder: 2 },
+      { title: "Play. Compete. Win Big.", subtitle: "Join exciting tournaments, build your team and compete with players across India.", badgeText: "India's home for esports", imageUrl: "/images/hero-squad.webp", linkUrl: "/tournaments", ctaLabel: "Explore Tournaments", secondaryCtaLabel: "Register Now", secondaryCtaUrl: "/signup", sortOrder: 0 },
+      { title: "Real Players. Real Rewards.", subtitle: "Join top tournaments, compete with the best and win exciting cash prizes.", badgeText: "Biggest gaming tournaments", imageUrl: "/images/hero-real-rewards-bg.webp", linkUrl: "/tournaments", ctaLabel: "Play Now", secondaryCtaLabel: null, secondaryCtaUrl: null, sortOrder: 1 },
+      { title: "Refer & Earn ₹50 Per Friend", subtitle: "Invite friends to XArena and earn when they join.", badgeText: "Refer & Earn", imageUrl: "/images/hero-booyah.webp", linkUrl: "/referral", ctaLabel: "Invite Friends", secondaryCtaLabel: null, secondaryCtaUrl: null, sortOrder: 2 },
     ];
     for (const b of banners) {
       db.prepare(
-        `INSERT INTO Banner (id, title, imageUrl, linkUrl, sortOrder, isActive, createdAt) VALUES (?, ?, ?, ?, ?, 1, ?)`
-      ).run(createId("banner"), b.title, b.imageUrl, b.linkUrl, b.sortOrder, now);
+        `INSERT INTO Banner (id, title, subtitle, badgeText, imageUrl, linkUrl, ctaLabel, secondaryCtaLabel, secondaryCtaUrl, sortOrder, isActive, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`
+      ).run(createId("banner"), b.title, b.subtitle, b.badgeText, b.imageUrl, b.linkUrl, b.ctaLabel, b.secondaryCtaLabel, b.secondaryCtaUrl, b.sortOrder, now, now);
     }
     console.log(`  ✓ ${banners.length} homepage banners`);
   }

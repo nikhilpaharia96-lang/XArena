@@ -48,6 +48,12 @@ function createConnection(): Database.Database {
   }
   db.exec("CREATE INDEX IF NOT EXISTS idx_tournament_category ON Tournament(category)");
 
+  // Hero-banner content columns (older DB files created the Banner table without them).
+  const bannerCols = db.prepare("PRAGMA table_info(Banner)").all() as { name: string }[];
+  for (const col of ["badgeText", "subtitle", "ctaLabel", "secondaryCtaLabel", "secondaryCtaUrl", "mobileImageUrl", "updatedAt"]) {
+    if (!bannerCols.some((c) => c.name === col)) db.exec(`ALTER TABLE Banner ADD COLUMN ${col} TEXT`);
+  }
+
   // Slot/position registration columns (older DB files won't have them yet).
   const partCols = db.prepare("PRAGMA table_info(TournamentParticipant)").all() as { name: string }[];
   for (const col of ["slotNumber INTEGER", "position INTEGER", "ign TEXT", "gameUid TEXT"]) {

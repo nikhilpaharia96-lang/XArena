@@ -6,22 +6,28 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Trophy, ShieldCheck, Zap, Users, Wallet, IndianRupee, Play, Crown, UsersRound } from "lucide-react";
 import { useTournaments } from "@/hooks/use-tournaments";
+import { useBanners } from "@/hooks/use-banners";
+import { HeroSlide } from "./hero-slide";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPaise } from "@/lib/format";
 import { posterForGame } from "./game-card";
 import { toast } from "@/lib/toast-store";
 
 /**
- * Swipeable hero. Slides 1–3 are always the XArena brand intro (static
- * copy, like an app tagline/promo poster — not data). Any remaining slides
- * are built from real featured tournaments so the hero never shows
- * fabricated tournament promos.
+ * Swipeable hero. Slides come from Admin > Hero Banners (live, scheduled, reorderable).
+ * Only if the admin hasn't published any slide do we fall back to the built-in XArena
+ * brand intro (3 static poster slides), so the home page is never empty. Real featured
+ * tournaments always follow, so the hero never shows fabricated tournament promos.
  */
 export function HeroCarousel() {
-  const { data: featured, isLoading } = useTournaments({ featured: true });
+  const { data: featured, isLoading: loadingFeatured } = useTournaments({ featured: true });
+  const { data: adminSlides, isLoading: loadingBanners } = useBanners();
+  const isLoading = loadingFeatured || loadingBanners;
+  const useAdminSlides = (adminSlides?.length ?? 0) > 0;
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const slideCount = 3 + Math.min(featured?.length ?? 0, 4);
+  const brandSlideCount = useAdminSlides ? adminSlides!.length : 3;
+  const slideCount = brandSlideCount + Math.min(featured?.length ?? 0, 4);
 
   function onScroll() {
     const el = scrollerRef.current;
@@ -83,6 +89,10 @@ export function HeroCarousel() {
         onScroll={onScroll}
         className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4"
       >
+        {useAdminSlides && adminSlides!.map((b, i) => <HeroSlide key={b.id} slide={b} priority={i === 0} />)}
+
+        {!useAdminSlides && (
+          <>
         {/* Brand slide 1 — original tagline banner */}
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
@@ -286,6 +296,9 @@ export function HeroCarousel() {
             Explore Tournaments <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </motion.div>
+
+          </>
+        )}
 
         {/* Real featured-tournament slides — same premium poster treatment as
             the brand slides, but every word is live tournament data. Uses the
