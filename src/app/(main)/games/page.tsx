@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FREE_FIRE_GAME_SLUG, FREE_FIRE_ROUTE } from "@/lib/free-fire-categories";
+import { OriginalsEntry } from "@/components/originals/originals-entry";
 import { ProviderGamesSection } from "@/components/games/provider-games-section";
 
 export default function GamesPage() {
@@ -40,6 +41,8 @@ export default function GamesPage() {
       ) : (
         <EmptyState icon={Gamepad2} title="No games available yet" />
       )}
+
+      <OriginalsEntry />
 
       <ProviderGamesSection />
     </div>
