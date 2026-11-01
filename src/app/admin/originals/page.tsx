@@ -18,7 +18,7 @@ import {
   type GameStat,
 } from "@/hooks/use-originals-admin";
 
-const NAMES = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash" } as const;
+const NAMES = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent" } as const;
 
 const rupees = (p: number) => String(p / 100);
 const toPaise = (s: string) => Math.round(Number(s) * 100);
