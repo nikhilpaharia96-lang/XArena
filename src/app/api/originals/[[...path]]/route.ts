@@ -36,7 +36,7 @@ function respond<T>(data: T) {
  *   GET  /api/originals/history         my recent rounds
  *   GET  /api/originals/fair            my seed info + revealed seeds
  *   POST /api/originals/fair/rotate     reveal old server seed, start a new one
- *   POST /api/originals/dice | coin | slot     POST slot/demo (virtual credits, no wallet)
+ *   POST /api/originals/dice | coin | slot     POST slot/demo, coins | coins/demo (virtual credits, no wallet)
  *   POST /api/originals/mines/start | mines/reveal | mines/cashout
  *   GET  /api/originals/mines/active    my open mines round (resume after refresh)
  *   POST /api/originals/crash/start | crash/cashout    GET crash/state
@@ -80,6 +80,10 @@ async function route(req: Request, ctx: { params: Promise<{ path?: string[] }> }
           return respond(gameService.playSlot({ userId: uid, ...slot.parse(await json(req)) }));
         case "slot/demo":
           return respond(gameService.demoSlot(slotDemo.parse(await json(req)).bet));
+        case "coins":
+          return respond(gameService.playCoinsGame({ userId: uid, ...slot.parse(await json(req)) }));
+        case "coins/demo":
+          return respond(gameService.demoCoins(slotDemo.parse(await json(req)).bet));
         case "coin":
           return respond(gameService.playCoin({ userId: uid, ...coin.parse(await json(req)) }));
         case "mines/start":

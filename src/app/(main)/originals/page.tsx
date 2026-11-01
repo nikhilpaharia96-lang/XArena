@@ -12,11 +12,12 @@ import { DiceGame } from "@/components/originals/dice-game";
 import { CoinGame } from "@/components/originals/coin-game";
 import { MinesGame } from "@/components/originals/mines-game";
 import { SlotGame } from "@/components/originals/slot/slot-game";
+import { CoinsGame } from "@/components/originals/coins/coins-game";
 import { CrashGame } from "@/components/originals/crash-game";
 import { FairnessPanel } from "@/components/originals/fairness-panel";
 import { HistoryList } from "@/components/originals/history-list";
 
-const TITLES: Record<GameKey, string> = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent" };
+const TITLES: Record<GameKey, string> = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins" };
 
 export default function OriginalsPage() {
   const { data, isLoading } = useOriginals();
@@ -53,6 +54,7 @@ export default function OriginalsPage() {
       {current.gameKey === "COINFLIP" && <CoinGame key="c" cfg={current} balance={balance} />}
       {current.gameKey === "MINES" && <MinesGame key="m" cfg={current} balance={balance} />}
       {current.gameKey === "SLOT" && <SlotGame key="s" cfg={current} balance={balance} />}
+      {current.gameKey === "COINS" && <CoinsGame key="l" cfg={current} balance={balance} />}
       {current.gameKey === "CRASH" && <CrashGame key="x" cfg={current} balance={balance} />}
       <p className="text-[11px] text-white/40 text-center">
         House edge {(current.houseEdgeBps / 100).toFixed(1)}% · Max payout {formatPaiseExact(current.maxPayout)} · Play responsibly. 18+ only.

@@ -6,7 +6,7 @@
 
 export const BPS = 10_000;
 
-export const GAME_KEYS = ["DICE", "COINFLIP", "MINES", "CRASH", "SLOT"] as const;
+export const GAME_KEYS = ["DICE", "COINFLIP", "MINES", "CRASH", "SLOT", "COINS"] as const;
 export type GameKey = (typeof GAME_KEYS)[number];
 
 /** floor(stake * multBps / 10000) using BigInt so large stake x multiplier can never lose precision. */
