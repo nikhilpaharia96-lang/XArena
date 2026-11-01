@@ -128,7 +128,7 @@ export function createDepositRequest(input: {
  *
  * Postgres equivalent: SELECT ... FOR UPDATE on the DepositRequest and Wallet rows.
  */
-export function approveDepositRequest(params: { id: string; adminId: string; ipAddress?: string | null }) {
+export function approveDepositRequest(params: { id: string; adminId: string; ipAddress?: string | null; expectedAmountPaise?: number }) {
   const run = db.transaction(() => {
     // 1. request exists
     const req = db.prepare("SELECT * FROM DepositRequest WHERE id = ?").get(params.id) as DepositRequestRow | undefined;
@@ -137,6 +137,11 @@ export function approveDepositRequest(params: { id: string; adminId: string; ipA
     // 2. still pending
     if (req.status !== "PENDING") {
       throw new ApiError(409, `This request was already ${req.status.toLowerCase()}.`, "ALREADY_REVIEWED");
+    }
+
+    // 2b. optional guard (used by quick-approve): the amount the admin saw on the bank statement must equal the request
+    if (params.expectedAmountPaise !== undefined && params.expectedAmountPaise !== req.amount) {
+      throw new ApiError(409, "Amount does not match this request.", "AMOUNT_MISMATCH");
     }
 
     // 3. UTR not already credited (defence in depth on top of UNIQUE(utr))

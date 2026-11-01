@@ -12,6 +12,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { formatPaiseExact, formatDateTimeFull } from "@/lib/format";
 import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
+import { QuickApprovePanel } from "./quick-approve-panel";
 
 type Tab = "PENDING" | "APPROVED" | "REJECTED";
 const TABS: Tab[] = ["PENDING", "APPROVED", "REJECTED"];
@@ -141,6 +142,8 @@ export default function AdminDepositRequestsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-black text-white">Deposit Requests</h1>
+
+      <QuickApprovePanel />
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar">
         {TABS.map((t) => (

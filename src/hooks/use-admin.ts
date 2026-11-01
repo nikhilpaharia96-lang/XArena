@@ -370,3 +370,32 @@ export function useRegistrationAction(id: string) {
     },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Quick approve by UTR (admin deposit page)
+// ---------------------------------------------------------------------------
+
+export type QuickApproveOutcome = "APPROVED" | "NOT_FOUND" | "ALREADY_APPROVED" | "ALREADY_REJECTED" | "AMOUNT_MISMATCH" | "INVALID_UTR" | "INVALID_AMOUNT";
+
+export interface QuickApproveResultRow {
+  utr: string;
+  outcome: QuickApproveOutcome;
+  code?: string | null;
+  username?: string;
+  requestAmount?: number;
+  enteredAmount?: number;
+  balanceAfter?: number;
+}
+
+export function useQuickApprove() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (entries: { utr: string; amountRupees: string }[]) =>
+      api.post<{ results: QuickApproveResultRow[]; approved: number }>("/api/admin/deposit-requests/quick-approve", { entries }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "deposit-requests"] });
+      qc.invalidateQueries({ queryKey: ["admin", "analytics"] });
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+  });
+}
