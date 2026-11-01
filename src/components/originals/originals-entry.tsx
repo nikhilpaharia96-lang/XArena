@@ -20,7 +20,7 @@ export function OriginalsEntry() {
             <Dices className="h-7 w-7 text-white" />
           </div>
           <div>
-            <p className="font-bold text-white">Dice · Coin Flip · Mines · Crash</p>
+            <p className="font-bold text-white">Garuda Ascent slot · Dice · Coin Flip · Mines · Crash</p>
             <p className="text-xs text-white/50 mt-0.5">Instant provably-fair games, played straight from your wallet.</p>
           </div>
         </Card>

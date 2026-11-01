@@ -13,6 +13,8 @@ const bet = z.number().int().positive();
 
 const dice = z.object({ bet, direction: z.enum(["UNDER", "OVER"]), chanceBps: z.number().int(), requestId }).strict();
 const coin = z.object({ bet, pick: z.enum(["HEADS", "TAILS"]), requestId }).strict();
+const slot = z.object({ bet, requestId }).strict();
+const slotDemo = z.object({ bet }).strict();
 const minesStart = z.object({ bet, mines: z.number().int(), requestId }).strict();
 const minesReveal = z.object({ tile: z.number().int().min(0).max(24) }).strict();
 const crashStart = z.object({ bet, autoCashoutBps: z.number().int().optional(), requestId }).strict();
@@ -34,7 +36,7 @@ function respond<T>(data: T) {
  *   GET  /api/originals/history         my recent rounds
  *   GET  /api/originals/fair            my seed info + revealed seeds
  *   POST /api/originals/fair/rotate     reveal old server seed, start a new one
- *   POST /api/originals/dice | coin
+ *   POST /api/originals/dice | coin | slot     POST slot/demo (virtual credits, no wallet)
  *   POST /api/originals/mines/start | mines/reveal | mines/cashout
  *   GET  /api/originals/mines/active    my open mines round (resume after refresh)
  *   POST /api/originals/crash/start | crash/cashout    GET crash/state
@@ -74,6 +76,10 @@ async function route(req: Request, ctx: { params: Promise<{ path?: string[] }> }
       switch (key) {
         case "dice":
           return respond(gameService.playDice({ userId: uid, ...dice.parse(await json(req)) }));
+        case "slot":
+          return respond(gameService.playSlot({ userId: uid, ...slot.parse(await json(req)) }));
+        case "slot/demo":
+          return respond(gameService.demoSlot(slotDemo.parse(await json(req)).bet));
         case "coin":
           return respond(gameService.playCoin({ userId: uid, ...coin.parse(await json(req)) }));
         case "mines/start":

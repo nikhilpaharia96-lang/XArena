@@ -2,7 +2,9 @@ import type Database from "better-sqlite3";
 import { createId } from "@/server/lib/ids";
 import type { BucketSplit } from "@/server/providers/provider-wallet";
 import { GameError } from "./errors";
+import { randomInt } from "node:crypto";
 import { floatStream, hashSeed, newClientSeed, newServerSeed } from "./fair";
+import { playSlot as rollSlot, unitsToPaise, type SlotOutcome } from "./slot-math";
 import { creditPayout, currentBalance, debitStake } from "./game-wallet";
 import {
   BPS,
@@ -454,6 +456,53 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
     });
   }
 
+  // --------------------------------------------------------------- slot ----
+  /** Turns a raw outcome into the public result: per-spin wins in paise, total clamped to the table's max payout. */
+  function slotResult(outcome: SlotOutcome, stake: number, edgeBps: number, maxPayout: number) {
+    const steps = outcome.steps.map((st) => ({
+      free: st.free,
+      stops: st.stops,
+      grid: st.grid,
+      lineWins: st.lineWins,
+      scatters: st.scatters,
+      ascent: st.ascent,
+      awarded: st.awarded,
+      win: unitsToPaise(stake, st.units, edgeBps),
+    }));
+    const raw = steps.reduce((a, st) => a + st.win, 0);
+    const payout = Math.min(raw, maxPayout);
+    return { steps, payout, capped: raw > maxPayout, freeSpins: outcome.freeSpinsTriggered };
+  }
+
+  /** One paid spin; any free-spin round it triggers is played out in the SAME round, server-side. */
+  function playSlot(input: { userId: string; bet: number; requestId?: string }): RoundView {
+    return guard(() =>
+      tx(() => {
+        const dup = findByRequest(input.userId, input.requestId);
+        if (dup) return toView(dup, true);
+        const p = prepare(input.userId, "SLOT", input.bet, BPS);
+        const outcome = rollSlot(floatStream(p.fair.serverSeed, p.fair.clientSeed, p.fair.nonce));
+        const res = slotResult(outcome, input.bet, p.cfg.houseEdgeBps, p.cfg.maxPayout);
+        insertRound({
+          id: p.roundId, userId: input.userId, gameKey: "SLOT", status: "ACTIVE", betAmount: input.bet, houseEdgeBps: p.cfg.houseEdgeBps,
+          debit: JSON.stringify(p.debit), serverSeedHash: p.fair.serverSeedHash, clientSeed: p.fair.clientSeed, nonce: p.fair.nonce,
+          params: JSON.stringify({}), state: null, requestId: input.requestId ?? null,
+        });
+        const mult = res.payout > 0 ? Math.floor((res.payout * BPS) / input.bet) : 0;
+        return toView(settle(getRow(p.roundId)!, res.payout > 0 ? "WON" : "LOST", res.payout, mult, res));
+      })
+    );
+  }
+
+  /** Virtual-credit practice spin: same maths and paytable, NO wallet, NO database writes. */
+  function demoSlot(bet: number) {
+    const cfg = getConfig("SLOT");
+    if (!cfg.isEnabled) throw new GameError("GAME_DISABLED", "This game is currently unavailable.");
+    if (!Number.isSafeInteger(bet) || bet <= 0) throw new GameError("INVALID_INPUT", "Enter a valid bet amount.");
+    const next = () => randomInt(0, 2 ** 32) / 2 ** 32;
+    return slotResult(rollSlot(next), bet, cfg.houseEdgeBps, Number.MAX_SAFE_INTEGER);
+  }
+
   // -------------------------------------------------------------- crash ----
   function startCrash(input: { userId: string; bet: number; autoCashoutBps?: number; requestId?: string }): RoundView {
     if (input.autoCashoutBps !== undefined && (!Number.isInteger(input.autoCashoutBps) || input.autoCashoutBps < CRASH_MIN_AUTO_BPS || input.autoCashoutBps > 10_000_000)) {
@@ -602,7 +651,7 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
   return {
     listConfigs, getConfig, updateConfig,
     getFairInfo, rotateSeed, revealedSeeds,
-    playDice, playCoin,
+    playDice, playCoin, playSlot, demoSlot,
     startMines, revealMine, cashoutMines, activeMines,
     startCrash, crashState, cashoutCrash, sweepCrash,
     history, getRound,

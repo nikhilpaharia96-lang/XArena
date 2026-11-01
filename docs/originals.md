@@ -1,6 +1,6 @@
 # XArena Originals (in-house games)
 
-Dice, Coin Flip, Mines and Crash, built into XArena. They use the **same wallet and
+Dice, Coin Flip, Mines, Crash and the **Garuda Ascent** slot, built into XArena. They use the **same wallet and
 `Transaction` ledger** as the rest of the app. No second wallet, no external provider.
 
 ## Money rules (same as the AS Tech seamless wallet)
@@ -26,7 +26,17 @@ Every game ships **switched off**. Per game: house edge (0.5%–15%), min bet, m
 - Run a **single server instance** with a persistent disk (SQLite).
 - Real-money games of chance are regulated in India and differ by state. Get legal advice before enabling them for the public.
 
+## Garuda Ascent (slot)
+Original 5x3 slot, 10 fixed lines, wild sun disc (reels 2-4), temple scatter. 3/4/5 scatters = 8/12/16 free spins;
+every winning free spin raises the "Ascent" multiplier x1 to x5. The whole feature is decided server-side inside ONE bet
+(one debit, one settlement), so a browser refresh can never lose or duplicate a feature.
+- Measured return: **94.73% RTP** over 8M simulated rounds (tests re-check it stays within +/-1.5%). Hit rate about 37%, free spins about 1 in 80.
+- Admin "house edge" for SLOT scales every payout around that baseline: default 5.3% (= 94.7% RTP). Raising it lowers RTP.
+- **Demo mode** (`POST /api/originals/slot/demo`) uses the same maths with virtual credits, no wallet and no database writes.
+- Max payout per round clamps the total including free spins.
+- Art is original SVG/CSS (no licensed or copied game assets). Sounds are synthesised in the browser.
+
 ## Where things are
-- Engine & math: `src/server/games/` (tests in `__tests__`)
+- Engine & math: `src/server/games/` (tests in `__tests__`); slot maths `slot-math.ts`; slot UI `src/components/originals/slot/`
 - Player API: `/api/originals/*` · Admin API: `/api/admin/originals/*`
 - Player UI: `/originals` · Admin UI: `/admin/originals`
