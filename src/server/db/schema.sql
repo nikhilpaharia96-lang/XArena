@@ -433,3 +433,74 @@ CREATE TABLE IF NOT EXISTS ProviderRequestLog (
 );
 CREATE INDEX IF NOT EXISTS idx_preq_provider_created ON ProviderRequestLog(provider, createdAt);
 CREATE INDEX IF NOT EXISTS idx_preq_ok ON ProviderRequestLog(ok);
+
+-- ============================================================================
+-- In-house ("XArena Originals") games: dice, coin flip, mines, crash.
+-- Uses the SAME Wallet / "Transaction" tables as everything else.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS GameConfig (
+  gameKey      TEXT PRIMARY KEY,
+  isEnabled    INTEGER NOT NULL DEFAULT 0,
+  houseEdgeBps INTEGER NOT NULL DEFAULT 200,
+  minBet       INTEGER NOT NULL,
+  maxBet       INTEGER NOT NULL,
+  maxPayout    INTEGER NOT NULL,
+  updatedAt    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+-- Games ship DISABLED; an admin must switch each one on.
+INSERT OR IGNORE INTO GameConfig (gameKey, isEnabled, houseEdgeBps, minBet, maxBet, maxPayout) VALUES
+  ('DICE',     0, 200, 1000, 100000, 2000000),
+  ('COINFLIP', 0, 200, 1000, 100000, 2000000),
+  ('MINES',    0, 200, 1000, 100000, 2000000),
+  ('CRASH',    0, 200, 1000, 100000, 2000000);
+
+CREATE TABLE IF NOT EXISTS FairSeed (
+  userId         TEXT PRIMARY KEY REFERENCES User(id) ON DELETE CASCADE,
+  serverSeed     TEXT NOT NULL,
+  serverSeedHash TEXT NOT NULL,
+  clientSeed     TEXT NOT NULL,
+  nonce          INTEGER NOT NULL DEFAULT 0,
+  updatedAt      TEXT NOT NULL
+);
+
+-- Server seeds are revealed only once rotated out, so past rounds become verifiable.
+CREATE TABLE IF NOT EXISTS FairSeedHistory (
+  id             TEXT PRIMARY KEY,
+  userId         TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  serverSeed     TEXT NOT NULL,
+  serverSeedHash TEXT NOT NULL,
+  clientSeed     TEXT NOT NULL,
+  roundsPlayed   INTEGER NOT NULL DEFAULT 0,
+  revealedAt     TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_fsh_user ON FairSeedHistory(userId);
+CREATE INDEX IF NOT EXISTS idx_fsh_hash ON FairSeedHistory(serverSeedHash);
+
+CREATE TABLE IF NOT EXISTS GameRound (
+  id             TEXT PRIMARY KEY,
+  userId         TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  gameKey        TEXT NOT NULL,
+  status         TEXT NOT NULL,                 -- ACTIVE | WON | LOST
+  betAmount      INTEGER NOT NULL,
+  payoutAmount   INTEGER NOT NULL DEFAULT 0,
+  multiplierBps  INTEGER NOT NULL DEFAULT 0,    -- 10000 = 1.00x
+  houseEdgeBps   INTEGER NOT NULL,
+  debit          TEXT NOT NULL,                 -- JSON {bonus,deposit,winning}: where the stake came from
+  serverSeedHash TEXT NOT NULL,
+  clientSeed     TEXT NOT NULL,
+  nonce          INTEGER NOT NULL,
+  params         TEXT NOT NULL,                 -- public JSON (player's choices)
+  state          TEXT,                          -- PRIVATE JSON (mine layout, crash point) until settled
+  result         TEXT,                          -- public JSON outcome
+  requestId      TEXT,
+  createdAt      TEXT NOT NULL,
+  settledAt      TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_gr_user_created ON GameRound(userId, createdAt);
+CREATE INDEX IF NOT EXISTS idx_gr_game_status ON GameRound(gameKey, status);
+CREATE INDEX IF NOT EXISTS idx_gr_created ON GameRound(createdAt);
+-- At most ONE open round per player per game (mines / crash).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_gr_one_active ON GameRound(userId, gameKey) WHERE status = 'ACTIVE';
+-- Double-click / retry protection for bet placement.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_gr_request ON GameRound(userId, requestId) WHERE requestId IS NOT NULL;

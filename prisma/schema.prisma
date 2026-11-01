@@ -621,3 +621,67 @@ model ProviderRequestLog {
   @@index([provider, createdAt])
   @@index([ok])
 }
+
+// ---------------------------------------------------------------------------
+// In-house games (XArena Originals). Mirror of src/server/db/schema.sql.
+// Partial unique indexes (one ACTIVE round per user+game; unique requestId)
+// are created in the runtime SQLite schema; add them as raw SQL in the
+// Postgres migration.
+// ---------------------------------------------------------------------------
+
+model GameConfig {
+  gameKey      String   @id
+  isEnabled    Boolean  @default(false)
+  houseEdgeBps Int      @default(200)
+  minBet       Int
+  maxBet       Int
+  maxPayout    Int
+  updatedAt    DateTime @default(now())
+}
+
+model FairSeed {
+  userId         String   @id
+  serverSeed     String
+  serverSeedHash String
+  clientSeed     String
+  nonce          Int      @default(0)
+  updatedAt      DateTime
+}
+
+model FairSeedHistory {
+  id             String   @id @default(cuid())
+  userId         String
+  serverSeed     String
+  serverSeedHash String
+  clientSeed     String
+  roundsPlayed   Int      @default(0)
+  revealedAt     DateTime
+
+  @@index([userId])
+  @@index([serverSeedHash])
+}
+
+model GameRound {
+  id             String    @id @default(cuid())
+  userId         String
+  gameKey        String
+  status         String
+  betAmount      Int
+  payoutAmount   Int       @default(0)
+  multiplierBps  Int       @default(0)
+  houseEdgeBps   Int
+  debit          String
+  serverSeedHash String
+  clientSeed     String
+  nonce          Int
+  params         String
+  state          String?
+  result         String?
+  requestId      String?
+  createdAt      DateTime
+  settledAt      DateTime?
+
+  @@index([userId, createdAt])
+  @@index([gameKey, status])
+  @@index([createdAt])
+}
