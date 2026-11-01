@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Zap } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
@@ -19,45 +20,34 @@ const LABEL: Record<QuickApproveOutcome, { text: string; cls: string }> = {
   INVALID_AMOUNT: { text: "Amount is not valid", cls: "text-crimson" },
 };
 
-/** One entry per line: "UTR amount" (separated by space, comma or tab). */
-function parse(text: string): { entries: { utr: string; amountRupees: string }[]; bad: number[] } {
-  const entries: { utr: string; amountRupees: string }[] = [];
-  const bad: number[] = [];
-  text.split(/\r?\n/).forEach((line, i) => {
-    if (!line.trim()) return;
-    const parts = line.trim().split(/[\s,|;\t]+/).filter(Boolean);
-    if (parts.length < 2) return void bad.push(i + 1);
-    entries.push({ utr: parts[0], amountRupees: parts.slice(1).join("") });
-  });
-  return { entries, bad };
-}
-
 export function QuickApprovePanel() {
-  const [text, setText] = useState("");
-  const [results, setResults] = useState<QuickApproveResultRow[] | null>(null);
+  const [utr, setUtr] = useState("");
+  const [amount, setAmount] = useState("");
+  const [results, setResults] = useState<QuickApproveResultRow[]>([]);
   const mutation = useQuickApprove();
 
   const run = () => {
     if (mutation.isPending) return;
-    const { entries, bad } = parse(text);
-    if (bad.length) {
-      toast({ title: "Amount missing", description: `Line ${bad.join(", ")}: write UTR and the amount received, e.g. 412345678901 500`, tone: "error" });
+    if (!utr.trim() || !amount.trim()) {
+      toast({ title: "UTR aur amount dono bharo", description: "Transaction UTR / reference no. aur received amount (₹) likhna zaroori hai.", tone: "error" });
       return;
     }
-    if (entries.length === 0) {
-      toast({ title: "Nothing to approve", description: "Enter at least one UTR and amount.", tone: "error" });
-      return;
-    }
-    mutation.mutate(entries, {
+    mutation.mutate([{ utr: utr.trim(), amountRupees: amount.trim() }], {
       onSuccess: (d) => {
-        setResults(d.results);
-        toast({ title: d.approved > 0 ? `${d.approved} deposit(s) approved` : "No deposit approved", tone: d.approved > 0 ? "success" : "info" });
-        // keep only the lines that still need attention
-        const left = d.results.filter((r) => r.outcome !== "APPROVED").map((r) => r.utr);
-        setText(entries.filter((e) => left.includes(e.utr.replace(/\s+/g, "").toUpperCase())).map((e) => `${e.utr} ${e.amountRupees}`).join("\n"));
+        const r = d.results[0];
+        setResults((prev) => [r, ...prev].slice(0, 8));
+        toast({ title: r.outcome === "APPROVED" ? "Deposit approved" : LABEL[r.outcome].text, tone: r.outcome === "APPROVED" ? "success" : "error" });
+        if (r.outcome === "APPROVED") {
+          setUtr("");
+          setAmount("");
+        }
       },
       onError: (e) => toast({ title: "Quick approve failed", description: e instanceof ApiClientError ? e.message : "Try again.", tone: "error" }),
     });
+  };
+
+  const onEnter = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") run();
   };
 
   return (
@@ -67,20 +57,22 @@ export function QuickApprovePanel() {
         <h2 className="font-black text-white">Quick approve by UTR</h2>
       </div>
       <p className="text-xs text-white/50">
-        Copy the UTR and the amount from your bank / UPI statement, one payment per line (e.g. <span className="font-mono">412345678901 500</span>).
-        A pending request is approved and the wallet credited <b>only</b> if the UTR and the amount both match exactly.
+        Bank / UPI statement se transaction UTR (reference no.) aur received amount likho. Pending request tabhi approve hogi aur wallet me paisa jayega
+        jab UTR <b>aur</b> amount dono bilkul match karein.
       </p>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value.slice(0, 6000))}
-        rows={3}
-        spellCheck={false}
-        placeholder={"412345678901 500\n509876543210 1,000"}
-        className="w-full rounded-xl bg-surface-2 border border-white/10 px-4 py-3 text-sm font-mono text-white placeholder:text-white/30 outline-none focus:border-violet/60"
-      />
+      <div className="grid sm:grid-cols-2 gap-3">
+        <div>
+          <label htmlFor="qa-utr" className="text-xs font-semibold text-white/60 mb-1.5 block">Transaction UPI / UTR / Reference No.</label>
+          <Input id="qa-utr" value={utr} onChange={(e) => setUtr(e.target.value.slice(0, 40))} onKeyDown={onEnter} placeholder="e.g. 412345678901" spellCheck={false} autoComplete="off" className="font-mono" />
+        </div>
+        <div>
+          <label htmlFor="qa-amount" className="text-xs font-semibold text-white/60 mb-1.5 block">Amount (₹)</label>
+          <Input id="qa-amount" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.,₹]/g, "").slice(0, 12))} onKeyDown={onEnter} inputMode="decimal" placeholder="e.g. 500" autoComplete="off" className="font-mono" />
+        </div>
+      </div>
       <Button fullWidth loading={mutation.isPending} onClick={run}>Match &amp; Approve</Button>
 
-      {results && results.length > 0 && (
+      {results.length > 0 && (
         <ul className="divide-y divide-white/5 rounded-xl bg-white/5">
           {results.map((r, i) => (
             <li key={`${r.utr}-${i}`} className="px-3 py-2 text-xs">
