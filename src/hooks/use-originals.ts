@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/lib/api-client";
 import { toast } from "@/lib/toast-store";
 
-export type GameKey = "DICE" | "COINFLIP" | "MINES" | "CRASH" | "SLOT";
+export type GameKey = "DICE" | "COINFLIP" | "MINES" | "CRASH" | "SLOT" | "COINS";
 
 export interface OriginalGame {
   gameKey: GameKey;
@@ -61,6 +61,24 @@ export interface SlotStep {
 }
 export interface SlotResult { steps: SlotStep[]; payout: number; capped: boolean; freeSpins: boolean }
 
+export interface CoinChipView { cell: number; label: "MINI" | "MINOR" | null; amount: number }
+export interface CoinsResult {
+  stops: number[];
+  grid: number[][]; // grid[reel][row]
+  ways: { symbol: number; reels: number; ways: number }[];
+  waysWin: number;
+  coinCount: number;
+  coinsWin: number;
+  bonus: {
+    initial: CoinChipView[];
+    rounds: { respinsLeft: number; newCoins: CoinChipView[] }[];
+    full: boolean;
+    grand: number;
+  } | null;
+  payout: number;
+  capped: boolean;
+}
+
 const BASE = "/api/originals";
 
 export function useOriginals() {
@@ -109,6 +127,8 @@ export const originals = {
   dice: (b: { bet: number; direction: "UNDER" | "OVER"; chanceBps: number; requestId: string }) => api.post<Round>(`${BASE}/dice`, b),
   slot: (b: { bet: number; requestId: string }) => api.post<Round>(`${BASE}/slot`, b),
   slotDemo: (bet: number) => api.post<SlotResult>(`${BASE}/slot/demo`, { bet }),
+  coins: (b: { bet: number; requestId: string }) => api.post<Round>(`${BASE}/coins`, b),
+  coinsDemo: (bet: number) => api.post<CoinsResult>(`${BASE}/coins/demo`, { bet }),
   coin: (b: { bet: number; pick: "HEADS" | "TAILS"; requestId: string }) => api.post<Round>(`${BASE}/coin`, b),
   minesStart: (b: { bet: number; mines: number; requestId: string }) => api.post<Round>(`${BASE}/mines/start`, b),
   minesReveal: (tile: number) => api.post<Round>(`${BASE}/mines/reveal`, { tile }),

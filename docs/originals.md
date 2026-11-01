@@ -1,6 +1,6 @@
 # XArena Originals (in-house games)
 
-Dice, Coin Flip, Mines, Crash and the **Garuda Ascent** slot, built into XArena. They use the **same wallet and
+Dice, Coin Flip, Mines, Crash and the **Garuda Ascent** and **Lakshmi Coins** slots, built into XArena. They use the **same wallet and
 `Transaction` ledger** as the rest of the app. No second wallet, no external provider.
 
 ## Money rules (same as the AS Tech seamless wallet)
@@ -35,6 +35,12 @@ every winning free spin raises the "Ascent" multiplier x1 to x5. The whole featu
 - **Demo mode** (`POST /api/originals/slot/demo`) uses the same maths with virtual credits, no wallet and no database writes.
 - Max payout per round clamps the total including free spins.
 - Art is original SVG/CSS (no licensed or copied game assets). Sounds are synthesised in the browser.
+
+## Lakshmi Coins (slot)
+Original 5x3 slot with **243 ways to win** and a **Coin Respin** bonus: 6+ Cash Coins lock with cash values (some are
+MINI / MINOR prizes), 3 respins that reset on every new coin, and a grand bonus if all 15 cells fill. The whole bonus is decided
+server-side inside ONE bet. Measured **93.95% RTP** (10M simulated rounds, +/-0.5%); bonus triggers about 1 in 240 spins.
+Admin edge default 6.05% is neutral; raising it lowers every payout proportionally. Demo mode (`/coins/demo`) writes nothing.
 
 ## Where things are
 - Engine & math: `src/server/games/` (tests in `__tests__`); slot maths `slot-math.ts`; slot UI `src/components/originals/slot/`

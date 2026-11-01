@@ -4,6 +4,7 @@ import type { BucketSplit } from "@/server/providers/provider-wallet";
 import { GameError } from "./errors";
 import { randomInt } from "node:crypto";
 import { floatStream, hashSeed, newClientSeed, newServerSeed } from "./fair";
+import { playCoins as rollCoins, coinUnitsToPaise, type CoinsOutcome } from "./coins-math";
 import { playSlot as rollSlot, unitsToPaise, type SlotOutcome } from "./slot-math";
 import { creditPayout, currentBalance, debitStake } from "./game-wallet";
 import {
@@ -503,6 +504,63 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
     return slotResult(rollSlot(next), bet, cfg.houseEdgeBps, Number.MAX_SAFE_INTEGER);
   }
 
+  // -------------------------------------------------------- lakshmi coins ----
+  function coinsResult(o: CoinsOutcome, stake: number, edgeBps: number, maxPayout: number) {
+    const conv = (u: number) => coinUnitsToPaise(stake, u, edgeBps);
+    const chip = (c: { cell: number; units: number; label?: string }) => ({ cell: c.cell, label: c.label ?? null, amount: conv(c.units) });
+    const waysWin = conv(o.waysUnits);
+    const bonus = o.bonus
+      ? {
+          initial: o.bonus.initial.map(chip),
+          rounds: o.bonus.rounds.map((r) => ({ respinsLeft: r.respinsLeft, newCoins: r.newCoins.map(chip) })),
+          full: o.bonus.full,
+          grand: conv(o.bonus.grandUnits),
+        }
+      : null;
+    const coinsWin = o.bonus ? [...o.bonus.initial, ...o.bonus.rounds.flatMap((r) => r.newCoins)].reduce((a, c) => a + conv(c.units), 0) : 0;
+    const raw = waysWin + coinsWin + (bonus?.grand ?? 0);
+    const payout = Math.min(raw, maxPayout);
+    return {
+      stops: o.stops,
+      grid: o.grid,
+      ways: o.ways.map((w) => ({ symbol: w.symbol, reels: w.reels, ways: w.ways })),
+      waysWin,
+      coinCount: o.coinCount,
+      bonus,
+      coinsWin,
+      payout,
+      capped: raw > maxPayout,
+    };
+  }
+
+  function playCoinsGame(input: { userId: string; bet: number; requestId?: string }): RoundView {
+    return guard(() =>
+      tx(() => {
+        const dup = findByRequest(input.userId, input.requestId);
+        if (dup) return toView(dup, true);
+        const p = prepare(input.userId, "COINS", input.bet, BPS);
+        const out = rollCoins(floatStream(p.fair.serverSeed, p.fair.clientSeed, p.fair.nonce));
+        const res = coinsResult(out, input.bet, p.cfg.houseEdgeBps, p.cfg.maxPayout);
+        insertRound({
+          id: p.roundId, userId: input.userId, gameKey: "COINS", status: "ACTIVE", betAmount: input.bet, houseEdgeBps: p.cfg.houseEdgeBps,
+          debit: JSON.stringify(p.debit), serverSeedHash: p.fair.serverSeedHash, clientSeed: p.fair.clientSeed, nonce: p.fair.nonce,
+          params: JSON.stringify({}), state: null, requestId: input.requestId ?? null,
+        });
+        const mult = res.payout > 0 ? Math.floor((res.payout * BPS) / input.bet) : 0;
+        return toView(settle(getRow(p.roundId)!, res.payout > 0 ? "WON" : "LOST", res.payout, mult, res));
+      })
+    );
+  }
+
+  /** Virtual-credit practice spin: same maths, NO wallet, NO database writes. */
+  function demoCoins(bet: number) {
+    const cfg = getConfig("COINS");
+    if (!cfg.isEnabled) throw new GameError("GAME_DISABLED", "This game is currently unavailable.");
+    if (!Number.isSafeInteger(bet) || bet <= 0) throw new GameError("INVALID_INPUT", "Enter a valid bet amount.");
+    const next = () => randomInt(0, 2 ** 32) / 2 ** 32;
+    return coinsResult(rollCoins(next), bet, cfg.houseEdgeBps, Number.MAX_SAFE_INTEGER);
+  }
+
   // -------------------------------------------------------------- crash ----
   function startCrash(input: { userId: string; bet: number; autoCashoutBps?: number; requestId?: string }): RoundView {
     if (input.autoCashoutBps !== undefined && (!Number.isInteger(input.autoCashoutBps) || input.autoCashoutBps < CRASH_MIN_AUTO_BPS || input.autoCashoutBps > 10_000_000)) {
@@ -651,7 +709,7 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
   return {
     listConfigs, getConfig, updateConfig,
     getFairInfo, rotateSeed, revealedSeeds,
-    playDice, playCoin, playSlot, demoSlot,
+    playDice, playCoin, playSlot, demoSlot, playCoinsGame, demoCoins,
     startMines, revealMine, cashoutMines, activeMines,
     startCrash, crashState, cashoutCrash, sweepCrash,
     history, getRound,
