@@ -494,8 +494,8 @@ async function main() {
   if (bannerCount === 0) {
     // Starter hero slides use the bundled brand artwork; admins edit/replace them in Admin > Banners.
     const banners = [
-      { title: "Play. Compete. Win Big.", subtitle: "Join exciting tournaments, build your team and compete with players across India.", badgeText: "India's home for esports", imageUrl: "/images/hero-squad.webp", linkUrl: "/tournaments", ctaLabel: "Explore Tournaments", secondaryCtaLabel: "Register Now", secondaryCtaUrl: "/signup", sortOrder: 0 },
-      { title: "Real Players. Real Rewards.", subtitle: "Join top tournaments, compete with the best and win exciting cash prizes.", badgeText: "Biggest gaming tournaments", imageUrl: "/images/hero-real-rewards-bg.webp", linkUrl: "/tournaments", ctaLabel: "Play Now", secondaryCtaLabel: null, secondaryCtaUrl: null, sortOrder: 1 },
+      { title: "Squad up. Lock your slot. Win real cash.", subtitle: "Pick a tournament, pay the entry fee and play your match. Prize money lands in your wallet after results are verified.", badgeText: "Tournaments open now", imageUrl: "/images/hero-squad.webp", linkUrl: "/tournaments", ctaLabel: "Browse tournaments", secondaryCtaLabel: "Create account", secondaryCtaUrl: "/signup", sortOrder: 0 },
+      { title: "Real Players. Real Rewards.", subtitle: "Every entry fee, prize and withdrawal is recorded in your wallet history.", badgeText: "Cash prize tournaments", imageUrl: "/images/hero-real-rewards-bg.webp", linkUrl: "/tournaments", ctaLabel: "Play Now", secondaryCtaLabel: null, secondaryCtaUrl: null, sortOrder: 1 },
       { title: "Refer & Earn ₹50 Per Friend", subtitle: "Invite friends to XArena and earn when they join.", badgeText: "Refer & Earn", imageUrl: "/images/hero-booyah.webp", linkUrl: "/referral", ctaLabel: "Invite Friends", secondaryCtaLabel: null, secondaryCtaUrl: null, sortOrder: 2 },
     ];
     for (const b of banners) {

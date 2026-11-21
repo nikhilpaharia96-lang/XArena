@@ -80,7 +80,7 @@ function SignupForm() {
           X
         </div>
         <h1 className="text-2xl font-black text-white">Create your account</h1>
-        <p className="text-white/50 text-sm mt-1">Join thousands of players competing daily</p>
+        <p className="text-white/50 text-sm mt-1">Make an account to join tournaments</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

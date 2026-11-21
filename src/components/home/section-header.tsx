@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 
-/** Shared "Title ... View All →" row used across every home section. */
+/** Shared "Title ... View all" row used across every home section.
+ *  `icon` is still accepted so existing call sites compile, but is no longer drawn —
+ *  an icon in front of every heading is what made the page read as templated. */
 export function SectionHeader({
   title,
   href,
-  icon: Icon,
   badge,
 }: {
   title: string;
@@ -14,15 +15,15 @@ export function SectionHeader({
   badge?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between mb-3">
-      <h2 className="text-base font-bold text-white flex items-center gap-1.5">
+    <div className="flex items-end justify-between mb-3 border-b border-white/10 pb-2">
+      <h2 className="font-display text-xl font-bold uppercase tracking-wide text-white flex items-center gap-2 leading-none">
+        <span className="h-4 w-1 rounded-sm bg-gold" aria-hidden />
         {badge}
-        {Icon && <Icon className="h-4 w-4 text-gold" />}
         {title}
       </h2>
       {href && (
-        <Link href={href} className="text-xs text-violet font-semibold flex items-center gap-0.5 shrink-0">
-          View All <ArrowRight className="h-3 w-3" />
+        <Link href={href} className="text-xs text-white/60 hover:text-white font-medium shrink-0 underline-offset-4 hover:underline">
+          View all
         </Link>
       )}
     </div>
