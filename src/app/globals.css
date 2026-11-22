@@ -111,3 +111,23 @@ html, body {
 .safe-top {
   padding-top: env(safe-area-inset-top, 0px);
 }
+/* Admin layout visibility. Plain (unlayered) media queries on purpose: they
+   do not depend on Tailwind utility ordering, so the desktop sidebar can
+   never leak into the mobile layout in any browser. */
+.admin-sidebar { display: none; }
+.admin-topbar { display: flex; }
+.admin-menu { display: block; }
+@media (min-width: 1024px) {
+  .admin-sidebar { display: flex; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .admin-topbar, .admin-menu { display: none; }
+}
+
+/* The mobile admin bar and dropdown must be opaque: .glass is translucent,
+   so without this the page content shows through the open menu and the
+   nav items overlap the dashboard cards. Declared after .glass to win. */
+.admin-topbar { background: #0B1224; }
+.admin-menu {
+  background: #0B1224;
+  box-shadow: 0 24px 40px -12px rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}

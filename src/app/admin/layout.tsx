@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen flex bg-void">
       {/* Sidebar - desktop */}
-      <aside className="hidden lg:flex flex-col w-64 shrink-0 border-r border-white/8 glass p-4">
+      <aside className="admin-sidebar flex-col w-64 shrink-0 border-r border-white/8 glass p-4">
         <Link href="/admin" className="flex items-center gap-2 mb-8 px-2">
           <div className="h-8 w-8 rounded-xl gradient-brand flex items-center justify-center font-black text-white text-sm">X</div>
           <span className="font-display font-extrabold text-white">XArena Admin</span>
@@ -80,14 +80,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-white/8 flex items-center justify-between px-4 h-14">
+      <div className="admin-topbar fixed top-0 left-0 right-0 z-40 glass border-b border-white/8 items-center justify-between px-4 h-14">
         <span className="font-display font-extrabold text-white">XArena Admin</span>
-        <button onClick={() => setMobileOpen(!mobileOpen)}>
+        <button aria-label="Menu" onClick={() => setMobileOpen(!mobileOpen)}>
           <Menu className="h-5 w-5 text-white" />
         </button>
       </div>
       {mobileOpen && (
-        <div className="lg:hidden fixed top-14 left-0 right-0 z-40 glass border-b border-white/8 p-3 space-y-1 max-h-[70vh] overflow-y-auto">
+        <div className="admin-menu fixed top-14 left-0 right-0 z-40 glass border-b border-white/8 p-3 space-y-1 max-h-[70vh] overflow-y-auto">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -102,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       )}
 
-      <main className="flex-1 p-4 lg:p-8 pt-20 lg:pt-8 max-w-7xl mx-auto w-full">{children}</main>
+      <main className="admin-main flex-1 min-w-0 p-4 lg:p-8 pt-20 lg:pt-8 max-w-7xl mx-auto w-full">{children}</main>
     </div>
   );
 }
