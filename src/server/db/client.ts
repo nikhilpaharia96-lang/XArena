@@ -20,8 +20,13 @@ declare global {
 }
 
 function openConnection(): Database.Database {
-  const dbPath = path.join(process.cwd(), "data", "xarena.db");
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  // During `next build`, several workers import this module in parallel to
+  // collect route metadata. Letting them all open (and run schema/migrations
+  // on) the same on-disk file races and can fail with SQLITE_BUSY, so the
+  // build phase uses a throwaway in-memory database instead.
+  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+  const dbPath = isBuildPhase ? ":memory:" : path.join(process.cwd(), "data", "xarena.db");
+  if (!isBuildPhase) fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
   const db = new Database(dbPath, { timeout: 30000 });
   db.pragma("busy_timeout = 30000");
