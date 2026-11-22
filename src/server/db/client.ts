@@ -19,11 +19,12 @@ declare global {
   var __xarenaDb: Database.Database | undefined;
 }
 
-function createConnection(): Database.Database {
+function openConnection(): Database.Database {
   const dbPath = path.join(process.cwd(), "data", "xarena.db");
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 
-  const db = new Database(dbPath);
+  const db = new Database(dbPath, { timeout: 30000 });
+  db.pragma("busy_timeout = 30000");
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
 
@@ -66,6 +67,25 @@ function createConnection(): Database.Database {
   backfillSlots(db);
 
   return db;
+}
+
+/**
+ * `next build` imports this module in several parallel workers, and each one runs the
+ * schema/migration statements above. Switching to WAL and ALTER TABLE need a brief
+ * exclusive lock, so a worker can hit SQLITE_BUSY. Retry instead of failing the build.
+ */
+function createConnection(): Database.Database {
+  const sleep = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return openConnection();
+    } catch (err) {
+      const code = (err as { code?: string }).code;
+      const busy = code === "SQLITE_BUSY" || code === "SQLITE_LOCKED";
+      if (!busy || attempt >= 40) throw err;
+      sleep(250 + Math.floor(Math.random() * 250));
+    }
+  }
 }
 
 /**
