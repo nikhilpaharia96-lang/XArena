@@ -14,11 +14,13 @@ import {
   LifeBuoy,
   ShieldCheck,
   LogOut,
+  Search,
 } from "lucide-react";
 import { useCurrentUser, useLogout } from "@/hooks/use-auth";
 import { cn } from "@/lib/cn";
 
 const links = [
+  { href: "/search", label: "Search", icon: Search },
   { href: "/tournaments", label: "Tournaments", icon: Trophy },
   { href: "/games", label: "Games", icon: Gamepad2 },
   { href: "/leaderboard", label: "Leaderboard", icon: BarChart3 },

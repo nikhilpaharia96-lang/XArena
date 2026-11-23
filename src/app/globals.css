@@ -139,7 +139,7 @@ body { overflow-x: clip; }
 
 /* Sticky top bar of the user app: opaque so scrolling content never shows
    through it (declared after .glass to win over its translucent gradient). */
-.app-topbar { background: #0B1224; }
+.app-topbar { background: #0C1424; }
 
 /* Toasts (notifications) and dialogs float above arbitrary page content, so
    they must be opaque; .glass alone lets the page text show through them.
