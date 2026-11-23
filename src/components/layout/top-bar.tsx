@@ -17,7 +17,7 @@ export function TopBar() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 glass border-b border-white/8 safe-top">
+      <header className="app-topbar sticky top-0 z-30 glass border-b border-white/8 safe-top">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-2 px-3 sm:px-4 h-16">
           <div className="flex items-center gap-1 sm:gap-3">
             <button

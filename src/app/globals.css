@@ -35,9 +35,14 @@ html, body {
   background: var(--color-void);
   color: #F8FAFC;
   -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
   max-width: 100vw;
 }
+/* Horizontal overflow guard. `hidden` on BOTH html and body turns body into
+   its own scroll container, which breaks `position: sticky` (the top bar
+   scrolled away). Only the root clips with `hidden`; body uses `clip`,
+   which hides overflow without creating a scroll container. */
+html { overflow-x: hidden; }
+body { overflow-x: clip; }
 
 * {
   scrollbar-width: thin;
@@ -94,7 +99,7 @@ html, body {
    bottom of the screen. */
 .nav-float {
   background:
-    linear-gradient(180deg, rgba(22, 33, 58, 0.92) 0%, rgba(8, 13, 26, 0.96) 100%);
+    linear-gradient(180deg, rgb(22, 33, 58) 0%, rgb(8, 13, 26) 100%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -131,3 +136,7 @@ html, body {
   box-shadow: 0 24px 40px -12px rgba(0, 0, 0, 0.8);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
+
+/* Sticky top bar of the user app: opaque so scrolling content never shows
+   through it (declared after .glass to win over its translucent gradient). */
+.app-topbar { background: #0B1224; }
