@@ -146,3 +146,11 @@ body { overflow-x: clip; }
    Declared after .glass to win over its translucent gradient. */
 .toast-solid { background: #111B33; }
 .dialog-solid { background: #0F172A; }
+
+/* Bottom navigation (mobile): flat, edge-to-edge dark bar. White active item,
+   muted slate inactive items, thin top divider. Fully opaque. */
+.nav-flat {
+  --nav-flat-inactive: #8E9BB3;
+  background: #0C1424;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
