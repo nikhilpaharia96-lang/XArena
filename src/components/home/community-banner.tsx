@@ -11,7 +11,7 @@ const LINKS = [
 
 export function CommunityBanner() {
   return (
-    <section className="relative rounded-3xl overflow-hidden border border-white/8">
+    <section className="force-dark relative rounded-3xl overflow-hidden border border-white/8">
       <div className="absolute inset-0 bg-cover bg-top" style={{ backgroundImage: "url(/images/hero-squad.webp)" }} />
       <div className="absolute inset-0 bg-gradient-to-r from-void via-void/85 to-violet-dim/40" />
 

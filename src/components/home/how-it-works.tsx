@@ -31,7 +31,7 @@ export function HowItWorks() {
   return (
     <section
       aria-labelledby="how-it-works-title"
-      className="relative overflow-hidden rounded-3xl border border-white/8 bg-void px-3 pt-6 pb-4 sm:px-6 sm:pb-6"
+      className="force-dark relative overflow-hidden rounded-3xl border border-white/8 bg-void px-3 pt-6 pb-4 sm:px-6 sm:pb-6"
     >
       {/* arena backdrop */}
       <Image

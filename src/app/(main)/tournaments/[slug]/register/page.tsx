@@ -234,7 +234,7 @@ export default function RegisterPage({ params }: { params: Promise<{ slug: strin
       </Link>
 
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10">
+      <div className="force-dark relative overflow-hidden rounded-3xl border border-white/10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />

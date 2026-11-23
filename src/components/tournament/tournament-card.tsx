@@ -31,7 +31,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentListItem 
     <Link href={`/tournaments/${t.slug}`}>
       <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} transition={{ duration: 0.15 }}>
         <Card className="overflow-hidden">
-          <div className="relative h-28 gradient-brand flex items-end p-3">
+          <div className="force-dark relative h-28 gradient-brand flex items-end p-3">
             {art && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={art} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />

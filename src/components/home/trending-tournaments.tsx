@@ -59,7 +59,7 @@ export function TrendingTournaments() {
                 <motion.div whileTap={{ scale: 0.98 }}>
                   <Card className="overflow-hidden">
                     <div
-                      className="relative h-24 flex items-start p-3"
+                      className="force-dark relative h-24 flex items-start p-3"
                       style={
                         poster
                           ? { backgroundImage: `url(${poster})`, backgroundSize: "cover", backgroundPosition: "50% 15%" }

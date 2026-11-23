@@ -42,12 +42,12 @@ export function BottomNav() {
             >
               <Icon
                 className="h-[26px] w-[26px] transition-colors"
-                style={{ color: active ? "#FFFFFF" : "var(--nav-flat-inactive)" }}
+                style={{ color: active ? "var(--nav-flat-active)" : "var(--nav-flat-inactive)" }}
                 strokeWidth={active ? 2 : 1.7}
               />
               <span
                 className="text-[12px] leading-none font-semibold text-center transition-colors"
-                style={{ color: active ? "#FFFFFF" : "var(--nav-flat-inactive)" }}
+                style={{ color: active ? "var(--nav-flat-active)" : "var(--nav-flat-inactive)" }}
               >
                 {item.label}
               </span>

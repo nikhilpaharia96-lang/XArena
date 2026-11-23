@@ -45,7 +45,7 @@ export function HeroSlide({ slide, className, priority }: { slide: HeroSlideCont
   return (
     <div
       className={cn(
-        "relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7",
+        "force-dark relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7",
         className
       )}
     >

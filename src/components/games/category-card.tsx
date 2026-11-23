@@ -42,7 +42,7 @@ export function CategoryCard({
           whileHover={reduce ? undefined : { y: -3 }}
           transition={{ duration: 0.15 }}
           style={{ "--accent": accent } as React.CSSProperties}
-          className="neon-card flex h-full min-h-[286px] flex-col overflow-hidden rounded-[20px] bg-elevated"
+          className="force-dark neon-card flex h-full min-h-[286px] flex-col overflow-hidden rounded-[20px] bg-elevated"
         >
           <div className="h-[112px] shrink-0">
             <CategoryArt value={value} sizes="(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 46vw" priority={index < 2} />

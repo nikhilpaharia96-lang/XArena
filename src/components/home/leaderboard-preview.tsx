@@ -9,8 +9,8 @@ import { SectionHeader } from "./section-header";
 
 /** Visual treatment per rank: top 3 get a crown + tinted card, 4-5 are plain. */
 const TIERS = [
-  { crown: "#F5B400", card: "bg-gradient-to-b from-gold/20 via-gold/5 to-surface border-gold/30", ring: "ring-gold", badge: "bg-gold text-void" },
-  { crown: "#D7DEE8", card: "bg-surface border-white/12", ring: "ring-[#D7DEE8]/70", badge: "bg-[#D7DEE8] text-void" },
+  { crown: "#F5B400", card: "bg-gradient-to-b from-gold/20 via-gold/5 to-surface border-gold/30", ring: "ring-gold", badge: "bg-gold text-[#020617]" },
+  { crown: "#D7DEE8", card: "bg-surface border-white/12", ring: "ring-[#D7DEE8]/70", badge: "bg-[#D7DEE8] text-[#020617]" },
   { crown: "#F97316", card: "bg-gradient-to-b from-[#F97316]/20 via-[#F97316]/5 to-surface border-[#F97316]/30", ring: "ring-[#F97316]", badge: "bg-[#F97316] text-white" },
   { crown: null, card: "bg-surface border-white/8", ring: "ring-cobalt/60", badge: "bg-cobalt text-white" },
   { crown: null, card: "bg-surface border-white/8", ring: "ring-white/20", badge: "bg-void text-white border border-white/20" },

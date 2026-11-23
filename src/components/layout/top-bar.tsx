@@ -10,6 +10,7 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { formatPaise } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { MobileMenu } from "./mobile-menu";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navLinks = [
   { href: "/tournaments", label: "Tournaments" },
@@ -68,6 +69,7 @@ export function TopBar() {
           </nav>
 
           <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
+            <ThemeToggle className={iconBtn} />
             <Link href="/search" aria-label="Search" className={cn(iconBtn, "max-[349px]:hidden")}>
               <Search className="h-5 w-5" />
             </Link>
@@ -93,7 +95,7 @@ export function TopBar() {
                 >
                   <Bell className="h-5 w-5" />
                   {unread > 0 && (
-                    <span className="absolute top-1 right-1 h-4 min-w-4 px-1 rounded-full bg-crimson text-[9px] font-bold flex items-center justify-center text-white ring-2 ring-[#0B1224]">
+                    <span className="absolute top-1 right-1 h-4 min-w-4 px-1 rounded-full bg-crimson text-[9px] font-bold flex items-center justify-center text-white ring-2 ring-[var(--topbar-bg)]">
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}

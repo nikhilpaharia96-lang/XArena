@@ -50,12 +50,14 @@ export default function OriginalsPage() {
         ))}
       </div>
       {/* key forces a clean state when switching games */}
+      <div className="force-dark rounded-3xl space-y-4">
       {current.gameKey === "DICE" && <DiceGame key="d" cfg={current} balance={balance} />}
       {current.gameKey === "COINFLIP" && <CoinGame key="c" cfg={current} balance={balance} />}
       {current.gameKey === "MINES" && <MinesGame key="m" cfg={current} balance={balance} />}
       {current.gameKey === "SLOT" && <SlotGame key="s" cfg={current} balance={balance} />}
       {current.gameKey === "COINS" && <CoinsGame key="l" cfg={current} balance={balance} />}
       {current.gameKey === "CRASH" && <CrashGame key="x" cfg={current} balance={balance} />}
+      </div>
       <p className="text-[11px] text-white/40 text-center">
         House edge {(current.houseEdgeBps / 100).toFixed(1)}% · Max payout {formatPaiseExact(current.maxPayout)} · Play responsibly. 18+ only.
       </p>

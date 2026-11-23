@@ -16,7 +16,7 @@ export function ReferEarnBanner() {
   const { data: referral } = useReferral();
 
   return (
-    <section className="relative rounded-3xl overflow-hidden border border-gold/20">
+    <section className="force-dark relative rounded-3xl overflow-hidden border border-gold/20">
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url(/images/refer-earn-banner.jpg)" }}
@@ -38,7 +38,7 @@ export function ReferEarnBanner() {
           </p>
           <Link
             href="/referral"
-            className="inline-flex items-center gap-1.5 mt-4 rounded-xl bg-gold px-4 h-10 text-sm font-bold text-void"
+            className="inline-flex items-center gap-1.5 mt-4 rounded-xl bg-gold px-4 h-10 text-sm font-bold text-[#020617]"
           >
             Invite Now <ArrowRight className="h-3.5 w-3.5" />
           </Link>

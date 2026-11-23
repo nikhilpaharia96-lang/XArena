@@ -228,7 +228,7 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.25 }}
-        className="relative h-64 sm:h-80 rounded-3xl overflow-hidden border border-white/10"
+        className="force-dark relative h-64 sm:h-80 rounded-3xl overflow-hidden border border-white/10"
       >
         <div
           className="absolute inset-0"

@@ -47,7 +47,7 @@ export function GameCard({ game, tournamentCount }: { game: Game; tournamentCoun
       className="shrink-0 w-[130px]"
       aria-label={`${game.name} tournaments`}
     >
-      <motion.div whileTap={{ scale: 0.96 }} className="relative h-[180px] rounded-2xl overflow-hidden border border-white/8">
+      <motion.div whileTap={{ scale: 0.96 }} className="force-dark relative h-[180px] rounded-2xl overflow-hidden border border-white/8">
         {poster ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" />

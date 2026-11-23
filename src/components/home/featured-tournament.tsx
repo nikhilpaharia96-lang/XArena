@@ -69,7 +69,7 @@ function FeaturedCard({ t }: { t: TournamentListItem }) {
         // gradient "glow border": blue → purple, like the reference
         className="rounded-[28px] p-px bg-gradient-to-br from-cobalt via-violet/50 to-purple-500/80 shadow-[0_0_34px_rgba(37,99,235,0.32)]"
       >
-        <div className="relative overflow-hidden rounded-[27px] bg-void md:min-h-[270px] lg:min-h-[310px]">
+        <div className="force-dark relative overflow-hidden rounded-[27px] bg-void md:min-h-[270px] lg:min-h-[310px]">
           {/* Background art — top block on mobile (fades into the card), full-bleed on desktop */}
           <div className="absolute inset-x-0 top-0 h-[265px] md:inset-0 md:h-auto">
             {bgSrc ? (

@@ -15,9 +15,12 @@ import {
   ShieldCheck,
   LogOut,
   Search,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useCurrentUser, useLogout } from "@/hooks/use-auth";
 import { cn } from "@/lib/cn";
+import { useTheme } from "@/lib/theme";
 
 const links = [
   { href: "/search", label: "Search", icon: Search },
@@ -34,6 +37,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
   const { data: me } = useCurrentUser();
   const pathname = usePathname();
   const logout = useLogout();
+  const { theme, toggleTheme } = useTheme();
   const isAdmin = me && ["ADMIN", "SUPER_ADMIN", "MODERATOR"].includes(me.user.role);
 
   return (
@@ -107,6 +111,14 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
                   </Link>
                 );
               })}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-white/75 hover:bg-white/5"
+              >
+                {theme === "dark" ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
+                {theme === "dark" ? "Light mode" : "Dark mode"}
+              </button>
               {isAdmin && (
                 <Link
                   href="/admin"

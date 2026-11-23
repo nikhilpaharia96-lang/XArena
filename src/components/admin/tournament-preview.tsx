@@ -30,7 +30,7 @@ export function TournamentPreview({ d }: { d: PreviewData }) {
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider text-white/35 mb-2">Tournament card</p>
         <div className="overflow-hidden rounded-3xl border border-white/10 bg-surface shadow-[0_20px_50px_-24px_rgba(37,99,235,0.45)]">
-          <div className="relative h-28">
+          <div className="force-dark relative h-28">
             {cardImg ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={cardImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -75,7 +75,7 @@ export function TournamentPreview({ d }: { d: PreviewData }) {
 
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider text-white/35 mb-2">Detail header</p>
-        <div className="relative h-32 overflow-hidden rounded-3xl border border-white/10">
+        <div className="force-dark relative h-32 overflow-hidden rounded-3xl border border-white/10">
           {d.bannerUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={d.bannerUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />

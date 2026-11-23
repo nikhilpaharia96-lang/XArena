@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useRequireAdmin } from "@/hooks/use-require-admin";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -76,15 +77,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
+        <ThemeToggle className="h-10 w-10 rounded-xl flex items-center justify-center text-white/70 hover:bg-white/5" />
         <Link href="/" className="text-xs text-white/40 px-3 mt-4">← Back to app</Link>
       </aside>
 
       {/* Mobile top bar */}
       <div className="admin-topbar fixed top-0 left-0 right-0 z-40 glass border-b border-white/8 items-center justify-between px-4 h-14">
         <span className="font-display font-extrabold text-white">XArena Admin</span>
-        <button aria-label="Menu" onClick={() => setMobileOpen(!mobileOpen)}>
-          <Menu className="h-5 w-5 text-white" />
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle className="h-10 w-10 rounded-xl flex items-center justify-center text-white/80" />
+          <button aria-label="Menu" onClick={() => setMobileOpen(!mobileOpen)} className="h-10 w-10 flex items-center justify-center">
+            <Menu className="h-5 w-5 text-white" />
+          </button>
+        </div>
       </div>
       {mobileOpen && (
         <div className="admin-menu fixed top-14 left-0 right-0 z-40 glass border-b border-white/8 p-3 space-y-1 max-h-[70vh] overflow-y-auto">

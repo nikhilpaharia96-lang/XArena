@@ -28,7 +28,7 @@ export function FreeFireHero({ stats, isLoading }: { stats?: FreeFireStats; isLo
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
       style={{ "--accent": "255,122,0" } as React.CSSProperties}
-      className="neon-card relative overflow-hidden rounded-3xl bg-void"
+      className="force-dark neon-card relative overflow-hidden rounded-3xl bg-void"
     >
       <Image
         src="/images/free-fire/hero.webp"

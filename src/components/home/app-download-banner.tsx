@@ -4,7 +4,7 @@ import { Smartphone } from "lucide-react";
  * (and currently fake) download link. Update once the app actually ships. */
 export function AppDownloadBanner() {
   return (
-    <section className="relative rounded-3xl overflow-hidden border border-cobalt/20 p-5" style={{ background: "linear-gradient(135deg, #0B1728 0%, #142244 60%, var(--color-cobalt) 160%)" }}>
+    <section className="force-dark relative rounded-3xl overflow-hidden border border-cobalt/20 p-5" style={{ background: "linear-gradient(135deg, #0B1728 0%, #142244 60%, var(--color-cobalt) 160%)" }}>
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-2xl bg-cobalt/20 border border-cobalt/30 flex items-center justify-center shrink-0">
           <Smartphone className="h-6 w-6 text-cobalt" />
