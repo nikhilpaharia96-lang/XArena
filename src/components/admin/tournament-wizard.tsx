@@ -541,7 +541,7 @@ export function TournamentWizard({ initial, tournamentId, status, slotsFilled = 
       </div>
 
       {/* Mobile sticky actions */}
-      <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-void/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
+      <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-void px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
         {!isPublished && <Button variant="secondary" fullWidth onClick={onSaveDraft} loading={saving === "draft"} disabled={busy}>Save Draft</Button>}
         <Button fullWidth onClick={onCreate} loading={saving === "create"} disabled={busy}>{isPublished ? "Save Changes" : editing ? "Publish" : "Create"}</Button>
       </div>

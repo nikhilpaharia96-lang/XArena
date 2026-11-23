@@ -343,7 +343,7 @@ export default function RegisterPage({ params }: { params: Promise<{ slug: strin
 
       {/* Mobile sticky CTA — above the bottom nav, respects the safe area */}
       <div className="fixed inset-x-0 z-30 sm:hidden px-4" style={{ bottom: "calc(4.75rem + env(safe-area-inset-bottom))" }}>
-        <div className="rounded-3xl border border-white/10 bg-void/95 backdrop-blur p-3 space-y-2 shadow-[0_-12px_32px_-12px_rgba(0,0,0,0.8)]">
+        <div className="rounded-3xl border border-white/10 bg-void p-3 space-y-2 shadow-[0_-12px_32px_-12px_rgba(0,0,0,0.8)]">
           {selectionLabel && <p className="text-center text-xs text-white/60">Selected: <span className="text-white font-semibold">{selectionLabel}</span></p>}
           {ctaButton}
         </div>

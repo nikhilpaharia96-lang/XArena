@@ -467,7 +467,12 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
         className="fixed inset-x-0 z-30 sm:hidden px-4"
         style={{ bottom: "calc(4.75rem + env(safe-area-inset-bottom))" }}
       >
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="rounded-3xl border border-white/10 bg-void p-2 shadow-[0_-12px_32px_-12px_rgba(0,0,0,0.8)]"
+        >
           <Button
             fullWidth
             size="lg"
