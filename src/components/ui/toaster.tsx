@@ -19,7 +19,7 @@ export function Toaster() {
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="glass glow-border rounded-2xl px-4 py-3 flex items-start gap-3 pointer-events-auto shadow-2xl"
+              className="toast-solid glass glow-border rounded-2xl px-4 py-3 flex items-start gap-3 pointer-events-auto shadow-2xl"
             >
               <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${toneColor[t.tone]}`} />
               <div className="flex-1 min-w-0">
