@@ -3,7 +3,7 @@ import { ApiError, fail, ok, validationError } from "@/server/lib/api-response";
 import { getCurrentUser } from "@/server/lib/current-user";
 import { createId } from "@/server/lib/ids";
 import { checkRateLimit, getClientKey } from "@/server/lib/rate-limit";
-import { assertBankOtp, clearBankOtp } from "@/server/lib/bank-otp";
+import { assertBankOtp, clearBankOtp, isBankOtpRequired } from "@/server/lib/bank-otp";
 import { addBankSchema } from "@/types/schemas";
 import { BANKS, MAX_BANKS, bankFromIfsc } from "@/lib/banks";
 
@@ -25,7 +25,7 @@ export async function GET() {
         "SELECT id, slot, ifsc, bankName, accountNumber, accountHolder, createdAt FROM BankAccount WHERE userId = ? ORDER BY slot ASC"
       )
       .all(user.id) as BankRow[];
-    return ok({ banks, maxBanks: MAX_BANKS });
+    return ok({ banks, maxBanks: MAX_BANKS, otpRequired: isBankOtpRequired() });
   } catch (error) {
     return fail(error);
   }
@@ -58,8 +58,9 @@ export async function POST(req: Request) {
       throw new ApiError(409, "This account number is already saved.", "BANK_DUPLICATE");
     }
 
-    // OTP is only checked (and consumed) once everything else is valid.
-    assertBankOtp(user.id, input.otp);
+    // OTP (when enabled) is only checked and consumed once everything else is valid.
+    const otpRequired = isBankOtpRequired();
+    if (otpRequired) assertBankOtp(user.id, input.otp ?? "");
 
     const used = new Set(existing.map((b) => b.slot));
     let slot = 1;
@@ -71,7 +72,7 @@ export async function POST(req: Request) {
         `INSERT INTO BankAccount (id, userId, slot, ifsc, bankName, accountNumber, accountHolder, createdAt)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
       ).run(id, user.id, slot, input.ifsc, input.bankName, input.accountNumber, input.accountHolder, new Date().toISOString());
-      clearBankOtp(user.id);
+      if (otpRequired) clearBankOtp(user.id);
     })();
 
     return ok({ id, slot }, 201);

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAddBank, useRequestBankOtp } from "@/hooks/use-wallet";
+import { useAddBank, useBanks, useRequestBankOtp } from "@/hooks/use-wallet";
 import { ApiClientError } from "@/lib/api-client";
 import { toast } from "@/lib/toast-store";
 import { BANKS, IFSC_REGEX, OTHER_BANK, bankFromIfsc } from "@/lib/banks";
@@ -15,6 +15,9 @@ const NAME_REGEX = /^[A-Za-z][A-Za-z .'-]{1,79}$/;
 export function AddBankForm({ slot, onBack, onDone }: { slot: number; onBack: () => void; onDone: () => void }) {
   const requestOtp = useRequestBankOtp();
   const addBank = useAddBank();
+  const { data: bankData } = useBanks();
+  // OTP step is off unless the server says otherwise (BANK_OTP_REQUIRED=true).
+  const otpRequired = bankData?.otpRequired === true;
 
   const [ifsc, setIfsc] = useState("");
   const [bankName, setBankName] = useState("");
@@ -44,9 +47,9 @@ export function AddBankForm({ slot, onBack, onDone }: { slot: number; onBack: ()
         : null;
     e.accountNumber = /^\d{9,18}$/.test(accountNumber) ? null : "Account number must be 9–18 digits";
     e.holder = NAME_REGEX.test(holder.trim()) ? null : "Enter the name exactly as on the bank account";
-    e.otp = /^\d{6}$/.test(otp) ? null : otpSent ? "Enter the 6-digit OTP" : "Request an OTP first";
+    e.otp = !otpRequired || /^\d{6}$/.test(otp) ? null : otpSent ? "Enter the 6-digit OTP" : "Request an OTP first";
     return e;
-  }, [ifsc, bankName, accountNumber, holder, otp, otpSent]);
+  }, [ifsc, bankName, accountNumber, holder, otp, otpSent, otpRequired]);
 
   const show = (k: string) => (touched ? errors[k] ?? undefined : undefined);
   const fieldsValid = !errors.ifsc && !errors.bankName && !errors.accountNumber && !errors.holder;
@@ -91,7 +94,7 @@ export function AddBankForm({ slot, onBack, onDone }: { slot: number; onBack: ()
     setTouched(true);
     if (!fieldsValid || errors.otp) return;
     addBank.mutate(
-      { ifsc, bankName, accountNumber, accountHolder: holder.trim().replace(/\s+/g, " "), otp },
+      { ifsc, bankName, accountNumber, accountHolder: holder.trim().replace(/\s+/g, " "), ...(otpRequired ? { otp } : {}) },
       {
         onSuccess: () => {
           toast({ title: "Bank account added", tone: "success" });
@@ -156,6 +159,7 @@ export function AddBankForm({ slot, onBack, onDone }: { slot: number; onBack: ()
           <Input id="holder" value={holder} onChange={(e) => setHolder(e.target.value)} placeholder="Enter Account holder Name" autoComplete="off" maxLength={80} error={show("holder")} />
         </div>
 
+        {otpRequired && (
         <div>
           <label className={label} htmlFor="otp">Enter OTP</label>
           <Input id="otp" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="Enter OTP" inputMode="numeric" autoComplete="one-time-code" disabled={!otpSent} className="disabled:opacity-60" error={otpSent ? show("otp") : undefined} />
@@ -176,6 +180,7 @@ export function AddBankForm({ slot, onBack, onDone }: { slot: number; onBack: ()
           </div>
           {touched && !otpSent && <p className="mt-1.5 text-xs text-crimson">Request an OTP first</p>}
         </div>
+        )}
 
         <Button fullWidth size="lg" variant="cta" loading={addBank.isPending} onClick={submit}>
           ADD BANK

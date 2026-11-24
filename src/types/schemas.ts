@@ -86,7 +86,7 @@ export const addBankSchema = z.object({
     .min(2, "Enter the account holder name")
     .max(80)
     .regex(/^[A-Za-z][A-Za-z .'-]*$/, "Use letters only, exactly as on the bank account"),
-  otp: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit OTP"),
+  otp: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit OTP").optional(),
 });
 export type AddBankInput = z.infer<typeof addBankSchema>;
 export type WithdrawInput = z.infer<typeof withdrawSchema>;

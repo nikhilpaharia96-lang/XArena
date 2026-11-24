@@ -153,7 +153,7 @@ export interface BankAccountItem {
 }
 
 export function useBanks() {
-  return useQuery<{ banks: BankAccountItem[]; maxBanks: number }>({
+  return useQuery<{ banks: BankAccountItem[]; maxBanks: number; otpRequired: boolean }>({
     queryKey: ["banks"],
     queryFn: () => api.get("/api/wallet/banks"),
   });
@@ -170,7 +170,7 @@ export function useRequestBankOtp() {
 export function useAddBank() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { ifsc: string; bankName: string; accountNumber: string; accountHolder: string; otp: string }) =>
+    mutationFn: (input: { ifsc: string; bankName: string; accountNumber: string; accountHolder: string; otp?: string }) =>
       api.post<{ id: string; slot: number }>("/api/wallet/banks", input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["banks"] });

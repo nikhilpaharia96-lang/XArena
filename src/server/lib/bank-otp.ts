@@ -8,6 +8,14 @@ export const OTP_RESEND_MS = 30_000;
 const MAX_ATTEMPTS = 5;
 const OTP_NOTIFICATION_TYPE = "BANK_OTP";
 
+/**
+ * OTP on "add bank" is switched OFF by default for now. Set BANK_OTP_REQUIRED=true
+ * (and redeploy) to turn the whole OTP step back on, in both the API and the UI.
+ */
+export function isBankOtpRequired(): boolean {
+  return process.env.BANK_OTP_REQUIRED === "true";
+}
+
 interface OtpRow {
   codeHash: string;
   expiresAt: string;
