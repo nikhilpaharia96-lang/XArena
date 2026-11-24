@@ -338,7 +338,6 @@ export function HeroCarousel() {
                 }
               />
               <div className="absolute inset-0 bg-gradient-to-t from-void via-void/60 to-black/10" />
-              <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-gold/20 blur-3xl" />
 
               <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gold mb-3">
                 <Zap className="h-3 w-3" /> Featured Tournament

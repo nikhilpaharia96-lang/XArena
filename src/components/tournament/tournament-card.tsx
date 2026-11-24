@@ -89,12 +89,12 @@ export function TournamentCard({ tournament, className }: { tournament: Tourname
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
 
-            <Badge tone={meta.tone} className="absolute top-2.5 left-2.5 z-10 !py-0.5 bg-black/65 backdrop-blur-sm">
+            <Badge tone={meta.tone} className="absolute top-2.5 left-2.5 z-10 !py-0.5 bg-[#0B1224]">
               {kind === "live" && <span className="h-1.5 w-1.5 rounded-full bg-crimson live-dot" />}
               {meta.label}
             </Badge>
 
-            <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 max-w-[60%] rounded-full bg-black/45 backdrop-blur-sm border border-white/10 pl-1 pr-2.5 py-0.5">
+            <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 max-w-[60%] rounded-full bg-[#0B1224] border border-[#26314F] pl-1 pr-2.5 py-0.5">
               {t.gameIcon ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={t.gameIcon} alt="" className="h-4 w-4 rounded-full object-cover" />

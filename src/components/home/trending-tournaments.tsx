@@ -69,11 +69,11 @@ export function TrendingTournaments() {
                     >
                       {!poster && <div className="absolute inset-0 gradient-brand" />}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
-                      <Badge tone={tone} className="relative z-10 bg-black/65 backdrop-blur-sm">
+                      <Badge tone={tone} className="relative z-10 bg-[#0B1224]">
                         {label === "HOT" && <span className="h-1.5 w-1.5 rounded-full bg-white live-dot" />}
                         {label}
                       </Badge>
-                      <span className="relative z-10 ml-auto text-[10px] font-bold uppercase tracking-wider text-white/80 bg-black/30 rounded-full px-2 py-1">
+                      <span className="relative z-10 ml-auto text-[10px] font-bold uppercase tracking-wider text-white/80 bg-[#0B1224] rounded-full px-2 py-1">
                         {t.gameName}
                       </span>
                     </div>
