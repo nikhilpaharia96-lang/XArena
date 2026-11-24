@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Copy, Download, Eye, ImagePlus, IndianRupee, Loader2, QrCode, ShieldCheck, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Headset, LifeBuoy, Copy, Download, Eye, ImagePlus, IndianRupee, Loader2, QrCode, ShieldCheck, X } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useWallet, usePaymentInfo, useSubmitDepositRequest } from "@/hooks/use-wallet";
 import { Button } from "@/components/ui/button";
@@ -130,9 +130,21 @@ export default function DepositPage() {
       <div className="space-y-4">
         {header}
         <Card className="p-6 text-center">
-          <QrCode className="h-8 w-8 text-white/30 mx-auto mb-3" />
-          <p className="font-semibold text-white">Deposits are temporarily unavailable</p>
-          <p className="text-sm text-white/50 mt-1">Please check back soon.</p>
+          <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+            <QrCode className="h-7 w-7 text-white/50" />
+          </div>
+          <p className="font-bold text-white text-lg">Deposits are paused right now</p>
+          <p className="text-sm text-white/60 mt-1.5 max-w-xs mx-auto">
+            We&apos;re not accepting new deposits at the moment. Your existing balance and tournaments are not affected.
+          </p>
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <Link href="/wallet">
+              <Button variant="secondary" fullWidth>Back to Wallet</Button>
+            </Link>
+            <Link href="/support">
+              <Button fullWidth><Headset className="h-4 w-4" /> Get Help</Button>
+            </Link>
+          </div>
         </Card>
       </div>
     );
@@ -165,6 +177,27 @@ export default function DepositPage() {
               <div className="h-11 w-11 rounded-2xl gradient-brand flex items-center justify-center">
                 <IndianRupee className="h-5 w-5 text-white" />
               </div>
+            </Card>
+
+            <Card className="p-4">
+              <p className="text-sm font-bold text-white mb-3 flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4 text-signal" /> How adding money works
+              </p>
+              <ol className="space-y-2.5">
+                {[
+                  "Choose an amount and pay it to our UPI ID / QR.",
+                  "Enter the UTR and upload your payment screenshot.",
+                  "Our team verifies it and credits your wallet.",
+                ].map((t, i) => (
+                  <li key={t} className="flex gap-3 text-[13px] text-white/70">
+                    <span className="h-5 w-5 shrink-0 rounded-full bg-violet/20 text-cobalt text-[11px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-3 text-[11px] text-white/45 flex items-center gap-1.5">
+                <LifeBuoy className="h-3.5 w-3.5 shrink-0" /> Stuck or paid but not credited? Contact support with your UTR.
+              </p>
             </Card>
 
             <Card className="p-5">

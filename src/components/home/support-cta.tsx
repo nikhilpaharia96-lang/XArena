@@ -9,7 +9,7 @@ export function SupportCta() {
       </div>
       <div className="flex-1 min-w-[10rem]">
         <p className="font-bold text-white text-sm">Need Help?</p>
-        <p className="text-xs text-white/50">Our support team is here for you 24/7.</p>
+        <p className="text-xs text-white/50">Our support team is here to help you.</p>
       </div>
       <Link
         href="/support"
