@@ -1,6 +1,7 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { useCurrentUser } from "@/hooks/use-auth";
 
 export interface ReferralData {
   referralCode: string;
@@ -11,8 +12,10 @@ export interface ReferralData {
 }
 
 export function useReferral() {
+  const { data: me } = useCurrentUser();
   return useQuery<ReferralData>({
     queryKey: ["referral"],
+    enabled: !!me,
     queryFn: () => api.get<ReferralData>("/api/referral"),
   });
 }

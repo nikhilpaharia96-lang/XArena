@@ -12,18 +12,18 @@ export function UpcomingTournaments() {
 
   return (
     <section>
-      <SectionHeader title="Upcoming Tournaments" href="/tournaments?status=REGISTRATION_OPEN" />
+      <SectionHeader title="Upcoming Tournaments" subtitle="Grab your slot before it fills up" href="/tournaments?status=REGISTRATION_OPEN" />
 
       {isLoading ? (
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-72 w-[240px] shrink-0 rounded-2xl" />
+            <Skeleton key={i} className="h-[22rem] w-[272px] shrink-0 rounded-2xl" />
           ))}
         </div>
       ) : upcoming && upcoming.length > 0 ? (
-        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
-          {upcoming.slice(0, 10).map((t) => (
-            <div key={t.id} className="shrink-0 w-[240px] snap-center">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 scroll-px-4 md:mx-0 md:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible">
+          {upcoming.slice(0, 9).map((t) => (
+            <div key={t.id} className="shrink-0 w-[272px] snap-start md:w-auto">
               <TournamentCard tournament={t} />
             </div>
           ))}

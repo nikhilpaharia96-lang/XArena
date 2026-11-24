@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { House, Trophy, UsersRound, WalletCards, UserRound, type LucideIcon } from "lucide-react";
 
 interface NavItem {
@@ -38,16 +39,23 @@ export function BottomNav() {
               href={item.href}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
-              className="flex flex-col items-center justify-center gap-1.5 pt-3 pb-2.5 min-h-[64px] focus-visible:outline-none focus-visible:bg-white/5 active:opacity-70 transition-opacity"
+              className="relative flex flex-col items-center justify-center gap-1 pt-2.5 pb-2 min-h-[60px] focus-visible:outline-none focus-visible:bg-white/5 active:opacity-70 transition-opacity"
             >
+              {active && (
+                <motion.span
+                  layoutId="bottom-nav-indicator"
+                  className="absolute top-0 h-[3px] w-9 rounded-b-full bg-gradient-to-r from-cobalt to-violet shadow-[0_2px_10px_rgba(59,130,246,0.7)]"
+                  transition={{ type: "spring", stiffness: 500, damping: 36 }}
+                />
+              )}
               <Icon
-                className="h-[26px] w-[26px] transition-colors"
-                style={{ color: active ? "var(--nav-flat-active)" : "var(--nav-flat-inactive)" }}
-                strokeWidth={active ? 2 : 1.7}
+                className="h-6 w-6 transition-colors"
+                style={{ color: active ? "var(--color-nav-active)" : "var(--nav-flat-inactive)" }}
+                strokeWidth={active ? 2.2 : 1.7}
               />
               <span
-                className="text-[12px] leading-none font-semibold text-center transition-colors"
-                style={{ color: active ? "var(--nav-flat-active)" : "var(--nav-flat-inactive)" }}
+                className="text-[11px] leading-none font-semibold text-center transition-colors"
+                style={{ color: active ? "var(--color-nav-active-label)" : "var(--nav-flat-inactive)" }}
               >
                 {item.label}
               </span>

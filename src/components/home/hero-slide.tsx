@@ -45,7 +45,7 @@ export function HeroSlide({ slide, className, priority }: { slide: HeroSlideCont
   return (
     <div
       className={cn(
-        "force-dark relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7",
+        "force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7",
         className
       )}
     >
@@ -63,7 +63,7 @@ export function HeroSlide({ slide, className, priority }: { slide: HeroSlideCont
         </span>
       )}
 
-      <Title className="relative text-white font-display font-black text-3xl sm:text-5xl leading-[1.05] mb-2 max-w-[18ch] sm:max-w-[22ch] drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] line-clamp-3">
+      <Title className="relative text-white font-display font-black text-3xl sm:text-5xl lg:text-6xl leading-[1.05] mb-2 max-w-[18ch] sm:max-w-[22ch] drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)] line-clamp-3">
         {slide.title}
       </Title>
 

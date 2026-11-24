@@ -19,10 +19,10 @@ const TESTIMONIALS = [
 export function Testimonials() {
   return (
     <section>
-      <SectionHeader title="What Players Say" icon={Users} />
-      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-4 px-4">
+      <SectionHeader title="What Players Say" subtitle="Community feedback" icon={Users} />
+      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory -mx-4 px-4 scroll-px-4 md:mx-0 md:px-0 md:grid md:grid-cols-3 md:overflow-visible">
         {TESTIMONIALS.map((t) => (
-          <div key={t.name} className="shrink-0 w-[240px] snap-center rounded-2xl bg-surface border border-white/8 p-4">
+          <div key={t.name} className="shrink-0 w-[272px] md:w-auto snap-start rounded-2xl bg-surface border border-white/10 p-4">
             <div className="flex items-center gap-2.5 mb-2.5">
               <div className="h-9 w-9 rounded-full gradient-brand flex items-center justify-center text-[11px] font-bold text-white shrink-0">
                 {t.initials}
@@ -36,7 +36,7 @@ export function Testimonials() {
                 </div>
               </div>
             </div>
-            <p className="text-xs text-white/60 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
+            <p className="text-[13px] text-white/65 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
           </div>
         ))}
       </div>

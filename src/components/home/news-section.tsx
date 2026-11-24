@@ -21,7 +21,7 @@ export function NewsSection() {
 
   return (
     <section>
-      <SectionHeader title="Latest News & Updates" href={me ? "/notifications" : undefined} icon={Megaphone} />
+      <SectionHeader title="Latest News & Updates" subtitle="Announcements from the XArena team" href={me ? "/notifications" : undefined} icon={Megaphone} />
 
       {!me ? (
         <EmptyState icon={Megaphone} title="Log in for the latest updates" description="Tournament announcements and platform news will show up here." className="py-8" />
@@ -34,7 +34,7 @@ export function NewsSection() {
       ) : announcements.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {announcements.map((n) => (
-            <Link key={n.id} href="/notifications" className="rounded-2xl bg-surface border border-white/8 overflow-hidden flex flex-col">
+            <Link key={n.id} href="/notifications" className="rounded-2xl bg-surface border border-white/10 hover:border-cobalt/40 transition-colors overflow-hidden flex flex-col">
               <div className="h-16 gradient-brand flex items-center justify-center">
                 <Megaphone className="h-6 w-6 text-white/80" />
               </div>

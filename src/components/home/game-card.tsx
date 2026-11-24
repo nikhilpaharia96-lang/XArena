@@ -44,7 +44,7 @@ export function GameCard({ game, tournamentCount }: { game: Game; tournamentCoun
   return (
     <Link
       href={game.slug === FREE_FIRE_GAME_SLUG ? FREE_FIRE_ROUTE : `/tournaments?game=${game.slug}`}
-      className="shrink-0 w-[130px]"
+      className="shrink-0 w-[130px] snap-start rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet/60"
       aria-label={`${game.name} tournaments`}
     >
       <motion.div whileTap={{ scale: 0.96 }} className="force-dark relative h-[180px] rounded-2xl overflow-hidden border border-white/8">
