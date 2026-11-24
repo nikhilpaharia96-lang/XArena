@@ -239,14 +239,11 @@ export default function TournamentDetailPage({ params }: { params: Promise<{ slu
           }
         />
         <div className="absolute inset-0 bg-gradient-to-t from-void via-void/55 to-black/10" />
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-violet/30 blur-3xl" />
 
         <div className="relative z-10 h-full flex flex-col justify-between p-4 sm:p-6">
           <div className="flex items-start justify-between gap-2">
             <div className="flex flex-wrap items-center gap-1.5">
-              <Badge tone={t.format === "FREE" ? "signal" : "gold"}>{t.format === "FREE" ? "Free Entry" : formatPaise(t.entryFee)}</Badge>
-              <Badge tone="neutral">{t.gameName}</Badge>
-              <Badge tone="violet">{gameModeLabel(t.mode)}</Badge>
+              <Badge tone={t.format === "FREE" ? "signal" : "gold"} className="bg-[#0B1224]">{t.format === "FREE" ? "Free Entry" : formatPaise(t.entryFee)}</Badge>
             </div>
             <span
               className={cn(

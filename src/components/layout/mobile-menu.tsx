@@ -69,7 +69,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
               <button
                 onClick={onClose}
                 aria-label="Close menu"
-                className="h-9 w-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70"
+                className="h-10 w-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70"
               >
                 <X className="h-4 w-4" />
               </button>

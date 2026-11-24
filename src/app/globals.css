@@ -10,9 +10,9 @@
  * component needed to be touched to pick up the new look.
  */
 @theme {
-  --color-void: #020617;       /* app background, deep navy (was near-black) */
-  --color-surface: #0F172A;    /* card / raised surface navy */
-  --color-surface-2: #16213A;
+  --color-void: #05070E;       /* app background, deep ink-navy */
+  --color-surface: #0C1223;    /* card / raised surface navy */
+  --color-surface-2: #131C36;
   --color-border-glow: rgba(37, 99, 235, 0.28);
 
   --color-violet: #2563EB;     /* primary brand blue (was violet #7C5CF6) */
@@ -50,19 +50,19 @@
   color-scheme: dark;
   --fg: #F8FAFC;
   --topbar-bg: #0C1424;
-  --menu-bg: #0B1224;
-  --toast-bg: #111B33;
-  --dialog-bg: #0F172A;
-  --glass-from: rgba(255, 255, 255, 0.045);
-  --glass-to: rgba(255, 255, 255, 0.015);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --menu-bg: #0A1020;
+  --toast-bg: #121B35;
+  --dialog-bg: #0C1223;
+  --glass-from: #0F1730;
+  --glass-to: #0C1223;
+  --glass-border: #1F2A47;
   --nav-flat-bg: #0C1424;
-  --nav-flat-line: rgba(255, 255, 255, 0.07);
+  --nav-flat-line: #1F2A47;
   --nav-flat-active: #FFFFFF;
   --nav-flat-inactive: #8E9BB3;
   --nav-float-from: rgb(22, 33, 58);
   --nav-float-to: rgb(8, 13, 26);
-  --scroll-thumb: rgba(124, 92, 246, 0.4);
+  --scroll-thumb: rgba(59, 130, 246, 0.4);
 }
 
 html[data-theme="light"] {
@@ -84,9 +84,9 @@ html[data-theme="light"] {
   --menu-bg: #FFFFFF;
   --toast-bg: #FFFFFF;
   --dialog-bg: #FFFFFF;
-  --glass-from: rgba(255, 255, 255, 0.92);
-  --glass-to: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(15, 23, 42, 0.1);
+  --glass-from: #FFFFFF;
+  --glass-to: #F8FAFC;
+  --glass-border: #E2E8F0;
   --nav-flat-bg: #FFFFFF;
   --nav-flat-line: rgba(15, 23, 42, 0.1);
   --nav-flat-active: #2563EB;
@@ -110,9 +110,9 @@ html[data-theme="light"] {
 /* A subtree that stays dark in both themes. */
 .force-dark {
   color-scheme: dark;
-  --color-void: #020617;
-  --color-surface: #0F172A;
-  --color-surface-2: #16213A;
+  --color-void: #05070E;
+  --color-surface: #0C1223;
+  --color-surface-2: #131C36;
   --color-border-glow: rgba(37, 99, 235, 0.28);
   --color-signal: #22C55E;
   --color-crimson: #EF4444;
@@ -124,8 +124,10 @@ html[data-theme="light"] {
   color: var(--fg);
 }
 
-html, body {
+html {
   background: var(--color-void);
+}
+html, body {
   color: var(--fg);
   -webkit-tap-highlight-color: transparent;
   max-width: 100vw;
@@ -135,7 +137,7 @@ html, body {
    scrolled away). Only the root clips with `hidden`; body uses `clip`,
    which hides overflow without creating a scroll container. */
 html { overflow-x: hidden; }
-body { overflow-x: clip; }
+body { overflow-x: clip; background: transparent; }
 
 * {
   scrollbar-width: thin;
@@ -152,15 +154,19 @@ html[data-theme="light"] .glass { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 
 
 .glow-border {
   border: 1px solid var(--color-border-glow);
-  box-shadow: 0 0 0 1px rgba(124,92,246,0.08), 0 8px 30px -10px rgba(124,92,246,0.35);
+  box-shadow: 0 0 0 1px rgba(37,99,235,0.1), 0 12px 36px -14px rgba(37,99,235,0.5);
 }
 
 .gradient-brand {
-  background: linear-gradient(135deg, var(--color-violet) 0%, var(--color-violet-dim) 100%);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0) 48%),
+    linear-gradient(135deg, var(--color-violet) 0%, var(--color-violet-dim) 100%);
 }
 
 .gradient-cta {
-  background: linear-gradient(135deg, var(--color-gold) 0%, #EA580C 100%);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0) 50%),
+    linear-gradient(135deg, #FB923C 0%, var(--color-gold) 45%, #EA580C 100%);
 }
 
 .gradient-text {
@@ -251,3 +257,59 @@ html[data-theme="light"] .glass { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 
 /* Light-mode shadows: the heavy black drop shadows used on dark surfaces look dirty on white. */
 html[data-theme="light"] .toast-solid,
 html[data-theme="light"] .dialog-solid { box-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.35); }
+
+
+/* ==========================================================================
+ * XArena solid system
+ * One rule: every surface is an opaque, flat colour, like the top bar and
+ * bottom nav. No blur, no see-through cards, no background glow. Tinted
+ * chips/badges/tiles are mapped to their solid equivalents (the colour they
+ * produce on the dark surface). Light mode keeps its own palette; only blur
+ * and the glass gradient are neutralised there.
+ * ========================================================================== */
+
+* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+.glass { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.9); }
+.glow-border { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, 0.9); }
+html[data-theme="light"] .glass { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px -12px rgba(15, 23, 42, 0.12); }
+
+:is(html:not([data-theme="light"]), .force-dark) {
+  /* neutral fills */
+  --s-fill-1: #141C33; --s-fill-2: #182139; --s-fill-3: #1B243C; --s-fill-4: #232C45; --s-fill-5: #2A344E;
+}
+
+/* Readable text scale (solid colours) */
+:is(html:not([data-theme="light"]), .force-dark) :is(.text-white\/25, .text-white\/30, .text-white\/35, .text-white\/40) { color: #8C99B5; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.text-white\/45, .text-white\/50) { color: #9AA8C4; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.text-white\/55, .text-white\/60) { color: #AEBBD4; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.text-white\/65, .text-white\/70) { color: #C3CDE2; }
+:is(html:not([data-theme="light"]), .force-dark) :is(input, textarea)::placeholder { color: #6F7D9A; }
+
+/* Neutral translucent fills -> solid */
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-white\/\[0\.03\], .bg-white\/\[0\.04\], .bg-white\/\[0\.06\], .bg-white\/5) { background-color: var(--s-fill-1); }
+:is(html:not([data-theme="light"]), .force-dark) .bg-white\/8 { background-color: var(--s-fill-2); }
+:is(html:not([data-theme="light"]), .force-dark) .bg-white\/10 { background-color: var(--s-fill-3); }
+:is(html:not([data-theme="light"]), .force-dark) .bg-white\/15 { background-color: var(--s-fill-4); }
+:is(html:not([data-theme="light"]), .force-dark) .bg-white\/20 { background-color: var(--s-fill-5); }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-surface\/60, .bg-surface\/80) { background-color: var(--color-surface); }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-black\/25, .bg-black\/30, .bg-black\/40, .bg-black\/45, .bg-black\/50):not(.fixed) { background-color: #0A0F1E; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-black\/60, .bg-black\/65):not(.fixed) { background-color: #0A0F1E; }
+
+/* Tinted status fills -> solid (blend of the tint over the card surface) */
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-signal\/10) { background-color: #0E2429; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-signal\/15, .bg-signal\/20) { background-color: #0F2D2C; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-gold\/10) { background-color: #241C22; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-gold\/15, .bg-gold\/20) { background-color: #302021; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-crimson\/10) { background-color: #231727; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-crimson\/15, .bg-crimson\/20) { background-color: #2E1A28; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-violet\/10) { background-color: #0F1A37; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-violet\/15) { background-color: #101F41; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-violet\/20, .bg-violet\/25, .bg-violet\/30) { background-color: #11224B; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-cobalt\/10) { background-color: #111D38; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.bg-cobalt\/15, .bg-cobalt\/20) { background-color: #132343; }
+
+/* Hairlines: solid */
+:is(html:not([data-theme="light"]), .force-dark) :is(.border-white\/8, .border-white\/10, .border-white\/\[0\.07\]) { border-color: #1F2A47; }
+:is(html:not([data-theme="light"]), .force-dark) :is(.border-white\/15, .border-white\/20, .border-white\/25) { border-color: #2A3556; }
+:is(html:not([data-theme="light"]), .force-dark) .divide-white\/8 > :not(:last-child) { border-color: #1B2540; }

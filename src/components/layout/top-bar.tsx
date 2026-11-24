@@ -31,7 +31,7 @@ export function TopBar() {
 
   return (
     <>
-      <header className="app-topbar sticky top-0 z-30 border-b border-white/[0.07] safe-top">
+      <header className="app-topbar sticky top-0 z-30 border-b border-white/[0.07] safe-top shadow-[0_1px_0_0_rgba(37,99,235,0.18)]">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-2 pl-1.5 pr-3 sm:px-4 h-14 sm:h-16">
           <div className="flex items-center gap-0.5 sm:gap-3 min-w-0">
             <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className={cn(iconBtn, "sm:hidden")}>
@@ -75,13 +75,13 @@ export function TopBar() {
                 <Link
                   href="/wallet"
                   aria-label="Wallet balance, add money"
-                  className="mx-0.5 flex items-center gap-1.5 rounded-full bg-white/[0.07] border border-white/10 pl-2.5 pr-1 h-9 max-[379px]:pl-2 hover:bg-white/10 active:bg-white/12 transition-colors"
+                  className="mx-0.5 flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/10 pl-2.5 pr-1 h-9 max-[379px]:pl-2 hover:bg-white/10 active:bg-white/12 transition-colors"
                 >
-                  <WalletIcon className="h-4 w-4 text-signal" />
-                  <span className="text-[13px] font-mono font-bold text-white tabular-nums">
+                  <WalletIcon className="h-4 w-4 text-signal shrink-0" />
+                  <span className="text-[13px] font-mono font-bold text-white tabular-nums max-[379px]:text-xs">
                     {formatPaise(me.wallet.depositBalance + me.wallet.winningBalance + me.wallet.bonusBalance)}
                   </span>
-                  <span className="h-7 w-7 rounded-full gradient-brand flex items-center justify-center">
+                  <span className="h-7 w-7 rounded-full gradient-cta flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(249,115,22,0.7)]">
                     <Plus className="h-4 w-4 text-white" strokeWidth={2.75} />
                   </span>
                 </Link>

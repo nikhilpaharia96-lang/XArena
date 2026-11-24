@@ -1,6 +1,7 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
+import { useCurrentUser } from "@/hooks/use-auth";
 
 export interface NotificationRow {
   id: string;
@@ -13,8 +14,11 @@ export interface NotificationRow {
 }
 
 export function useNotifications() {
+  // Notifications require a session; skip the request for signed-out visitors.
+  const { data: me } = useCurrentUser();
   return useQuery<{ notifications: NotificationRow[]; unreadCount: number }>({
     queryKey: ["notifications"],
+    enabled: !!me,
     queryFn: () => api.get("/api/notifications"),
     staleTime: 15_000,
     refetchInterval: 30_000,

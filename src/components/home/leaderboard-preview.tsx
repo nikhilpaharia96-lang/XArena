@@ -25,7 +25,7 @@ export function LeaderboardPreview() {
 
   return (
     <section>
-      <SectionHeader title="Top Players Leaderboard" href="/leaderboard" icon={Crown} />
+      <SectionHeader title="Top Players Leaderboard" subtitle="Ranked by all-time wins" href="/leaderboard" icon={Crown} />
 
       {isLoading ? (
         <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
@@ -34,14 +34,14 @@ export function LeaderboardPreview() {
           ))}
         </div>
       ) : top.length > 0 ? (
-        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-5 md:overflow-visible">
           {top.map((r) => {
             const tier = TIERS[r.rank - 1] ?? FALLBACK_TIER;
             return (
               <Link
                 key={r.id}
                 href="/leaderboard"
-                className={`relative shrink-0 w-[124px] rounded-2xl border overflow-hidden flex flex-col items-center text-center pt-3 pb-4 px-2 ${tier.card}`}
+                className={`relative shrink-0 w-[124px] md:w-auto rounded-2xl border overflow-hidden flex flex-col items-center text-center pt-3 pb-4 px-2 ${tier.card}`}
               >
                 {/* Decorative shield behind the avatar */}
                 <div

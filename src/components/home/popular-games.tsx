@@ -24,8 +24,8 @@ export function PopularGames() {
 
   return (
     <section>
-      <SectionHeader title="Popular Games" href="/games" />
-      <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
+      <SectionHeader title="Popular Games" subtitle="Pick your battleground" href="/games" />
+      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-x -mx-4 px-4 scroll-px-4 md:mx-0 md:px-0 md:flex-wrap">
         {isLoading ? (
           Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[92px] w-[84px] shrink-0 rounded-2xl" />)
         ) : games && games.length > 0 ? (

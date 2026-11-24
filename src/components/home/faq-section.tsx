@@ -17,8 +17,8 @@ export function FaqSection() {
 
   return (
     <section>
-      <SectionHeader title="Frequently Asked Questions" icon={HelpCircle} />
-      <div className="rounded-2xl bg-surface border border-white/8 divide-y divide-white/8 overflow-hidden">
+      <SectionHeader title="Frequently Asked Questions" subtitle="Quick answers" icon={HelpCircle} />
+      <div className="rounded-2xl bg-surface border border-white/10 divide-y divide-white/8 overflow-hidden">
         {FAQS.map((f, i) => {
           const expanded = open === i;
           return (
@@ -26,12 +26,12 @@ export function FaqSection() {
               <button
                 onClick={() => setOpen(expanded ? null : i)}
                 aria-expanded={expanded}
-                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left"
+                className="w-full flex items-center justify-between gap-3 px-4 py-4 min-h-[52px] text-left"
               >
                 <span className="text-sm font-semibold text-white">{f.q}</span>
                 <ChevronDown className={`h-4 w-4 text-white/40 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
               </button>
-              {expanded && <p className="px-4 pb-4 text-xs text-white/55 leading-relaxed">{f.a}</p>}
+              {expanded && <p className="px-4 pb-4 text-[13px] text-white/60 leading-relaxed">{f.a}</p>}
             </div>
           );
         })}

@@ -1,6 +1,7 @@
 "use client";
 
 import { HeroCarousel } from "@/components/home/hero-carousel";
+import { TrustStrip } from "@/components/home/trust-strip";
 import { PopularGames } from "@/components/home/popular-games";
 import { FeaturedTournament } from "@/components/home/featured-tournament";
 import { UpcomingTournaments } from "@/components/home/upcoming-tournaments";
@@ -17,8 +18,9 @@ import { SupportCta } from "@/components/home/support-cta";
 
 export default function HomePage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-10 sm:space-y-14">
       <HeroCarousel />
+      <TrustStrip />
       <PopularGames />
       <FeaturedTournament />
       <UpcomingTournaments />

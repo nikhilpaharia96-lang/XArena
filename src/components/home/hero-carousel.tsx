@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Trophy, ShieldCheck, Zap, Users, Wallet, IndianRupee, Play, Crown, UsersRound } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Trophy, ShieldCheck, Zap, Users, Wallet, IndianRupee, Play, Crown, UsersRound } from "lucide-react";
 import { useTournaments } from "@/hooks/use-tournaments";
 import { useBanners } from "@/hooks/use-banners";
 import { HeroSlide } from "./hero-slide";
@@ -29,14 +29,27 @@ export function HeroCarousel() {
   const brandSlideCount = useAdminSlides ? adminSlides!.length : 3;
   const slideCount = brandSlideCount + Math.min(featured?.length ?? 0, 4);
 
+  /** Distance between two neighbouring slides (slide width + gap). */
+  function slideStep(el: HTMLElement) {
+    const a = el.children[0] as HTMLElement | undefined;
+    const b = el.children[1] as HTMLElement | undefined;
+    return a && b ? b.offsetLeft - a.offsetLeft : el.clientWidth;
+  }
+
   function onScroll() {
     const el = scrollerRef.current;
     if (!el) return;
-    const idx = Math.round(el.scrollLeft / el.clientWidth);
-    setActive(idx);
+    setActive(Math.min(slideCount - 1, Math.max(0, Math.round(el.scrollLeft / slideStep(el)))));
   }
 
-  // Auto-advance every 3s. Pauses while the person is actually touching/
+  function goTo(i: number) {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const n = (i + slideCount) % slideCount;
+    el.scrollTo({ left: n * slideStep(el), behavior: "smooth" });
+  }
+
+  // Auto-advance every 5s. Pauses while the person is actually touching/
   // dragging the carousel so autoplay never fights a manual swipe, and is
   // skipped entirely for prefers-reduced-motion.
   useEffect(() => {
@@ -54,9 +67,10 @@ export function HeroCarousel() {
 
     const interval = setInterval(() => {
       if (paused) return;
-      const nextIndex = (Math.round(el.scrollLeft / el.clientWidth) + 1) % slideCount;
-      el.scrollTo({ left: nextIndex * el.clientWidth, behavior: "smooth" });
-    }, 3000);
+      const step = slideStep(el);
+      const nextIndex = (Math.round(el.scrollLeft / step) + 1) % slideCount;
+      el.scrollTo({ left: nextIndex * step, behavior: "smooth" });
+    }, 5000);
 
     el.addEventListener("pointerdown", pause);
     el.addEventListener("pointerup", resume);
@@ -79,11 +93,11 @@ export function HeroCarousel() {
   }, [slideCount]);
 
   if (isLoading) {
-    return <Skeleton className="h-72 sm:h-80 rounded-3xl -mx-4 sm:mx-0 sm:rounded-3xl" />;
+    return <Skeleton className="h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl -mx-4 sm:mx-0 sm:rounded-3xl" />;
   }
 
   return (
-    <div>
+    <div className="relative">
       <div
         ref={scrollerRef}
         onScroll={onScroll}
@@ -98,7 +112,7 @@ export function HeroCarousel() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25 }}
-          className="force-dark relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
+          className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
         >
           {/* Squad artwork */}
           <div
@@ -119,7 +133,7 @@ export function HeroCarousel() {
               <Trophy className="h-3 w-3" /> The Ultimate Gaming Arena
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-signal/40 bg-signal/10 px-3 py-1 text-[10px] font-bold text-signal">
-              <ShieldCheck className="h-3 w-3" /> Trusted by Gamers
+              <ShieldCheck className="h-3 w-3" /> Fair &amp; Verified
             </span>
           </div>
 
@@ -153,16 +167,12 @@ export function HeroCarousel() {
           </div>
         </motion.div>
 
-        {/* Brand slide 2 — "Play Compete Win" poster banner. Static marketing
-            copy (app tagline + illustrative platform stats), not tournament
-            data. The 1K+/50K+/₹10L+ figures are placeholder headline numbers
-            matching the reference poster; swap in real aggregate figures
-            once the platform has them to report. */}
+        {/* Brand slide 2 — "Play Compete Win" poster banner. Static marketing copy only (no made-up statistics). */}
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25, delay: 0.05 }}
-          className="force-dark relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
+          className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
         >
           {/* Character artwork */}
           <div
@@ -178,7 +188,7 @@ export function HeroCarousel() {
           <div className="absolute inset-0 bg-gradient-to-t from-void via-void/15 to-transparent" />
 
           <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[10px] font-bold tracking-widest text-gold mb-2">
-            <Zap className="h-3 w-3" /> INDIA&apos;S FASTEST GROWING
+            <Zap className="h-3 w-3" /> JOIN THE ARENA
           </span>
 
           <h1 className="relative mb-1.5 -ml-1">
@@ -193,24 +203,21 @@ export function HeroCarousel() {
           </h1>
 
           <p className="relative text-white/75 text-xs sm:text-sm max-w-xs sm:max-w-sm mb-3 line-clamp-2">
-            Join thousands of gamers, compete in exciting tournaments and win real rewards.
+            Compete in exciting tournaments and win real rewards.
           </p>
 
           <div className="relative flex items-center gap-3 sm:gap-5 mb-3">
             <span className="flex items-center gap-1.5">
               <Trophy className="h-3.5 w-3.5 text-gold" />
-              <span className="text-xs sm:text-sm font-black text-white">1K+</span>
-              <span className="text-[10px] text-white/50">Tournaments</span>
+              <span className="text-[11px] text-white/75 font-semibold">Cash Prizes</span>
             </span>
             <span className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 text-cobalt" />
-              <span className="text-xs sm:text-sm font-black text-white">50K+</span>
-              <span className="text-[10px] text-white/50">Gamers</span>
+              <span className="text-[11px] text-white/75 font-semibold">Solo, Duo &amp; Squad</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <IndianRupee className="h-3.5 w-3.5 text-signal" />
-              <span className="text-xs sm:text-sm font-black text-white">10L+</span>
-              <span className="text-[10px] text-white/50">Rewards</span>
+              <ShieldCheck className="h-3.5 w-3.5 text-signal" />
+              <span className="text-[11px] text-white/75 font-semibold">Verified Results</span>
             </span>
           </div>
 
@@ -239,7 +246,7 @@ export function HeroCarousel() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25, delay: 0.1 }}
-          className="force-dark relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
+          className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
         >
           {/* Stadium/soldier artwork */}
           <div
@@ -285,7 +292,7 @@ export function HeroCarousel() {
             </span>
             <span className="hidden sm:flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-cobalt" />
-              <span className="text-[11px] text-white/70 font-semibold">Instant Withdrawals</span>
+              <span className="text-[11px] text-white/70 font-semibold">Easy Withdrawals</span>
             </span>
           </div>
 
@@ -313,7 +320,7 @@ export function HeroCarousel() {
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.25, delay: 0.15 + i * 0.05 }}
-              className="force-dark relative shrink-0 w-full sm:w-[92%] h-72 sm:h-80 rounded-3xl snap-center overflow-hidden flex flex-col justify-end p-5 sm:p-7"
+              className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
             >
               <div
                 className="absolute inset-0"
@@ -324,7 +331,6 @@ export function HeroCarousel() {
                 }
               />
               <div className="absolute inset-0 bg-gradient-to-t from-void via-void/60 to-black/10" />
-              <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-gold/20 blur-3xl" />
 
               <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gold mb-3">
                 <Zap className="h-3 w-3" /> Featured Tournament
@@ -369,14 +375,39 @@ export function HeroCarousel() {
       </div>
 
       {slideCount > 1 && (
-        <div className="flex items-center justify-center gap-1.5 mt-3">
-          {Array.from({ length: slideCount }).map((_, i) => (
-            <span
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${i === active ? "w-5 bg-violet" : "w-1.5 bg-white/20"}`}
-            />
-          ))}
-        </div>
+        <>
+          <div className="flex items-center justify-center gap-2 mt-2" role="tablist" aria-label="Hero slides">
+            <button
+              type="button"
+              onClick={() => goTo(active - 1)}
+              aria-label="Previous slide"
+              className="hidden md:flex h-8 w-8 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            {Array.from({ length: slideCount }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                role="tab"
+                aria-selected={i === active}
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={() => goTo(i)}
+                className="h-6 px-1 flex items-center"
+              >
+                <span className={`block h-1.5 rounded-full transition-all ${i === active ? "w-6 bg-gold" : "w-1.5 bg-white/25"}`} />
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => goTo(active + 1)}
+              aria-label="Next slide"
+              className="hidden md:flex h-8 w-8 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
