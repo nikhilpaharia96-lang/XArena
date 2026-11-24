@@ -69,7 +69,7 @@ export function TopBar() {
           </nav>
 
           <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-            <ThemeToggle className={iconBtn} />
+            <ThemeToggle className={cn(iconBtn, "max-sm:hidden")} />
             <Link href="/search" aria-label="Search" className={cn(iconBtn, "max-[349px]:hidden")}>
               <Search className="h-5 w-5" />
             </Link>

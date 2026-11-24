@@ -6,6 +6,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useLogout } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/lib/toast-store";
+import { useTheme } from "@/lib/theme";
 import { Avatar, Panel, SectionTitle, SettingsRow } from "@/components/profile/parts";
 import {
   Settings, User, ShieldCheck, Wallet, BadgeCheck, Bell, Globe, Moon, Sun, Lock,
@@ -16,6 +17,7 @@ const XP_PER_LEVEL = 1000;
 
 export default function ProfilePage() {
   useRequireAuth();
+  const { theme, setTheme } = useTheme();
   const { data, isLoading } = useProfile();
   const logout = useLogout();
 
@@ -104,15 +106,28 @@ export default function ProfilePage() {
           title="Theme"
           subtitle="Dark / Light mode"
           right={
-            <div className="flex rounded-xl bg-surface-2 border border-white/10 p-0.5 text-xs font-semibold">
-              <span className="flex items-center gap-1 rounded-lg bg-cobalt px-3 py-1.5 text-white"><Moon className="h-3.5 w-3.5" /> Dark</span>
-              <button
-                type="button"
-                onClick={() => toast({ title: "Light mode is coming soon", tone: "info" })}
-                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-white/60"
-              >
-                <Sun className="h-3.5 w-3.5" /> Light
-              </button>
+            <div role="group" aria-label="Theme" className="flex rounded-xl bg-surface-2 border border-white/10 p-0.5 text-xs font-semibold">
+              {([
+                { value: "dark", label: "Dark", Icon: Moon },
+                { value: "light", label: "Light", Icon: Sun },
+              ] as const).map(({ value, label, Icon }) => {
+                const active = theme === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setTheme(value)}
+                    className={
+                      active
+                        ? "flex items-center gap-1 rounded-lg bg-cobalt px-3 py-1.5 text-[#FFFFFF]"
+                        : "flex items-center gap-1 rounded-lg px-3 py-1.5 text-white/60"
+                    }
+                  >
+                    <Icon className="h-3.5 w-3.5" /> {label}
+                  </button>
+                );
+              })}
             </div>
           }
         />
