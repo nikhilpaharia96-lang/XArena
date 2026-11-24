@@ -1,3 +1,4 @@
+import type React from "react";
 import Image from "next/image";
 
 type Step = {
@@ -20,7 +21,7 @@ const STEPS: Step[] = [
 
 function Chevron() {
   return (
-    <svg viewBox="0 0 28 32" className="h-7 w-6 text-cobalt drop-shadow-[0_0_6px_rgba(59,130,246,0.9)]" aria-hidden>
+    <svg viewBox="0 0 28 32" className="hiw-chevron h-7 w-6 text-cobalt" aria-hidden>
       <path d="M4 3l10 13L4 29M15 3l10 13-10 13" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
@@ -31,7 +32,7 @@ export function HowItWorks() {
   return (
     <section
       aria-labelledby="how-it-works-title"
-      className="force-dark relative overflow-hidden rounded-3xl border border-white/8 bg-void px-3 pt-6 pb-4 sm:px-6 sm:pb-6"
+      className="hiw-section relative overflow-hidden rounded-3xl border px-3 pt-6 pb-4 sm:px-6 sm:pb-6"
     >
       {/* arena backdrop */}
       <Image
@@ -39,24 +40,24 @@ export function HowItWorks() {
         alt=""
         fill
         sizes="(min-width: 1152px) 1152px, 100vw"
-        className="object-cover opacity-30 pointer-events-none select-none"
+        className="hiw-arena object-cover pointer-events-none select-none"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-void/70 via-void/60 to-void/90 pointer-events-none" />
+      <div className="hiw-fade absolute inset-0 pointer-events-none" />
 
       <div className="relative">
         <h2
           id="how-it-works-title"
           className="text-center text-3xl sm:text-5xl font-black italic tracking-tight leading-none"
         >
-          <span className="bg-gradient-to-b from-white to-[#3B82F6] bg-clip-text text-transparent drop-shadow-[0_0_14px_rgba(59,130,246,0.55)]">
+          <span className="hiw-title-a bg-clip-text text-transparent">
             HOW IT
           </span>{" "}
-          <span className="bg-gradient-to-b from-[#FDE68A] to-[#F97316] bg-clip-text text-transparent drop-shadow-[0_0_14px_rgba(249,115,22,0.55)]">
+          <span className="hiw-title-b bg-clip-text text-transparent">
             WORKS
           </span>
         </h2>
 
-        <div className="mt-3 flex items-center justify-center gap-2 text-xs sm:text-base text-white/70">
+        <div className="mt-3 flex items-center justify-center gap-2 text-xs sm:text-base text-white/70 font-medium">
           <span className="h-px w-8 sm:w-24 bg-gradient-to-r from-transparent to-cobalt" />
           <span className="h-1 w-1 rounded-full bg-cobalt" />
           <p>Join a tournament in 4 simple steps</p>
@@ -68,12 +69,8 @@ export function HowItWorks() {
           {STEPS.map((s, i) => (
             <li key={s.title} className="contents sm:flex sm:flex-1 sm:items-center">
               <div
-                className="relative flex flex-1 flex-col items-center rounded-2xl border px-2 pt-8 pb-4 text-center backdrop-blur-[2px]"
-                style={{
-                  borderColor: `rgba(${s.rgb},0.6)`,
-                  background: `radial-gradient(120% 80% at 50% 30%, rgba(${s.rgb},0.22), rgba(2,6,23,0.85) 70%)`,
-                  boxShadow: `0 0 18px -4px rgba(${s.rgb},0.55), inset 0 0 22px -12px rgba(${s.rgb},0.9)`,
-                }}
+                className="hiw-card relative flex flex-1 flex-col items-center rounded-2xl border px-2 pt-8 pb-4 text-center"
+                style={{ "--c": s.rgb } as React.CSSProperties}
               >
                 <Image
                   src={`/images/how-it-works/badge-${s.n}.webp`}
@@ -90,7 +87,7 @@ export function HowItWorks() {
                     width={s.w}
                     height={s.h}
                     sizes="(min-width: 640px) 200px, 45vw"
-                    className="max-h-full w-auto max-w-[88%] object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.6)]"
+                    className="hiw-img max-h-full w-auto max-w-[88%] object-contain"
                   />
                 </div>
 

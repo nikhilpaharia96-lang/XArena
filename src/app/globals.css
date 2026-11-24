@@ -313,3 +313,36 @@ html[data-theme="light"] .glass { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 
 :is(html:not([data-theme="light"]), .force-dark) :is(.border-white\/8, .border-white\/10, .border-white\/\[0\.07\]) { border-color: #1F2A47; }
 :is(html:not([data-theme="light"]), .force-dark) :is(.border-white\/15, .border-white\/20, .border-white\/25) { border-color: #2A3556; }
 :is(html:not([data-theme="light"]), .force-dark) .divide-white\/8 > :not(:last-child) { border-color: #1B2540; }
+
+/* ---- Home: How It Works. Dark = arena look, light = clean tinted cards. ---- */
+.hiw-section { background: var(--color-void); border-color: rgba(255, 255, 255, 0.08); }
+.hiw-arena { opacity: 0.3; }
+.hiw-fade { background: linear-gradient(to bottom, rgba(2,6,23,.7), rgba(2,6,23,.6), rgba(2,6,23,.9)); }
+.hiw-title-a {
+  background-image: linear-gradient(to bottom, #FFFFFF, #3B82F6);
+  filter: drop-shadow(0 0 14px rgba(59, 130, 246, 0.55));
+}
+.hiw-title-b {
+  background-image: linear-gradient(to bottom, #FDE68A, #F97316);
+  filter: drop-shadow(0 0 14px rgba(249, 115, 22, 0.55));
+}
+.hiw-card {
+  border-color: rgba(var(--c), 0.6);
+  background: radial-gradient(120% 80% at 50% 30%, rgba(var(--c), 0.22), rgba(2, 6, 23, 0.85) 70%);
+  box-shadow: 0 0 18px -4px rgba(var(--c), 0.55), inset 0 0 22px -12px rgba(var(--c), 0.9);
+}
+.hiw-img { filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.6)); }
+.hiw-chevron { filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.9)); }
+
+html[data-theme="light"] .hiw-section { background: #FFFFFF; border-color: rgba(15, 23, 42, 0.1); }
+html[data-theme="light"] .hiw-arena { opacity: 0.06; }
+html[data-theme="light"] .hiw-fade { background: linear-gradient(to bottom, rgba(255,255,255,.85), rgba(255,255,255,.7), rgba(255,255,255,.9)); }
+html[data-theme="light"] .hiw-title-a { background-image: linear-gradient(to bottom, #1E3A8A, #2563EB); filter: none; }
+html[data-theme="light"] .hiw-title-b { background-image: linear-gradient(to bottom, #F59E0B, #EA580C); filter: none; }
+html[data-theme="light"] .hiw-card {
+  border-color: rgba(var(--c), 0.4);
+  background: radial-gradient(120% 90% at 50% 25%, rgba(var(--c), 0.14), #FFFFFF 78%);
+  box-shadow: 0 10px 22px -14px rgba(var(--c), 0.7);
+}
+html[data-theme="light"] .hiw-img { filter: drop-shadow(0 8px 12px rgba(15, 23, 42, 0.22)); }
+html[data-theme="light"] .hiw-chevron { filter: none; }
