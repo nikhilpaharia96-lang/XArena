@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Bell, Search, Menu, Plus, Wallet as WalletIcon } from "lucide-react";
+import { Bell, Menu, Plus, Wallet as WalletIcon } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
 import { formatPaise } from "@/lib/format";
@@ -70,9 +70,6 @@ export function TopBar() {
 
           <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
             <ThemeToggle className={cn(iconBtn, "max-sm:hidden")} />
-            <Link href="/search" aria-label="Search" className={cn(iconBtn, "max-[349px]:hidden")}>
-              <Search className="h-5 w-5" />
-            </Link>
             {me ? (
               <>
                 <Link
