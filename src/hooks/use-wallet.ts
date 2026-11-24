@@ -69,7 +69,7 @@ export function useVerifyDeposit() {
 export function useRequestWithdraw() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { amountRupees: number; upiId: string }) => api.post("/api/wallet/withdraw", input),
+    mutationFn: (input: { amountRupees: number; bankId: string }) => api.post("/api/wallet/withdraw", input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["wallet"] });
       qc.invalidateQueries({ queryKey: ["transactions"] });
@@ -135,5 +135,54 @@ export function useSubmitDepositRequest() {
       qc.invalidateQueries({ queryKey: ["my-deposits"] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
     },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Saved bank accounts for withdrawals (max 3, OTP-verified on add)
+// ---------------------------------------------------------------------------
+
+export interface BankAccountItem {
+  id: string;
+  slot: number;
+  ifsc: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  createdAt: string;
+}
+
+export function useBanks() {
+  return useQuery<{ banks: BankAccountItem[]; maxBanks: number }>({
+    queryKey: ["banks"],
+    queryFn: () => api.get("/api/wallet/banks"),
+  });
+}
+
+export function useRequestBankOtp() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<{ expiresInSec: number; resendInSec: number }>("/api/wallet/banks/otp"),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+}
+
+export function useAddBank() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { ifsc: string; bankName: string; accountNumber: string; accountHolder: string; otp: string }) =>
+      api.post<{ id: string; slot: number }>("/api/wallet/banks", input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["banks"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function useDeleteBank() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/wallet/banks/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["banks"] }),
   });
 }

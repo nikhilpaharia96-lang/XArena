@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
+import { WalletTabs } from "@/components/wallet/wallet-tabs";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
@@ -105,6 +106,7 @@ export default function DepositPage() {
         <ArrowLeft className="h-4 w-4" /> Back to Wallet
       </Link>
       <h1 className="text-xl font-black text-white">Add Money</h1>
+      <WalletTabs active="deposit" />
     </>
   );
 

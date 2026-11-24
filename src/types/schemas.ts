@@ -66,10 +66,29 @@ export const depositSchema = z.object({
 });
 export type DepositInput = z.infer<typeof depositSchema>;
 
-export const withdrawSchema = z.object({
-  amountRupees: z.number().int().min(100, "Minimum withdrawal is ₹100"),
-  upiId: z.string().trim().regex(/^[\w.-]+@[\w]+$/, "Enter a valid UPI ID"),
+export const withdrawSchema = z
+  .object({
+    amountRupees: z.number().int().min(100, "Minimum withdrawal is ₹100"),
+    /** Preferred: one of the user's saved bank accounts. */
+    bankId: z.string().trim().min(1).max(64).optional(),
+    /** Legacy UPI payout, still accepted by the API. */
+    upiId: z.string().trim().regex(/^[\w.-]+@[\w]+$/, "Enter a valid UPI ID").optional(),
+  })
+  .refine((d) => d.bankId || d.upiId, { message: "Choose a bank account to withdraw into", path: ["bankId"] });
+
+export const addBankSchema = z.object({
+  ifsc: z.string().trim().toUpperCase().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Enter a valid IFSC code (e.g. SBIN0001234)"),
+  bankName: z.string().trim().min(2, "Select your bank").max(60),
+  accountNumber: z.string().trim().regex(/^\d{9,18}$/, "Account number must be 9–18 digits"),
+  accountHolder: z
+    .string()
+    .trim()
+    .min(2, "Enter the account holder name")
+    .max(80)
+    .regex(/^[A-Za-z][A-Za-z .'-]*$/, "Use letters only, exactly as on the bank account"),
+  otp: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit OTP"),
 });
+export type AddBankInput = z.infer<typeof addBankSchema>;
 export type WithdrawInput = z.infer<typeof withdrawSchema>;
 
 export const forgotPasswordSchema = z.object({

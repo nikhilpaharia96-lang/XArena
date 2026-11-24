@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
     const rows = db
       .prepare(
-        `SELECT wr.id, wr.amount, wr.status, wr.upiId, wr.createdAt, wr.reviewedAt, wr.rejectionReason,
+        `SELECT wr.id, wr.amount, wr.status, wr.upiId, wr.bankName, wr.bankAccount, wr.ifsc, wr.accountHolder, wr.createdAt, wr.reviewedAt, wr.rejectionReason,
                 u.id as userId, u.username, u.email
          FROM WithdrawRequest wr JOIN User u ON u.id = wr.userId
          WHERE wr.status = ?

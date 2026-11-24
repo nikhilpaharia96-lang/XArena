@@ -161,6 +161,7 @@ model User {
   depositRequests  DepositRequest[] @relation("DepositRequestUser")
   reviewedDepositRequests DepositRequest[] @relation("DepositRequestReviewer")
   withdrawRequests WithdrawRequest[]
+  bankAccounts     BankAccount[]
   participations   TournamentParticipant[]
   matchResults     MatchResult[]
   notifications    Notification[]
@@ -423,6 +424,8 @@ model WithdrawRequest {
   upiId           String?
   bankAccount     String?
   ifsc            String?
+  bankName        String?
+  accountHolder   String?
   reviewedById    String?
   reviewedAt      DateTime?
   rejectionReason String?
@@ -430,6 +433,22 @@ model WithdrawRequest {
 
   @@index([userId])
   @@index([status])
+}
+
+model BankAccount {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slot          Int
+  ifsc          String
+  bankName      String
+  accountNumber String
+  accountHolder String
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, slot])
+  @@unique([userId, accountNumber])
+  @@index([userId])
 }
 
 model Referral {

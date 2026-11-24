@@ -32,6 +32,7 @@ export interface AdminDepositRow {
 
 export interface AdminWithdrawalRow {
   id: string; amount: number; status: string; upiId: string | null; createdAt: string;
+  bankName: string | null; bankAccount: string | null; ifsc: string | null; accountHolder: string | null;
   userId: string; username: string; email: string;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useAdminWithdrawals, useWithdrawalAction } from "@/hooks/use-admin";
+import { useAdminWithdrawals, useWithdrawalAction, type AdminWithdrawalRow } from "@/hooks/use-admin";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +8,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPaise, formatDateTime } from "@/lib/format";
 import { toast } from "@/lib/toast-store";
-import { ArrowUpCircle, Check, X } from "lucide-react";
+import { ArrowUpCircle, Check, Copy, X } from "lucide-react";
 
-function WithdrawalRow({ w }: { w: { id: string; amount: number; status: string; upiId: string | null; createdAt: string; username: string; email: string } }) {
+function copy(text: string, label: string) {
+  navigator.clipboard
+    .writeText(text)
+    .then(() => toast({ title: `${label} copied`, tone: "success" }))
+    .catch(() => toast({ title: "Couldn't copy", tone: "error" }));
+}
+
+function WithdrawalRow({ w }: { w: AdminWithdrawalRow }) {
   const approve = useWithdrawalAction(w.id, "approve");
   const reject = useWithdrawalAction(w.id, "reject");
 
@@ -18,7 +25,18 @@ function WithdrawalRow({ w }: { w: { id: string; amount: number; status: string;
     <div className="p-4 flex items-center justify-between flex-wrap gap-3">
       <div>
         <p className="text-sm font-semibold text-white">{w.username} <span className="text-white/40 font-normal">({w.email})</span></p>
-        <p className="text-xs text-white/40">UPI: {w.upiId} · {formatDateTime(w.createdAt)}</p>
+        <p className="text-xs text-white/40">{formatDateTime(w.createdAt)}</p>
+        {w.bankAccount ? (
+          <div className="mt-1.5 text-xs text-white/60 space-y-0.5">
+            <p>{w.bankName} · IFSC {w.ifsc}</p>
+            <p>{w.accountHolder}</p>
+            <button type="button" onClick={() => copy(w.bankAccount!, "Account number")} className="inline-flex items-center gap-1 font-mono text-white hover:text-violet">
+              A/C {w.bankAccount} <Copy className="h-3 w-3" />
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-white/60 mt-1">UPI: {w.upiId}</p>
+        )}
       </div>
       <div className="flex items-center gap-2">
         <span className="font-mono font-bold text-gold">{formatPaise(w.amount)}</span>

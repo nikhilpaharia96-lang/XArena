@@ -247,6 +247,8 @@ CREATE TABLE IF NOT EXISTS WithdrawRequest (
   upiId            TEXT,
   bankAccount      TEXT,
   ifsc             TEXT,
+  bankName         TEXT,
+  accountHolder    TEXT,
   reviewedById     TEXT,
   reviewedAt       TEXT,
   rejectionReason  TEXT,
@@ -254,6 +256,30 @@ CREATE TABLE IF NOT EXISTS WithdrawRequest (
 );
 CREATE INDEX IF NOT EXISTS idx_withdraw_userId ON WithdrawRequest(userId);
 CREATE INDEX IF NOT EXISTS idx_withdraw_status ON WithdrawRequest(status);
+
+-- Saved payout bank accounts (max 3 per user, slot 1..3).
+CREATE TABLE IF NOT EXISTS BankAccount (
+  id            TEXT PRIMARY KEY,
+  userId        TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  slot          INTEGER NOT NULL,
+  ifsc          TEXT NOT NULL,
+  bankName      TEXT NOT NULL,
+  accountNumber TEXT NOT NULL,
+  accountHolder TEXT NOT NULL,
+  createdAt     TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (userId, slot),
+  UNIQUE (userId, accountNumber)
+);
+CREATE INDEX IF NOT EXISTS idx_bank_userId ON BankAccount(userId);
+
+-- One pending OTP per user for adding a bank account (stored hashed).
+CREATE TABLE IF NOT EXISTS BankOtp (
+  userId    TEXT PRIMARY KEY REFERENCES User(id) ON DELETE CASCADE,
+  codeHash  TEXT NOT NULL,
+  expiresAt TEXT NOT NULL,
+  attempts  INTEGER NOT NULL DEFAULT 0,
+  createdAt TEXT NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS Referral (
   id             TEXT PRIMARY KEY,

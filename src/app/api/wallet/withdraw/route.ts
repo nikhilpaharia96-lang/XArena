@@ -1,5 +1,5 @@
 import { db } from "@/server/db/client";
-import { ApiError, fail, ok } from "@/server/lib/api-response";
+import { ApiError, fail, ok, validationError } from "@/server/lib/api-response";
 import { getCurrentUser } from "@/server/lib/current-user";
 import { createId } from "@/server/lib/ids";
 import { checkRateLimit, getClientKey } from "@/server/lib/rate-limit";
@@ -45,25 +45,49 @@ export async function POST(req: Request) {
       );
     }
 
+    // Resolve the payout destination. A bank is looked up server-side by id + owner,
+    // so a client can never withdraw into someone else's saved account.
+    let bank: { id: string; ifsc: string; bankName: string; accountNumber: string; accountHolder: string } | undefined;
+    if (input.bankId) {
+      bank = db
+        .prepare("SELECT id, ifsc, bankName, accountNumber, accountHolder FROM BankAccount WHERE id = ? AND userId = ?")
+        .get(input.bankId, user.id) as typeof bank;
+      if (!bank) throw new ApiError(404, "Selected bank account was not found.", "BANK_NOT_FOUND");
+    }
+
     const now = new Date().toISOString();
     const withdrawId = createId("wd");
 
     db.transaction(() => {
-      db.prepare(
-        `UPDATE Wallet SET winningBalance = winningBalance - ?, lockedBalance = lockedBalance + ?, updatedAt = ? WHERE userId = ?`
-      ).run(amountPaise, amountPaise, now, user.id);
+      // Guarded UPDATE: the balance check and the debit happen atomically.
+      const res = db
+        .prepare(
+          `UPDATE Wallet SET winningBalance = winningBalance - ?, lockedBalance = lockedBalance + ?, updatedAt = ?
+           WHERE userId = ? AND winningBalance >= ?`
+        )
+        .run(amountPaise, amountPaise, now, user.id, amountPaise);
+      if (res.changes === 0) {
+        throw new ApiError(402, "Insufficient winning balance. Only prize winnings can be withdrawn.", "INSUFFICIENT_BALANCE");
+      }
 
       db.prepare(
-        `INSERT INTO WithdrawRequest (id, userId, amount, status, upiId, createdAt)
-         VALUES (?, ?, ?, 'PENDING', ?, ?)`
-      ).run(withdrawId, user.id, amountPaise, input.upiId, now);
+        `INSERT INTO WithdrawRequest (id, userId, amount, status, upiId, bankAccount, ifsc, bankName, accountHolder, createdAt)
+         VALUES (?, ?, ?, 'PENDING', ?, ?, ?, ?, ?, ?)`
+      ).run(
+        withdrawId,
+        user.id,
+        amountPaise,
+        bank ? null : input.upiId ?? null,
+        bank?.accountNumber ?? null,
+        bank?.ifsc ?? null,
+        bank?.bankName ?? null,
+        bank?.accountHolder ?? null,
+        now
+      );
     })();
 
     return ok({ requestId: withdrawId, status: "PENDING" }, 201);
   } catch (error) {
-    if (error instanceof Error && error.name === "ZodError") {
-      return fail(new ApiError(400, "Invalid input.", "VALIDATION_ERROR"));
-    }
-    return fail(error);
+    return fail(validationError(error) ?? error);
   }
 }

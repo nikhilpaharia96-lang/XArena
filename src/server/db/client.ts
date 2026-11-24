@@ -60,6 +60,12 @@ function openConnection(): Database.Database {
     if (!bannerCols.some((c) => c.name === col)) db.exec(`ALTER TABLE Banner ADD COLUMN ${col} TEXT`);
   }
 
+  // Bank payout snapshot columns on withdrawals (older DB files won't have them yet).
+  const withdrawCols = db.prepare("PRAGMA table_info(WithdrawRequest)").all() as { name: string }[];
+  for (const col of ["bankName", "accountHolder"]) {
+    if (!withdrawCols.some((c) => c.name === col)) db.exec(`ALTER TABLE WithdrawRequest ADD COLUMN ${col} TEXT`);
+  }
+
   // Slot/position registration columns (older DB files won't have them yet).
   const partCols = db.prepare("PRAGMA table_info(TournamentParticipant)").all() as { name: string }[];
   for (const col of ["slotNumber INTEGER", "position INTEGER", "ign TEXT", "gameUid TEXT"]) {

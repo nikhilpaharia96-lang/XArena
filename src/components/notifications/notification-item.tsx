@@ -7,6 +7,7 @@ import type { NotificationRow } from "@/hooks/use-notifications";
 const iconMap: Record<string, typeof Bell> = {
   TOURNAMENT_REMINDER: Bell,
   ROOM_RELEASED: KeyRound,
+  BANK_OTP: KeyRound,
   DEPOSIT_PENDING: Wallet,
   DEPOSIT_SUCCESS: Wallet,
   DEPOSIT_REJECTED: Wallet,
