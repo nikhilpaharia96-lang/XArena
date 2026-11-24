@@ -2,6 +2,8 @@ import { db } from "@/server/db/client";
 import { ApiError } from "@/server/lib/api-response";
 import { createId } from "@/server/lib/ids";
 import { writeAuditLog } from "@/server/lib/audit";
+import { matchDepositByUtr } from "@/server/lib/deposit-matching";
+import { normalizeUtr } from "@/server/lib/deposit-requests-shared";
 
 export type DepositRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -22,12 +24,7 @@ export interface DepositRequestRow {
   updatedAt: string;
 }
 
-/** UTRs are 12 digits for UPI; some banks/apps issue 12-22 char alphanumeric references. */
-export const UTR_REGEX = /^[A-Z0-9]{12,22}$/;
-
-export function normalizeUtr(raw: string): string {
-  return raw.replace(/\s+/g, "").toUpperCase();
-}
+export { UTR_REGEX, normalizeUtr } from "./deposit-requests-shared";
 
 /** The Transaction.referenceId used for a credited manual deposit. UNIQUE in the DB, so a UTR can never be credited twice. */
 export function depositReference(utr: string): string {
@@ -129,7 +126,49 @@ export function createDepositRequest(input: {
  * Postgres equivalent: SELECT ... FOR UPDATE on the DepositRequest and Wallet rows.
  */
 export function approveDepositRequest(params: { id: string; adminId: string; ipAddress?: string | null }) {
-  const run = db.transaction(() => {
+  return db.transaction(() => approveInTx(params)).immediate();
+}
+
+/**
+ * Admin types a UTR + amount; if they match a PENDING request, it is approved and the
+ * wallet credited — in one transaction (lookup and approval can't be split by a race).
+ * Mismatches throw and change nothing.
+ */
+export function approveDepositByUtr(params: {
+  utr: string;
+  amountPaise: number;
+  adminId: string;
+  ipAddress?: string | null;
+}) {
+  return db
+    .transaction(() => {
+      const m = matchDepositByUtr(db, params.utr, params.amountPaise);
+      switch (m.kind) {
+        case "INVALID_UTR":
+          throw new ApiError(400, "Enter a valid UTR (12–22 letters/digits).", "INVALID_UTR");
+        case "NOT_FOUND":
+          throw new ApiError(404, "No deposit request found with this UTR.", "UTR_NOT_FOUND");
+        case "ALREADY_REVIEWED":
+          throw new ApiError(409, `This request was already ${m.status.toLowerCase()}.`, "ALREADY_REVIEWED");
+        case "AMOUNT_MISMATCH":
+          throw new ApiError(
+            409,
+            `Amount does not match. The user requested ${formatRupees(m.requestedPaise)}.`,
+            "AMOUNT_MISMATCH"
+          );
+        case "MATCH":
+          return approveInTx({
+            id: m.id,
+            adminId: params.adminId,
+            ipAddress: params.ipAddress,
+            autoMatchedUtr: normalizeUtr(params.utr),
+          });
+      }
+    })
+    .immediate();
+}
+
+function approveInTx(params: { id: string; adminId: string; ipAddress?: string | null; autoMatchedUtr?: string }) {
     // 1. request exists
     const req = db.prepare("SELECT * FROM DepositRequest WHERE id = ?").get(params.id) as DepositRequestRow | undefined;
     if (!req) throw new ApiError(404, "Deposit request not found.", "NOT_FOUND");
@@ -204,14 +243,16 @@ export function approveDepositRequest(params: { id: string; adminId: string; ipA
       action: "DEPOSIT_REQUEST_APPROVED",
       targetType: "DepositRequest",
       targetId: req.id,
-      metadata: { amountPaise: req.amount, utr: req.utr, userId: req.userId },
+      metadata: {
+        amountPaise: req.amount,
+        utr: req.utr,
+        userId: req.userId,
+        ...(params.autoMatchedUtr ? { autoMatchedByUtr: true } : {}),
+      },
       ipAddress: params.ipAddress,
     });
 
     return { id: req.id, amount: req.amount, balanceAfter: total };
-  });
-
-  return run.immediate();
 }
 
 export function rejectDepositRequest(params: { id: string; adminId: string; reason?: string; ipAddress?: string | null }) {

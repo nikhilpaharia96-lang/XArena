@@ -289,6 +289,22 @@ export function useDepositRequestAction(id: string, action: "approve" | "reject"
   });
 }
 
+export function useApproveDepositByUtr() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { utr: string; amount: number }) =>
+      api.post<{ approved: boolean; id: string; amount: number; balanceAfter: number }>(
+        "/api/admin/deposit-requests/approve-by-utr",
+        body
+      ),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "deposit-requests"] });
+      qc.invalidateQueries({ queryKey: ["admin", "analytics"] });
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+    },
+  });
+}
+
 export function useAdminPaymentSettings() {
   return useQuery<AdminPaymentSettings>({
     queryKey: ["admin", "payment-settings"],

@@ -1,11 +1,12 @@
 "use client";
 import { useRef, useState } from "react";
 import { CheckCircle2, Eye, Inbox, X, Check } from "lucide-react";
-import { useAdminDepositRequests, useDepositRequestAction, type AdminDepositRequestRow } from "@/hooks/use-admin";
+import { useAdminDepositRequests, useDepositRequestAction, useApproveDepositByUtr, type AdminDepositRequestRow } from "@/hooks/use-admin";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -133,6 +134,53 @@ function ReviewDialogs({ row, onClose }: { row: AdminDepositRequestRow; onClose:
   );
 }
 
+function AutoApprovePanel() {
+  const [utr, setUtr] = useState("");
+  const [amount, setAmount] = useState("");
+  const approve = useApproveDepositByUtr();
+  const busy = useRef(false);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (busy.current) return;
+    const value = Number(amount);
+    if (!utr.trim() || !Number.isFinite(value) || value <= 0) {
+      toast({ title: "Enter UTR and amount", tone: "error" });
+      return;
+    }
+    busy.current = true;
+    approve.mutate(
+      { utr: utr.trim(), amount: value },
+      {
+        onSuccess: (r) => {
+          toast({ title: "Deposit approved", description: `${formatPaiseExact(r.amount)} credited to wallet.`, tone: "success" });
+          setUtr("");
+          setAmount("");
+        },
+        onError: (e) =>
+          toast({ title: "Not approved", description: e instanceof ApiClientError ? e.message : "Try again.", tone: "error" }),
+        onSettled: () => { busy.current = false; },
+      }
+    );
+  };
+
+  return (
+    <Card className="p-4">
+      <form onSubmit={submit} className="space-y-3">
+        <div>
+          <p className="text-sm font-bold text-white">Auto Approve</p>
+          <p className="text-xs text-white/50">Type the UTR and amount from your bank statement. If a pending request matches both, it is approved instantly.</p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-[1fr_180px_auto] md:items-end">
+          <Input aria-label="UTR number" value={utr} onChange={(e) => setUtr(e.target.value)} placeholder="UTR number, e.g. 412345678901" autoComplete="off" />
+          <Input aria-label="Amount in rupees" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))} inputMode="decimal" placeholder="Amount (₹)" autoComplete="off" />
+          <Button type="submit" loading={approve.isPending}>Verify &amp; Approve</Button>
+        </div>
+      </form>
+    </Card>
+  );
+}
+
 export default function AdminDepositRequestsPage() {
   const [tab, setTab] = useState<Tab>("PENDING");
   const [selected, setSelected] = useState<AdminDepositRequestRow | null>(null);
@@ -141,6 +189,8 @@ export default function AdminDepositRequestsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-black text-white">Deposit Requests</h1>
+
+      <AutoApprovePanel />
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar">
         {TABS.map((t) => (
