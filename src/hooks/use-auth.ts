@@ -90,3 +90,16 @@ export function useLogout() {
     },
   });
 }
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (input: { identifier: string }) => api.post<{ mode: "email" | "support" }>("/api/auth/forgot-password", input),
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (input: { token: string; password: string; confirmPassword: string }) =>
+      api.post<{ reset: true }>("/api/auth/reset-password", input),
+  });
+}

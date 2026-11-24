@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { DIAL_CODES, validatePhone } from "@/lib/phone";
 
+/** Single source of truth for password strength (signup + reset). */
+export const passwordRule = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[A-Z]/, "Include at least one uppercase letter")
+  .regex(/[0-9]/, "Include at least one number");
+
 export const signupSchema = z
   .object({
     email: z.string().trim().toLowerCase().email("Enter a valid email address"),
@@ -12,11 +19,7 @@ export const signupSchema = z
       .min(3, "Username must be at least 3 characters")
       .max(20, "Username must be at most 20 characters")
       .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores allowed"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Include at least one uppercase letter")
-      .regex(/[0-9]/, "Include at least one number"),
+    password: passwordRule,
     confirmPassword: z.string().min(1, "Confirm your password"),
     /** Signup code = another player's referral code. Optional; a wrong code is rejected. */
     signupCode: z.string().trim().toUpperCase().optional().or(z.literal("")),
@@ -68,3 +71,17 @@ export const withdrawSchema = z.object({
   upiId: z.string().trim().regex(/^[\w.-]+@[\w]+$/, "Enter a valid UPI ID"),
 });
 export type WithdrawInput = z.infer<typeof withdrawSchema>;
+
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().trim().min(1, "Enter your email or phone number").max(254),
+});
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(20, "This reset link is invalid.").max(200),
+    password: passwordRule,
+    confirmPassword: z.string().min(1, "Confirm your password"),
+  })
+  .refine((v) => v.password === v.confirmPassword, { path: ["confirmPassword"], message: "Passwords do not match" });
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

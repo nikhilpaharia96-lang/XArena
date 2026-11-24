@@ -65,7 +65,12 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className="text-xs font-semibold text-white/60 mb-1.5 block">Password</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-semibold text-white/60">Password</label>
+            <Link href="/forgot-password" className="text-xs font-bold text-cobalt hover:underline py-1">
+              Forgot password?
+            </Link>
+          </div>
           <PasswordInput autoComplete="current-password" placeholder="Enter your password" {...register("password")} error={errors.password?.message} />
         </div>
 

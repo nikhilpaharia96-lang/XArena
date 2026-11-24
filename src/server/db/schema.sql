@@ -312,6 +312,18 @@ CREATE TABLE IF NOT EXISTS SupportTicket (
 CREATE INDEX IF NOT EXISTS idx_ticket_userId ON SupportTicket(userId);
 CREATE INDEX IF NOT EXISTS idx_ticket_status ON SupportTicket(status);
 
+-- Password reset links. Only a SHA-256 hash of the token is stored; the raw
+-- token exists only in the emailed link. Single-use, short-lived.
+CREATE TABLE IF NOT EXISTS PasswordResetToken (
+  id        TEXT PRIMARY KEY,
+  userId    TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  tokenHash TEXT NOT NULL UNIQUE,
+  expiresAt TEXT NOT NULL,
+  usedAt    TEXT,
+  createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_prt_userId ON PasswordResetToken(userId);
+
 CREATE TABLE IF NOT EXISTS Setting (
   key       TEXT PRIMARY KEY,
   value     TEXT NOT NULL,
