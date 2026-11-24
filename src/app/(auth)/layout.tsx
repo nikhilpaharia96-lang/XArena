@@ -28,7 +28,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </ul>
 
         <p className="mt-4 text-center text-[11px] leading-relaxed text-white/45">
-          18+ only. Play responsibly. By continuing you agree to play fair and follow XArena&apos;s rules.
+          18+ only. Play responsibly. By continuing you agree to XArena&apos;s{" "}
+          <Link href="/terms" className="underline underline-offset-2 hover:text-white">Terms</Link> and{" "}
+          <Link href="/privacy" className="underline underline-offset-2 hover:text-white">Privacy Policy</Link>.
         </p>
       </div>
     </div>

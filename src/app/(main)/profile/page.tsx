@@ -10,7 +10,7 @@ import { useTheme } from "@/lib/theme";
 import { Avatar, Panel, SectionTitle, SettingsRow } from "@/components/profile/parts";
 import {
   Settings, User, ShieldCheck, Wallet, BadgeCheck, Bell, Globe, Moon, Sun, Lock,
-  Headphones, FileText, Info, LogOut, ChevronRight, Copy, Crown, SlidersHorizontal, CircleHelp,
+  Headphones, FileText, Info, LogOut, ChevronRight, Copy, Crown, SlidersHorizontal, CircleHelp, Undo2,
 } from "lucide-react";
 
 const XP_PER_LEVEL = 1000;
@@ -131,13 +131,14 @@ export default function ProfilePage() {
             </div>
           }
         />
-        <SettingsRow icon={Lock} chip="bg-violet/20 text-cobalt" title="Privacy" subtitle="Privacy settings and data control" soon />
+        <SettingsRow icon={Lock} chip="bg-violet/20 text-cobalt" title="Privacy Policy" subtitle="How we use and protect your data" href="/privacy" />
       </Panel>
 
       <SectionTitle icon={CircleHelp}>Support &amp; Info</SectionTitle>
       <Panel>
         <SettingsRow icon={Headphones} chip="bg-gold/15 text-gold" title="Help & Support" subtitle="Get help or contact support" href="/support" />
-        <SettingsRow icon={FileText} chip="bg-cobalt/15 text-cobalt" title="Terms & Conditions" subtitle="Read our terms and policies" soon />
+        <SettingsRow icon={FileText} chip="bg-cobalt/15 text-cobalt" title="Terms & Conditions" subtitle="Rules for using XArena" href="/terms" />
+        <SettingsRow icon={Undo2} chip="bg-signal/15 text-signal" title="Refund Policy" subtitle="When and how refunds work" href="/refund" />
         <SettingsRow icon={Info} chip="bg-cobalt/15 text-cobalt" title="About XArena" subtitle="App version, legal info" soon />
       </Panel>
 

@@ -144,7 +144,10 @@ function SignupForm() {
 
         <p className="text-xs leading-relaxed text-white/60">
           By clicking the &lsquo;Sign up&rsquo; button, you confirm that you have attained the age of majority in your country of
-          residence and accept the Terms &amp; Conditions of XArena.
+          residence and accept XArena&apos;s{" "}
+          <Link href="/terms" className="text-cobalt font-semibold underline underline-offset-2">Terms &amp; Conditions</Link>,{" "}
+          <Link href="/privacy" className="text-cobalt font-semibold underline underline-offset-2">Privacy Policy</Link> and{" "}
+          <Link href="/refund" className="text-cobalt font-semibold underline underline-offset-2">Refund Policy</Link>.
         </p>
 
         <Button type="submit" fullWidth size="lg" loading={signup.isPending}>
