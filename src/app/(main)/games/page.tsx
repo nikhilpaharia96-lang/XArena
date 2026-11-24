@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useGames } from "@/hooks/use-tournaments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Card } from "@/components/ui/card";
+import { posterForGame } from "@/components/home/game-card";
 import { Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FREE_FIRE_GAME_SLUG, FREE_FIRE_ROUTE } from "@/lib/free-fire-categories";
@@ -24,16 +25,30 @@ export default function GamesPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {games.map((g, i) => (
             <motion.div key={g.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-              <Link href={g.slug === FREE_FIRE_GAME_SLUG ? FREE_FIRE_ROUTE : `/tournaments?game=${g.slug}`}>
-                <Card className="p-5 flex flex-col items-center gap-3 text-center hover:glow-border transition-shadow">
-                  <div className="h-14 w-14 rounded-2xl gradient-brand flex items-center justify-center">
-                    <Gamepad2 className="h-7 w-7 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-sm">{g.name}</p>
-                    <p className="text-[11px] text-white/40 mt-0.5">{g.supportedModes.length} modes</p>
-                  </div>
-                </Card>
+              <Link
+                href={g.slug === FREE_FIRE_GAME_SLUG ? FREE_FIRE_ROUTE : `/tournaments?game=${g.slug}`}
+                aria-label={`${g.name} tournaments`}
+                className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet/60 active:scale-[0.98] transition-transform"
+              >
+                <div className="force-dark relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10">
+                  {posterForGame(g.slug, g.bannerUrl) ? (
+                    <Image
+                      src={posterForGame(g.slug, g.bannerUrl) as string}
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 gradient-brand flex items-center justify-center">
+                      <Gamepad2 className="h-12 w-12 text-white" />
+                    </div>
+                  )}
+                </div>
+                <div className="px-1 pt-2">
+                  <p className="font-bold text-white text-sm leading-tight truncate">{g.name}</p>
+                  <p className="text-[11px] text-white/50 mt-0.5">{g.supportedModes.length} modes</p>
+                </div>
               </Link>
             </motion.div>
           ))}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Dices } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -19,10 +20,15 @@ import { HistoryList } from "@/components/originals/history-list";
 
 const TITLES: Record<GameKey, string> = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins" };
 
-export default function OriginalsPage() {
+function OriginalsContent() {
   const { data, isLoading } = useOriginals();
   const { data: wallet } = useWallet();
-  const [selected, setSelected] = useState<GameKey | null>(null);
+  const searchParams = useSearchParams();
+  const fromUrl = searchParams.get("game");
+  const [picked, setPicked] = useState<GameKey | null>(null);
+  // A tile on the Games page links here with ?game=KEY; a tab tap overrides it.
+  const selected: GameKey | null = picked ?? (fromUrl && fromUrl in TITLES ? (fromUrl as GameKey) : null);
+  const setSelected = setPicked;
 
   if (isLoading) return <Skeleton className="h-72 rounded-2xl" />;
   const games = data?.games ?? [];
@@ -64,5 +70,13 @@ export default function OriginalsPage() {
       <HistoryList />
       <FairnessPanel />
     </div>
+  );
+}
+
+export default function OriginalsPage() {
+  return (
+    <Suspense fallback={<Skeleton className="h-72 rounded-2xl" />}>
+      <OriginalsContent />
+    </Suspense>
   );
 }
