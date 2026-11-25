@@ -57,6 +57,15 @@ export default function GamesPage() {
         <EmptyState icon={Gamepad2} title="No games available yet" />
       )}
 
+      <Link
+        href="/demo/color-prediction"
+        className="force-dark mt-10 block rounded-2xl border border-white/10 bg-gradient-to-r from-purple-700 to-green-700 p-4 active:scale-[0.98] transition-transform"
+      >
+        <p className="text-xs font-bold text-white/70">DEMO · VIRTUAL POINTS</p>
+        <p className="text-lg font-black text-white">Color Prediction</p>
+        <p className="text-xs text-white/70">Free to play. No real money.</p>
+      </Link>
+
       <OriginalsEntry />
 
       <ProviderGamesSection />
