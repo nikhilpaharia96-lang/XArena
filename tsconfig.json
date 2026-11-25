@@ -17,5 +17,13 @@
     "paths": { "@/*": ["./src/*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "featured-tournament.tsx", "tournament-card.tsx"]
+  "exclude": [
+    "node_modules",
+    "featured-tournament.tsx",
+    "tournament-card.tsx",
+    ".agents",
+    ".claude",
+    "agent",
+    "data/skills"
+  ]
 }
