@@ -5,7 +5,7 @@ import { formatDateTime, formatPaiseExact } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { useOriginalsHistory } from "@/hooks/use-originals";
 
-const NAMES = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins" } as const;
+const NAMES = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins", COLOR: "Color Prediction", AVIATOR: "Aviator", ROULETTE: "Roulette", GEMS: "Fortune Gems" } as const;
 
 export function HistoryList() {
   const { data } = useOriginalsHistory();

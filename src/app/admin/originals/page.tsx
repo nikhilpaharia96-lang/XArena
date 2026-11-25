@@ -18,9 +18,9 @@ import {
   type GameStat,
 } from "@/hooks/use-originals-admin";
 
-const NAMES = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins" } as const;
+const NAMES = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins", COLOR: "Color Prediction", AVIATOR: "Aviator", ROULETTE: "Roulette", GEMS: "Fortune Gems" } as const;
 
-const DEMO_CAPABLE: AdminGameConfig["gameKey"][] = ["SLOT", "COINS"];
+const DEMO_CAPABLE: AdminGameConfig["gameKey"][] = ["SLOT", "COINS", "COLOR", "AVIATOR", "ROULETTE", "GEMS"];
 const MODE_OPTIONS = [
   { value: "DEMO", label: "Demo only", hint: "Virtual credits. No wallet money moves." },
   { value: "REAL", label: "Real money", hint: "Players bet their wallet balance." },

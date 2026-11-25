@@ -5,6 +5,7 @@ import { checkRateLimit } from "@/server/lib/rate-limit";
 import { gameService } from "@/server/games/service.instance";
 import { failGame } from "@/server/games/http";
 import { GAME_KEYS } from "@/server/games/math";
+import type { RouletteBet } from "@/server/games/table-math";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,11 @@ const slotDemo = z.object({ bet }).strict();
 const minesStart = z.object({ bet, mines: z.number().int(), requestId }).strict();
 const minesReveal = z.object({ tile: z.number().int().min(0).max(24) }).strict();
 const crashStart = z.object({ bet, autoCashoutBps: z.number().int().optional(), requestId }).strict();
+const colorBody = z.object({ bet, pick: z.string().max(8), requestId }).strict();
+const colorDemo = z.object({ bet, pick: z.string().max(8) }).strict();
+const rouletteBet = z.object({ type: z.string().max(12), number: z.number().int().optional(), amount: z.number().int().positive() }).strict();
+const rouletteBody = z.object({ bets: z.array(rouletteBet).min(1).max(20), requestId }).strict();
+const rouletteDemo = z.object({ bets: z.array(rouletteBet).min(1).max(20) }).strict();
 const rotate = z.object({ clientSeed: z.string().max(64).optional() }).strict();
 
 const json = async (req: Request) => (await req.json().catch(() => ({}))) as unknown;
@@ -40,6 +46,8 @@ function respond<T>(data: T) {
  *   POST /api/originals/mines/start | mines/reveal | mines/cashout
  *   GET  /api/originals/mines/active    my open mines round (resume after refresh)
  *   POST /api/originals/crash/start | crash/cashout    GET crash/state
+ *   POST /api/originals/aviator/start | aviator/cashout | aviator/demo    GET aviator/state
+ *   POST /api/originals/color | roulette | gems, each with a /demo twin (virtual credits, no wallet)
  */
 async function route(req: Request, ctx: { params: Promise<{ path?: string[] }> }) {
   try {
@@ -69,6 +77,8 @@ async function route(req: Request, ctx: { params: Promise<{ path?: string[] }> }
           return respond({ current: gameService.getFairInfo(uid), revealed: gameService.revealedSeeds(uid) });
         case "crash/state":
           return respond({ round: gameService.crashState(uid) });
+        case "aviator/state":
+          return respond({ round: gameService.crashState(uid, "AVIATOR") });
         case "mines/active":
           return respond({ round: gameService.activeMines(uid) });
       }
@@ -96,6 +106,30 @@ async function route(req: Request, ctx: { params: Promise<{ path?: string[] }> }
           return respond(gameService.startCrash({ userId: uid, ...crashStart.parse(await json(req)) }));
         case "crash/cashout":
           return respond(gameService.cashoutCrash(uid));
+        case "aviator/start":
+          return respond(gameService.startCrash({ userId: uid, ...crashStart.parse(await json(req)) }, "AVIATOR"));
+        case "aviator/cashout":
+          return respond(gameService.cashoutCrash(uid, "AVIATOR"));
+        case "aviator/demo":
+          return respond(gameService.demoAviator(slotDemo.parse(await json(req)).bet));
+        case "color": {
+          const b = colorBody.parse(await json(req));
+          return respond(gameService.playColor({ userId: uid, ...b }));
+        }
+        case "color/demo": {
+          const b = colorDemo.parse(await json(req));
+          return respond(gameService.demoColor(b.bet, b.pick));
+        }
+        case "roulette": {
+          const b = rouletteBody.parse(await json(req));
+          return respond(gameService.playRoulette({ userId: uid, bets: b.bets as RouletteBet[], requestId: b.requestId }));
+        }
+        case "roulette/demo":
+          return respond(gameService.demoRoulette(rouletteDemo.parse(await json(req)).bets as RouletteBet[]));
+        case "gems":
+          return respond(gameService.playGems({ userId: uid, ...slot.parse(await json(req)) }));
+        case "gems/demo":
+          return respond(gameService.demoGems(slotDemo.parse(await json(req)).bet));
         case "fair/rotate":
           return respond(gameService.rotateSeed(uid, rotate.parse(await json(req)).clientSeed));
       }
