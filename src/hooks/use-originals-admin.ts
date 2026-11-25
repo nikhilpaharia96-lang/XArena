@@ -2,11 +2,12 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
-import type { GameKey } from "@/hooks/use-originals";
+import type { GameKey, PlayMode } from "@/hooks/use-originals";
 
 export interface AdminGameConfig {
   gameKey: GameKey;
   isEnabled: boolean;
+  playMode: PlayMode;
   houseEdgeBps: number;
   minBet: number;
   maxBet: number;
@@ -51,7 +52,7 @@ export function useOriginalsOverview() {
 export function useUpdateOriginalConfig() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ game, patch }: { game: GameKey; patch: Partial<Pick<AdminGameConfig, "isEnabled" | "houseEdgeBps" | "minBet" | "maxBet" | "maxPayout">> }) =>
+    mutationFn: ({ game, patch }: { game: GameKey; patch: Partial<Pick<AdminGameConfig, "isEnabled" | "playMode" | "houseEdgeBps" | "minBet" | "maxBet" | "maxPayout">> }) =>
       api.patch<AdminGameConfig>(`/api/admin/originals/${game}`, patch),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-originals"] }),
   });

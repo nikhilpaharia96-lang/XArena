@@ -60,7 +60,7 @@ async function route(req: Request, ctx: { params: Promise<{ path?: string[] }> }
           const games = gameService
             .listConfigs()
             .filter((c) => c.isEnabled)
-            .map(({ gameKey, houseEdgeBps, minBet, maxBet, maxPayout }) => ({ gameKey, houseEdgeBps, minBet, maxBet, maxPayout }));
+            .map(({ gameKey, playMode, houseEdgeBps, minBet, maxBet, maxPayout }) => ({ gameKey, playMode, houseEdgeBps, minBet, maxBet, maxPayout }));
           return respond({ games, fair: gameService.getFairInfo(uid), keys: GAME_KEYS });
         }
         case "history":

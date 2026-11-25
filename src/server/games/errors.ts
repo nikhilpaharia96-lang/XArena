@@ -1,5 +1,6 @@
 export type GameErrorCode =
   | "GAME_DISABLED"
+  | "MODE_UNAVAILABLE"
   | "INVALID_INPUT"
   | "BET_TOO_LOW"
   | "BET_TOO_HIGH"
@@ -13,6 +14,7 @@ export type GameErrorCode =
 
 const STATUS: Record<GameErrorCode, number> = {
   GAME_DISABLED: 403,
+  MODE_UNAVAILABLE: 403,
   INVALID_INPUT: 400,
   BET_TOO_LOW: 400,
   BET_TOO_HIGH: 400,

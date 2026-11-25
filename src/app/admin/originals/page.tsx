@@ -20,6 +20,13 @@ import {
 
 const NAMES = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins" } as const;
 
+const DEMO_CAPABLE: AdminGameConfig["gameKey"][] = ["SLOT", "COINS"];
+const MODE_OPTIONS = [
+  { value: "DEMO", label: "Demo only", hint: "Virtual credits. No wallet money moves." },
+  { value: "REAL", label: "Real money", hint: "Players bet their wallet balance." },
+  { value: "BOTH", label: "Both", hint: "Players can switch between demo and wallet." },
+] as const;
+
 const rupees = (p: number) => String(p / 100);
 const toPaise = (s: string) => Math.round(Number(s) * 100);
 
@@ -49,6 +56,36 @@ function ConfigCard({ cfg, stat24, statAll }: { cfg: AdminGameConfig; stat24?: G
             {cfg.isEnabled ? "Turn off" : "Turn on"}
           </Button>
         </div>
+      </div>
+      <div>
+        <p className="text-[11px] text-white/50 mb-1.5">How this game runs</p>
+        <div className="grid grid-cols-3 gap-1.5" role="radiogroup" aria-label={`${NAMES[cfg.gameKey]} play mode`}>
+          {MODE_OPTIONS.map((o) => {
+            const supported = o.value === "REAL" || DEMO_CAPABLE.includes(cfg.gameKey);
+            const active = cfg.playMode === o.value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                disabled={!supported || update.isPending}
+                onClick={() => {
+                  if (active) return;
+                  if (o.value !== "DEMO" && !window.confirm(`Allow real wallet money on ${NAMES[cfg.gameKey]}?`)) return;
+                  save({ playMode: o.value }, `${NAMES[cfg.gameKey]}: ${o.label}`);
+                }}
+                className={`h-10 rounded-xl text-xs font-bold border transition-colors disabled:opacity-40 ${active ? "gradient-brand text-white border-transparent" : "bg-surface-2 text-white/70 border-white/10"}`}
+              >
+                {o.label}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-white/40 mt-1.5">
+          {MODE_OPTIONS.find((o) => o.value === cfg.playMode)?.hint}
+          {!DEMO_CAPABLE.includes(cfg.gameKey) && " This game has no demo version yet, so it runs with real money only."}
+        </p>
       </div>
       <div className="grid grid-cols-2 gap-3 text-center">
         <div className="rounded-xl bg-surface-2 p-3">

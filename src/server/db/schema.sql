@@ -458,16 +458,18 @@ CREATE TABLE IF NOT EXISTS GameConfig (
   minBet       INTEGER NOT NULL,
   maxBet       INTEGER NOT NULL,
   maxPayout    INTEGER NOT NULL,
+  -- DEMO = virtual credits only, REAL = wallet money only, BOTH = player can switch (DEMO/BOTH only for games with a demo engine).
+  playMode     TEXT NOT NULL DEFAULT 'REAL',
   updatedAt    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 -- Games ship DISABLED; an admin must switch each one on.
-INSERT OR IGNORE INTO GameConfig (gameKey, isEnabled, houseEdgeBps, minBet, maxBet, maxPayout) VALUES
-  ('DICE',     0, 200, 1000, 100000, 2000000),
-  ('COINFLIP', 0, 200, 1000, 100000, 2000000),
-  ('MINES',    0, 200, 1000, 100000, 2000000),
-  ('CRASH',    0, 200, 1000, 100000, 2000000),
-  ('SLOT',     0, 530, 1000, 100000, 2000000),
-  ('COINS',    0, 605, 1000, 100000, 2000000);
+INSERT OR IGNORE INTO GameConfig (gameKey, isEnabled, houseEdgeBps, minBet, maxBet, maxPayout, playMode) VALUES
+  ('DICE',     0, 200, 1000, 100000, 2000000, 'REAL'),
+  ('COINFLIP', 0, 200, 1000, 100000, 2000000, 'REAL'),
+  ('MINES',    0, 200, 1000, 100000, 2000000, 'REAL'),
+  ('CRASH',    0, 200, 1000, 100000, 2000000, 'REAL'),
+  ('SLOT',     0, 530, 1000, 100000, 2000000, 'BOTH'),
+  ('COINS',    0, 605, 1000, 100000, 2000000, 'BOTH');
 
 CREATE TABLE IF NOT EXISTS FairSeed (
   userId         TEXT PRIMARY KEY REFERENCES User(id) ON DELETE CASCADE,

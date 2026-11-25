@@ -423,3 +423,32 @@ describe("concurrency", () => {
     b.close();
   });
 });
+
+describe("play mode (demo / real)", () => {
+  it("ships real-only except slot + coins, which offer both", () => {
+    const fresh = makeDb();
+    const s = createGameService(fresh);
+    const modes = Object.fromEntries(s.listConfigs().map((c) => [c.gameKey, c.playMode]));
+    expect(modes).toEqual({ DICE: "REAL", COINFLIP: "REAL", MINES: "REAL", CRASH: "REAL", SLOT: "BOTH", COINS: "BOTH" });
+  });
+
+  it("DEMO blocks wallet play but still allows demo spins", async () => {
+    svc.updateConfig("SLOT", { playMode: "DEMO" });
+    const before = total(u.userId);
+    await expectCode(() => svc.playSlot({ userId: u.userId, bet: 1000 }), "MODE_UNAVAILABLE");
+    expect(total(u.userId)).toBe(before);
+    expect(svc.demoSlot(1000).payout).toBeGreaterThanOrEqual(0);
+  });
+
+  it("REAL blocks demo spins but allows wallet play", async () => {
+    svc.updateConfig("COINS", { playMode: "REAL" });
+    await expectCode(() => svc.demoCoins(1000), "MODE_UNAVAILABLE");
+    expect(() => svc.playCoinsGame({ userId: u.userId, bet: 1000 })).not.toThrow();
+  });
+
+  it("games without a demo engine cannot be set to demo or both", () => {
+    expect(() => svc.updateConfig("DICE", { playMode: "DEMO" })).toThrow(GameError);
+    expect(() => svc.updateConfig("MINES", { playMode: "BOTH" })).toThrow(GameError);
+    expect(svc.updateConfig("DICE", { playMode: "REAL" }).playMode).toBe("REAL");
+  });
+});

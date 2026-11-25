@@ -53,7 +53,8 @@ export function SlotGame({ cfg, balance }: { cfg: OriginalGame; balance: number 
     return l.length ? l : [cfg.minBet];
   }, [cfg.minBet, cfg.maxBet]);
 
-  const [mode, setMode] = useState<"demo" | "real">("demo");
+  // The admin decides per game: demo only, real wallet only, or both (player switches; starts in demo).
+  const [mode, setMode] = useState<"demo" | "real">(cfg.playMode === "REAL" ? "real" : "demo");
   const [demoBal, setDemoBal] = useState(DEMO_START);
   const [realOverride, setRealOverride] = useState<number | null>(null);
   const [seenBalance, setSeenBalance] = useState(balance);
@@ -315,8 +316,12 @@ export function SlotGame({ cfg, balance }: { cfg: OriginalGame; balance: number 
         <div className="ga-titlebar">
           <span>GARUDA ASCENT</span>
           <span className="flex gap-1.5">
-            <button type="button" className={cn("ga-chip", mode === "demo" && "on")} onClick={() => switchMode("demo")} disabled={busy}>DEMO</button>
-            <button type="button" className={cn("ga-chip", mode === "real" && "on")} onClick={() => switchMode("real")} disabled={busy}>WALLET</button>
+            {cfg.playMode !== "REAL" && (
+              <button type="button" className={cn("ga-chip", mode === "demo" && "on")} onClick={() => switchMode("demo")} disabled={busy || cfg.playMode === "DEMO"}>DEMO</button>
+            )}
+            {cfg.playMode !== "DEMO" && (
+              <button type="button" className={cn("ga-chip", mode === "real" && "on")} onClick={() => switchMode("real")} disabled={busy || cfg.playMode === "REAL"}>WALLET</button>
+            )}
           </span>
         </div>
 

@@ -35,6 +35,14 @@ function openConnection(): Database.Database {
 
   const schemaPath = path.join(process.cwd(), "src", "server", "db", "schema.sql");
   const schema = fs.readFileSync(schemaPath, "utf-8");
+  // Per-game demo/real switch. Must run BEFORE schema.sql, whose GameConfig seed rows name the column.
+  // Older DBs keep today's behaviour: slot + coins offer both, the rest are real-only.
+  const gameCfgCols = db.prepare("PRAGMA table_info(GameConfig)").all() as { name: string }[];
+  if (gameCfgCols.length > 0 && !gameCfgCols.some((c) => c.name === "playMode")) {
+    db.exec("ALTER TABLE GameConfig ADD COLUMN playMode TEXT NOT NULL DEFAULT 'REAL'");
+    db.exec("UPDATE GameConfig SET playMode = 'BOTH' WHERE gameKey IN ('SLOT','COINS')");
+  }
+
   db.exec(schema);
 
   // Lightweight in-place migrations for DB files created before a column existed

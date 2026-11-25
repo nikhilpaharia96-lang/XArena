@@ -32,6 +32,7 @@ export function OriginalsEntry() {
   if (!data || data.games.length === 0) return null;
 
   const enabled = new Set(data.games.map((g) => g.gameKey));
+  const demoOnly = new Set(data.games.filter((g) => g.playMode === "DEMO").map((g) => g.gameKey));
   const keys = ORDER.filter((k) => enabled.has(k));
 
   return (
@@ -70,6 +71,9 @@ export function OriginalsEntry() {
                   </p>
                   <p className="absolute bottom-[8%] text-[11px] font-bold tracking-wide text-white/70">ORIGINAL GAME</p>
                 </div>
+              )}
+              {demoOnly.has(k) && (
+                <span className="absolute top-2 left-2 rounded-full bg-[#0B1224] border border-[#26314F] px-2 py-0.5 text-[10px] font-bold tracking-wide text-white/90">DEMO</span>
               )}
             </Link>
           );
