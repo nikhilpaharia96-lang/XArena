@@ -75,6 +75,15 @@ export default function GamesPage() {
         <p className="text-xs text-white/70">Cash out before the plane flies away. No real money.</p>
       </Link>
 
+      <Link
+        href="/demo/roulette"
+        className="force-dark mt-3 block rounded-2xl border border-white/10 bg-gradient-to-r from-emerald-800 to-zinc-900 p-4 active:scale-[0.98] transition-transform"
+      >
+        <p className="text-xs font-bold text-white/70">DEMO · VIRTUAL POINTS</p>
+        <p className="text-lg font-black text-white">Roulette</p>
+        <p className="text-xs text-white/70">European wheel, 0-36. No real money.</p>
+      </Link>
+
       <OriginalsEntry />
 
       <ProviderGamesSection />
