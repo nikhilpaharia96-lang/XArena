@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiClientError } from "@/lib/api-client";
 import { toast } from "@/lib/toast-store";
 
-export type GameKey = "DICE" | "COINFLIP" | "MINES" | "CRASH" | "SLOT" | "COINS";
+export type GameKey = "DICE" | "COINFLIP" | "MINES" | "CRASH" | "SLOT" | "COINS" | "COLOR" | "AVIATOR" | "ROULETTE" | "GEMS";
 
 export type PlayMode = "DEMO" | "REAL" | "BOTH";
 
@@ -82,6 +82,12 @@ export interface CoinsResult {
   capped: boolean;
 }
 
+export interface ColorOutcome { number: number; colors: ("GREEN" | "RED" | "VIOLET")[]; win: boolean; pick: string; multiplierBps: number }
+export interface RouletteOutcome { number: number; winningBets: boolean[] }
+export interface GemsOutcome { grid: number[][]; wins: { row: number; gem: number; count: 2 | 3; multBps: number }[] }
+export interface DemoOutcome<T> { payout: number; result: T }
+export interface RouletteChip { type: string; number?: number; amount: number }
+
 const BASE = "/api/originals";
 
 export function useOriginals() {
@@ -140,6 +146,16 @@ export const originals = {
   crashStart: (b: { bet: number; autoCashoutBps?: number; requestId: string }) => api.post<Round>(`${BASE}/crash/start`, b),
   crashCashout: () => api.post<Round>(`${BASE}/crash/cashout`, {}),
   crashState: () => api.get<{ round: Round | null }>(`${BASE}/crash/state`),
+  colorPlay: (b: { bet: number; pick: string; requestId: string }) => api.post<Round>(`${BASE}/color`, b),
+  colorDemo: (bet: number, pick: string) => api.post<DemoOutcome<ColorOutcome>>(`${BASE}/color/demo`, { bet, pick }),
+  roulettePlay: (b: { bets: RouletteChip[]; requestId: string }) => api.post<Round>(`${BASE}/roulette`, b),
+  rouletteDemo: (bets: RouletteChip[]) => api.post<DemoOutcome<RouletteOutcome>>(`${BASE}/roulette/demo`, { bets }),
+  gemsPlay: (b: { bet: number; requestId: string }) => api.post<Round>(`${BASE}/gems`, b),
+  gemsDemo: (bet: number) => api.post<DemoOutcome<GemsOutcome>>(`${BASE}/gems/demo`, { bet }),
+  aviatorStart: (b: { bet: number; autoCashoutBps?: number; requestId: string }) => api.post<Round>(`${BASE}/aviator/start`, b),
+  aviatorCashout: () => api.post<Round>(`${BASE}/aviator/cashout`, {}),
+  aviatorState: () => api.get<{ round: Round | null }>(`${BASE}/aviator/state`),
+  aviatorDemo: (bet: number) => api.post<{ crashBps: number }>(`${BASE}/aviator/demo`, { bet }),
   rotate: (clientSeed?: string) =>
     api.post<{ revealed: RevealedSeed; current: FairInfo }>(`${BASE}/fair/rotate`, clientSeed ? { clientSeed } : {}),
 };

@@ -425,11 +425,11 @@ describe("concurrency", () => {
 });
 
 describe("play mode (demo / real)", () => {
-  it("ships real-only except slot + coins, which offer both", () => {
+  it("ships real-only except slot + coins (both) and the table games (demo)", () => {
     const fresh = makeDb();
     const s = createGameService(fresh);
     const modes = Object.fromEntries(s.listConfigs().map((c) => [c.gameKey, c.playMode]));
-    expect(modes).toEqual({ DICE: "REAL", COINFLIP: "REAL", MINES: "REAL", CRASH: "REAL", SLOT: "BOTH", COINS: "BOTH" });
+    expect(modes).toEqual({ DICE: "REAL", COINFLIP: "REAL", MINES: "REAL", CRASH: "REAL", SLOT: "BOTH", COINS: "BOTH", COLOR: "DEMO", AVIATOR: "DEMO", ROULETTE: "DEMO", GEMS: "DEMO" });
   });
 
   it("DEMO blocks wallet play but still allows demo spins", async () => {

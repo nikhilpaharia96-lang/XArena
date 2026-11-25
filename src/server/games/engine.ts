@@ -8,6 +8,11 @@ import { playCoins as rollCoins, coinUnitsToPaise, type CoinsOutcome } from "./c
 import { playSlot as rollSlot, unitsToPaise, type SlotOutcome } from "./slot-math";
 import { creditPayout, currentBalance, debitStake } from "./game-wallet";
 import {
+  COLOR_PICKS, colorDraw, colorMultiplierBps, colorWins, colorsOf, gemDraw, gemEvaluate, gemMaxMultBps, GEM_REELS, GEM_ROWS,
+  rouletteBetWins, rouletteSpin, rouletteValidate, roulettePayout, rouletteWorstCase,
+  type ColorPick, type RouletteBet,
+} from "./table-math";
+import {
   BPS,
   CRASH_MIN_AUTO_BPS,
   DICE_MAX_CHANCE_BPS,
@@ -35,7 +40,7 @@ import {
 export type PlayMode = "DEMO" | "REAL" | "BOTH";
 export const PLAY_MODES: readonly PlayMode[] = ["DEMO", "REAL", "BOTH"];
 /** Only these games have a virtual-credit engine, so only they can be demo. */
-export const DEMO_CAPABLE: readonly GameKey[] = ["SLOT", "COINS"];
+export const DEMO_CAPABLE: readonly GameKey[] = ["SLOT", "COINS", "COLOR", "AVIATOR", "ROULETTE", "GEMS"];
 
 export interface GameConfigRow {
   gameKey: GameKey;
@@ -102,6 +107,8 @@ interface MinesState {
   revealed: number[];
   capPayout: number;
 }
+
+type CrashGame = "CRASH" | "AVIATOR";
 
 interface CrashState {
   crashBps: number;
@@ -248,7 +255,7 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
         capPayout: st.capPayout,
       };
     }
-    if (row.gameKey === "CRASH") {
+    if (row.gameKey === "CRASH" || row.gameKey === "AVIATOR") {
       const st = parse<CrashState>(row.state)!;
       return { startedAtMs: st.startedAtMs, serverNowMs: now(), autoCashoutBps: st.autoBps, capMultiplierBps: st.capBps };
     }
@@ -573,8 +580,111 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
     return coinsResult(rollCoins(next), bet, cfg.houseEdgeBps, Number.MAX_SAFE_INTEGER);
   }
 
+  // ------------------------------------------------ table-style games ----
+  /** Shared plumbing for the one-shot games: debit, derive the outcome from the seed, settle. */
+  function oneShot(
+    userId: string, game: GameKey, stake: number, requestId: string | undefined, params: unknown, maxMultBps: number,
+    resolve: (next: () => number, cfg: GameConfigRow) => { payout: number; result: Record<string, unknown> }
+  ): RoundView {
+    return guard(() =>
+      tx(() => {
+        const dup = findByRequest(userId, requestId);
+        if (dup) return toView(dup, true);
+        const p = prepare(userId, game, stake, maxMultBps);
+        const out = resolve(floatStream(p.fair.serverSeed, p.fair.clientSeed, p.fair.nonce), p.cfg);
+        insertRound({
+          id: p.roundId, userId, gameKey: game, status: "ACTIVE", betAmount: stake, houseEdgeBps: p.cfg.houseEdgeBps,
+          debit: JSON.stringify(p.debit), serverSeedHash: p.fair.serverSeedHash, clientSeed: p.fair.clientSeed, nonce: p.fair.nonce,
+          params: JSON.stringify(params), state: null, requestId: requestId ?? null,
+        });
+        const mult = out.payout > 0 ? Math.floor((out.payout * BPS) / stake) : 0;
+        return toView(settle(getRow(p.roundId)!, out.payout > 0 ? "WON" : "LOST", out.payout, mult, out.result));
+      })
+    );
+  }
+
+  const demoGate = (game: GameKey, bet: number) => {
+    const cfg = getConfig(game);
+    if (!cfg.isEnabled) throw new GameError("GAME_DISABLED", "This game is currently unavailable.");
+    if (cfg.playMode === "REAL") throw new GameError("MODE_UNAVAILABLE", "Demo play is switched off for this game.");
+    if (!Number.isSafeInteger(bet) || bet <= 0) throw new GameError("INVALID_INPUT", "Enter a valid bet amount.");
+    return cfg;
+  };
+  const demoRandom = () => randomInt(0, 2 ** 32) / 2 ** 32;
+
+  // color prediction
+  const colorPick = (pick: string): ColorPick => {
+    if (!COLOR_PICKS.includes(pick as ColorPick)) throw new GameError("INVALID_INPUT", "Pick Green, Violet, Red or a number 0-9.");
+    return pick as ColorPick;
+  };
+  function colorOutcome(f: number, pick: ColorPick, bet: number, edgeBps: number) {
+    const number = colorDraw(f);
+    const win = colorWins(pick, number);
+    const mult = colorMultiplierBps(pick, edgeBps);
+    return { payout: win ? payoutFor(bet, mult) : 0, result: { number, colors: colorsOf(number), win, pick, multiplierBps: win ? mult : 0 } };
+  }
+  function playColor(input: { userId: string; bet: number; pick: string; requestId?: string }): RoundView {
+    const pick = colorPick(input.pick);
+    const cfg = getConfig("COLOR");
+    return oneShot(input.userId, "COLOR", input.bet, input.requestId, { pick }, colorMultiplierBps(pick, cfg.houseEdgeBps), (next, c) => colorOutcome(next(), pick, input.bet, c.houseEdgeBps));
+  }
+  function demoColor(bet: number, pick: string) {
+    const cfg = demoGate("COLOR", bet);
+    return colorOutcome(demoRandom(), colorPick(pick), bet, cfg.houseEdgeBps);
+  }
+
+  // roulette
+  function checkRoulette(bets: RouletteBet[], edgeBps: number, maxPayout: number) {
+    const bad = rouletteValidate(bets);
+    if (bad) throw new GameError("INVALID_INPUT", bad);
+    const stake = bets.reduce((a, b) => a + b.amount, 0);
+    if (!Number.isSafeInteger(stake)) throw new GameError("INVALID_INPUT", "Enter a valid bet amount.");
+    if (rouletteWorstCase(bets, edgeBps) > maxPayout) throw new GameError("PAYOUT_TOO_HIGH", "Potential payout is above the table limit. Lower your chips.");
+    return stake;
+  }
+  const rouletteResult = (f: number, bets: RouletteBet[], edgeBps: number) => {
+    const number = rouletteSpin(f);
+    return { payout: roulettePayout(bets, number, edgeBps), result: { number, winningBets: bets.map((b) => rouletteBetWins(b, number)) } };
+  };
+  function playRoulette(input: { userId: string; bets: RouletteBet[]; requestId?: string }): RoundView {
+    const cfg = getConfig("ROULETTE");
+    const bets = input.bets.map((b) => ({ type: b.type, number: b.number, amount: b.amount }));
+    const stake = checkRoulette(bets, cfg.houseEdgeBps, cfg.maxPayout);
+    return oneShot(input.userId, "ROULETTE", stake, input.requestId, { bets }, BPS, (next, c) => rouletteResult(next(), bets, c.houseEdgeBps));
+  }
+  function demoRoulette(bets: RouletteBet[]) {
+    const cfg = getConfig("ROULETTE");
+    const clean = bets.map((b) => ({ type: b.type, number: b.number, amount: b.amount }));
+    const rv = rouletteValidate(clean);
+    if (rv) throw new GameError("INVALID_INPUT", rv);
+    const stake = clean.reduce((a, b) => a + b.amount, 0);
+    demoGate("ROULETTE", stake);
+    return rouletteResult(demoRandom(), clean, cfg.houseEdgeBps);
+  }
+
+  // fortune gems
+  function gemsResult(next: () => number, bet: number, edgeBps: number) {
+    const grid = Array.from({ length: GEM_ROWS }, () => Array.from({ length: GEM_REELS }, () => gemDraw(next())));
+    const ev = gemEvaluate(grid, edgeBps);
+    return { payout: payoutFor(bet, ev.totalMultBps), result: { grid, wins: ev.wins } };
+  }
+  function playGems(input: { userId: string; bet: number; requestId?: string }): RoundView {
+    const cfg = getConfig("GEMS");
+    return oneShot(input.userId, "GEMS", input.bet, input.requestId, {}, gemMaxMultBps(cfg.houseEdgeBps), (next, c) => gemsResult(next, input.bet, c.houseEdgeBps));
+  }
+  function demoGems(bet: number) {
+    const cfg = demoGate("GEMS", bet);
+    return gemsResult(demoRandom, bet, cfg.houseEdgeBps);
+  }
+
+  /** Virtual-credit aviator: only reveals where THIS flight crashes (credits are not real money). */
+  function demoAviator(bet: number) {
+    const cfg = demoGate("AVIATOR", bet);
+    return { crashBps: crashPointBps(demoRandom(), cfg.houseEdgeBps) };
+  }
+
   // -------------------------------------------------------------- crash ----
-  function startCrash(input: { userId: string; bet: number; autoCashoutBps?: number; requestId?: string }): RoundView {
+  function startCrash(input: { userId: string; bet: number; autoCashoutBps?: number; requestId?: string }, game: CrashGame = "CRASH"): RoundView {
     if (input.autoCashoutBps !== undefined && (!Number.isInteger(input.autoCashoutBps) || input.autoCashoutBps < CRASH_MIN_AUTO_BPS || input.autoCashoutBps > 10_000_000)) {
       throw new GameError("INVALID_INPUT", "Auto cash-out must be between 1.01x and 1000x.");
     }
@@ -583,16 +693,16 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
         const dup = findByRequest(input.userId, input.requestId);
         if (dup) return toView(dup, true);
         sweepCrash(input.userId);
-        const cfg = getConfig("CRASH");
-        const open = db.prepare("SELECT 1 FROM GameRound WHERE userId = ? AND gameKey = 'CRASH' AND status = 'ACTIVE'").get(input.userId);
+        const cfg = getConfig(game);
+        const open = db.prepare("SELECT 1 FROM GameRound WHERE userId = ? AND gameKey = ? AND status = 'ACTIVE'").get(input.userId, game);
         if (open) throw new GameError("ROUND_ACTIVE", "Finish your current round first.");
         const capBps = Math.floor((cfg.maxPayout * BPS) / Math.max(1, input.bet));
         if (capBps <= BPS) throw new GameError("BET_TOO_HIGH", "Bet is above the maximum for this game.");
-        const p = prepare(input.userId, "CRASH", input.bet, BPS);
+        const p = prepare(input.userId, game, input.bet, BPS);
         const crashBps = crashPointBps(floatStream(p.fair.serverSeed, p.fair.clientSeed, p.fair.nonce)(), p.cfg.houseEdgeBps);
         const state: CrashState = { crashBps, startedAtMs: now(), autoBps: input.autoCashoutBps ?? null, capBps };
         insertRound({
-          id: p.roundId, userId: input.userId, gameKey: "CRASH", status: "ACTIVE", betAmount: input.bet, houseEdgeBps: p.cfg.houseEdgeBps,
+          id: p.roundId, userId: input.userId, gameKey: game, status: "ACTIVE", betAmount: input.bet, houseEdgeBps: p.cfg.houseEdgeBps,
           debit: JSON.stringify(p.debit), serverSeedHash: p.fair.serverSeedHash, clientSeed: p.fair.clientSeed, nonce: p.fair.nonce,
           params: JSON.stringify({ autoCashoutBps: input.autoCashoutBps ?? null }), state: JSON.stringify(state), requestId: input.requestId ?? null,
         });
@@ -629,24 +739,24 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
   /** Resolve every finished crash round (for one player, or all when userId is omitted). */
   function sweepCrash(userId?: string): number {
     const rows = (userId
-      ? db.prepare("SELECT * FROM GameRound WHERE gameKey = 'CRASH' AND status = 'ACTIVE' AND userId = ?").all(userId)
-      : db.prepare("SELECT * FROM GameRound WHERE gameKey = 'CRASH' AND status = 'ACTIVE'").all()) as RoundRow[];
+      ? db.prepare("SELECT * FROM GameRound WHERE gameKey IN ('CRASH','AVIATOR') AND status = 'ACTIVE' AND userId = ?").all(userId)
+      : db.prepare("SELECT * FROM GameRound WHERE gameKey IN ('CRASH','AVIATOR') AND status = 'ACTIVE'").all()) as RoundRow[];
     let n = 0;
     for (const r of rows) if (resolveCrash(r).status !== "ACTIVE") n++;
     return n;
   }
 
-  function crashState(userId: string): RoundView | null {
+  function crashState(userId: string, game: CrashGame = "CRASH"): RoundView | null {
     return tx(() => {
-      const row = db.prepare("SELECT * FROM GameRound WHERE userId = ? AND gameKey = 'CRASH' AND status = 'ACTIVE'").get(userId) as RoundRow | undefined;
+      const row = db.prepare("SELECT * FROM GameRound WHERE userId = ? AND gameKey = ? AND status = 'ACTIVE'").get(userId, game) as RoundRow | undefined;
       if (!row) return null;
       return toView(resolveCrash(row));
     });
   }
 
-  function cashoutCrash(userId: string): RoundView {
+  function cashoutCrash(userId: string, game: CrashGame = "CRASH"): RoundView {
     return tx(() => {
-      const row0 = activeRound(userId, "CRASH");
+      const row0 = activeRound(userId, game);
       const row = resolveCrash(row0);
       if (row.status !== "ACTIVE") return toView(row); // already decided by time (crashed, or auto cash-out hit)
       const st = parse<CrashState>(row.state)!;
@@ -724,6 +834,7 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
     playDice, playCoin, playSlot, demoSlot, playCoinsGame, demoCoins,
     startMines, revealMine, cashoutMines, activeMines,
     startCrash, crashState, cashoutCrash, sweepCrash,
+    playColor, demoColor, playRoulette, demoRoulette, playGems, demoGems, demoAviator,
     history, getRound,
     voidRound, stats, recentRounds,
   };

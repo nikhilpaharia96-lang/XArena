@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Coins, Crown, Dices, Sparkles } from "lucide-react";
+import { Coins, Crown, Dices, Gem, Palette, Plane, Sparkles, CircleDot } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useOriginals, type GameKey } from "@/hooks/use-originals";
 
@@ -15,7 +15,7 @@ interface Cover {
 }
 
 /** Display order on the Games page. */
-const ORDER: GameKey[] = ["SLOT", "COINS", "DICE", "COINFLIP", "MINES", "CRASH"];
+const ORDER: GameKey[] = ["SLOT", "COINS", "GEMS", "AVIATOR", "ROULETTE", "COLOR", "DICE", "COINFLIP", "MINES", "CRASH"];
 
 const COVERS: Record<GameKey, Cover> = {
   MINES: { title: "Mines", art: "/images/originals/mines.webp", gradient: "from-[#9B1CF0] to-[#6B0FC4]", icon: Dices },
@@ -24,6 +24,10 @@ const COVERS: Record<GameKey, Cover> = {
   COINFLIP: { title: "Coin Flip", gradient: "from-[#F59E0B] to-[#B45309]", icon: Coins },
   SLOT: { title: "Garuda Ascent", gradient: "from-[#312E81] to-[#7C3AED]", icon: Crown },
   COINS: { title: "Lakshmi Coins", gradient: "from-[#DC2626] to-[#9A3412]", icon: Sparkles },
+  COLOR: { title: "Color Prediction", gradient: "from-[#12A150] to-[#8B3FE0]", icon: Palette },
+  AVIATOR: { title: "Aviator", gradient: "from-[#0B1B3A] to-[#EA580C]", icon: Plane },
+  ROULETTE: { title: "Roulette", gradient: "from-[#0E3B2A] to-[#C62E3E]", icon: CircleDot },
+  GEMS: { title: "Fortune Gems", gradient: "from-[#1B1442] to-[#A855F7]", icon: Gem },
 };
 
 /** Shown on the Games page only while at least one Original is switched on. */

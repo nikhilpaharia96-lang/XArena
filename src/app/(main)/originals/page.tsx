@@ -14,11 +14,15 @@ import { CoinGame } from "@/components/originals/coin-game";
 import { MinesGame } from "@/components/originals/mines-game";
 import { SlotGame } from "@/components/originals/slot/slot-game";
 import { CoinsGame } from "@/components/originals/coins/coins-game";
+import { ColorGame } from "@/components/originals/table/color-game";
+import { RouletteGame } from "@/components/originals/table/roulette-game";
+import { GemsGame } from "@/components/originals/table/gems-game";
+import { AviatorGame } from "@/components/originals/table/aviator-game";
 import { CrashGame } from "@/components/originals/crash-game";
 import { FairnessPanel } from "@/components/originals/fairness-panel";
 import { HistoryList } from "@/components/originals/history-list";
 
-const TITLES: Record<GameKey, string> = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins" };
+const TITLES: Record<GameKey, string> = { DICE: "Dice", COINFLIP: "Coin Flip", MINES: "Mines", CRASH: "Crash", SLOT: "Garuda Ascent", COINS: "Lakshmi Coins", COLOR: "Color Prediction", AVIATOR: "Aviator", ROULETTE: "Roulette", GEMS: "Fortune Gems" };
 
 function OriginalsContent() {
   const { data, isLoading } = useOriginals();
@@ -63,6 +67,10 @@ function OriginalsContent() {
       {current.gameKey === "SLOT" && <SlotGame key="s" cfg={current} balance={balance} />}
       {current.gameKey === "COINS" && <CoinsGame key="l" cfg={current} balance={balance} />}
       {current.gameKey === "CRASH" && <CrashGame key="x" cfg={current} balance={balance} />}
+      {current.gameKey === "COLOR" && <ColorGame key="co" cfg={current} balance={balance} />}
+      {current.gameKey === "ROULETTE" && <RouletteGame key="ro" cfg={current} balance={balance} />}
+      {current.gameKey === "GEMS" && <GemsGame key="ge" cfg={current} balance={balance} />}
+      {current.gameKey === "AVIATOR" && <AviatorGame key="av" cfg={current} balance={balance} />}
       </div>
       <p className="text-[11px] text-white/40 text-center">
         House edge {(current.houseEdgeBps / 100).toFixed(1)}% · Max payout {formatPaiseExact(current.maxPayout)} · Play responsibly. 18+ only.
