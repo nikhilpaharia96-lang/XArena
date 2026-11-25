@@ -32,9 +32,15 @@ import {
   type GameKey,
 } from "./math";
 
+export type PlayMode = "DEMO" | "REAL" | "BOTH";
+export const PLAY_MODES: readonly PlayMode[] = ["DEMO", "REAL", "BOTH"];
+/** Only these games have a virtual-credit engine, so only they can be demo. */
+export const DEMO_CAPABLE: readonly GameKey[] = ["SLOT", "COINS"];
+
 export interface GameConfigRow {
   gameKey: GameKey;
   isEnabled: boolean;
+  playMode: PlayMode;
   houseEdgeBps: number;
   minBet: number;
   maxBet: number;
@@ -128,6 +134,7 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
   function requirePlayable(game: GameKey, stake: number): GameConfigRow {
     const cfg = getConfig(game);
     if (!cfg.isEnabled) throw new GameError("GAME_DISABLED", "This game is currently unavailable.");
+    if (cfg.playMode === "DEMO") throw new GameError("MODE_UNAVAILABLE", "This game is demo-only right now. Real-money play is switched off.");
     if (!Number.isSafeInteger(stake) || stake <= 0) throw new GameError("INVALID_INPUT", "Enter a valid bet amount.");
     if (stake < cfg.minBet) throw new GameError("BET_TOO_LOW", "Bet is below the minimum for this game.");
     if (stake > cfg.maxBet) throw new GameError("BET_TOO_HIGH", "Bet is above the maximum for this game.");
@@ -136,19 +143,22 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
 
   function updateConfig(
     game: GameKey,
-    patch: Partial<Pick<GameConfigRow, "isEnabled" | "houseEdgeBps" | "minBet" | "maxBet" | "maxPayout">>
+    patch: Partial<Pick<GameConfigRow, "isEnabled" | "playMode" | "houseEdgeBps" | "minBet" | "maxBet" | "maxPayout">>
   ): GameConfigRow {
     return tx(() => {
       const cur = getConfig(game);
       const next = { ...cur, ...patch };
       const ints = [next.houseEdgeBps, next.minBet, next.maxBet, next.maxPayout];
       if (!ints.every(Number.isSafeInteger)) throw new GameError("INVALID_INPUT", "Values must be whole numbers.");
+      if (!PLAY_MODES.includes(next.playMode)) throw new GameError("INVALID_INPUT", "Unknown play mode.");
+      if (next.playMode !== "REAL" && !DEMO_CAPABLE.includes(game)) throw new GameError("INVALID_INPUT", "This game has no demo version yet, so it can only run with real money.");
       if (next.houseEdgeBps < 50 || next.houseEdgeBps > 1500) throw new GameError("INVALID_INPUT", "House edge must be between 0.5% and 15%.");
       if (next.minBet < 100) throw new GameError("INVALID_INPUT", "Minimum bet cannot be below ₹1.");
       if (next.maxBet < next.minBet) throw new GameError("INVALID_INPUT", "Max bet must be at least the min bet.");
       if (next.maxPayout <= next.maxBet) throw new GameError("INVALID_INPUT", "Max payout must be larger than the max bet.");
-      db.prepare("UPDATE GameConfig SET isEnabled = ?, houseEdgeBps = ?, minBet = ?, maxBet = ?, maxPayout = ?, updatedAt = ? WHERE gameKey = ?").run(
+      db.prepare("UPDATE GameConfig SET isEnabled = ?, playMode = ?, houseEdgeBps = ?, minBet = ?, maxBet = ?, maxPayout = ?, updatedAt = ? WHERE gameKey = ?").run(
         next.isEnabled ? 1 : 0,
+        next.playMode,
         next.houseEdgeBps,
         next.minBet,
         next.maxBet,
@@ -499,6 +509,7 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
   function demoSlot(bet: number) {
     const cfg = getConfig("SLOT");
     if (!cfg.isEnabled) throw new GameError("GAME_DISABLED", "This game is currently unavailable.");
+    if (cfg.playMode === "REAL") throw new GameError("MODE_UNAVAILABLE", "Demo play is switched off for this game.");
     if (!Number.isSafeInteger(bet) || bet <= 0) throw new GameError("INVALID_INPUT", "Enter a valid bet amount.");
     const next = () => randomInt(0, 2 ** 32) / 2 ** 32;
     return slotResult(rollSlot(next), bet, cfg.houseEdgeBps, Number.MAX_SAFE_INTEGER);
@@ -556,6 +567,7 @@ export function createGameService(db: Database.Database, opts: { now?: () => num
   function demoCoins(bet: number) {
     const cfg = getConfig("COINS");
     if (!cfg.isEnabled) throw new GameError("GAME_DISABLED", "This game is currently unavailable.");
+    if (cfg.playMode === "REAL") throw new GameError("MODE_UNAVAILABLE", "Demo play is switched off for this game.");
     if (!Number.isSafeInteger(bet) || bet <= 0) throw new GameError("INVALID_INPUT", "Enter a valid bet amount.");
     const next = () => randomInt(0, 2 ** 32) / 2 ** 32;
     return coinsResult(rollCoins(next), bet, cfg.houseEdgeBps, Number.MAX_SAFE_INTEGER);

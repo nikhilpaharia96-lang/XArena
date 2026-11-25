@@ -6,8 +6,11 @@ import { toast } from "@/lib/toast-store";
 
 export type GameKey = "DICE" | "COINFLIP" | "MINES" | "CRASH" | "SLOT" | "COINS";
 
+export type PlayMode = "DEMO" | "REAL" | "BOTH";
+
 export interface OriginalGame {
   gameKey: GameKey;
+  playMode: PlayMode;
   houseEdgeBps: number;
   minBet: number;
   maxBet: number;

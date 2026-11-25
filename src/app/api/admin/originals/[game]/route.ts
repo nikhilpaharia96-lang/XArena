@@ -9,6 +9,7 @@ import { GAME_KEYS, type GameKey } from "@/server/games/math";
 const schema = z
   .object({
     isEnabled: z.boolean().optional(),
+    playMode: z.enum(["DEMO", "REAL", "BOTH"]).optional(),
     houseEdgeBps: z.number().int().optional(),
     minBet: z.number().int().optional(),
     maxBet: z.number().int().optional(),
