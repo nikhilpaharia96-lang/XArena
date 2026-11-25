@@ -112,7 +112,7 @@ export function HeroCarousel() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25 }}
-          className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
+          className="force-dark relative shrink-0 w-full sm:w-[92%] min-h-[19rem] sm:min-h-[22rem] lg:min-h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
         >
           {/* Squad artwork */}
           <div
@@ -151,16 +151,16 @@ export function HeroCarousel() {
           <p className="relative text-white/80 text-sm max-w-sm mb-4">
             Join exciting tournaments, build your team and compete with players across India.
           </p>
-          <div className="relative flex items-center gap-2">
+          <div className="relative flex flex-wrap items-center gap-2">
             <Link
               href="/tournaments"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white text-violet-dim px-4 h-10 text-sm font-bold"
+              className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-xl bg-white text-violet-dim px-4 h-10 text-sm font-bold"
             >
               Explore Tournaments <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <Link
               href="/signup"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-black/25 border border-white/25 text-white px-4 h-10 text-sm font-semibold"
+              className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-xl bg-black/25 border border-white/25 text-white px-4 h-10 text-sm font-semibold"
             >
               Register Now <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -172,7 +172,7 @@ export function HeroCarousel() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25, delay: 0.05 }}
-          className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
+          className="force-dark relative shrink-0 w-full sm:w-[92%] min-h-[19rem] sm:min-h-[22rem] lg:min-h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
         >
           {/* Character artwork */}
           <div
@@ -221,7 +221,7 @@ export function HeroCarousel() {
             </span>
           </div>
 
-          <div className="relative flex items-center gap-2">
+          <div className="relative flex flex-wrap items-center gap-2">
             <Link
               href="/tournaments"
               className="inline-flex items-center gap-1.5 rounded-xl gradient-cta px-4 h-10 text-sm font-bold text-white shadow-[0_8px_24px_-6px_rgba(249,115,22,0.5)]"
@@ -246,7 +246,7 @@ export function HeroCarousel() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25, delay: 0.1 }}
-          className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
+          className="force-dark relative shrink-0 w-full sm:w-[92%] min-h-[19rem] sm:min-h-[22rem] lg:min-h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
         >
           {/* Stadium/soldier artwork */}
           <div
@@ -320,7 +320,7 @@ export function HeroCarousel() {
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.25, delay: 0.15 + i * 0.05 }}
-              className="force-dark relative shrink-0 w-full sm:w-[92%] h-[19rem] sm:h-[22rem] lg:h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
+              className="force-dark relative shrink-0 w-full sm:w-[92%] min-h-[19rem] sm:min-h-[22rem] lg:min-h-[25rem] rounded-3xl snap-center overflow-hidden border border-white/10 flex flex-col justify-end p-5 sm:p-7"
             >
               <div
                 className="absolute inset-0"

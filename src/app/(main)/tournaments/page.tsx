@@ -51,11 +51,24 @@ function TournamentsListing() {
 
   const tournaments = useMemo(() => {
     if (!tournamentsRaw) return tournamentsRaw;
-    if (prizeSort === "NONE") return tournamentsRaw;
     const sorted = [...tournamentsRaw];
-    sorted.sort((a, b) => (prizeSort === "HIGH" ? b.prizePool - a.prizePool : a.prizePool - b.prizePool));
+    if (prizeSort !== "NONE") {
+      sorted.sort((a, b) => (prizeSort === "HIGH" ? b.prizePool - a.prizePool : a.prizePool - b.prizePool));
+      return sorted;
+    }
+    if (statusKey !== "ALL") return tournamentsRaw;
+    // Default "All" order: what you can play now comes first. Live, then
+    // upcoming (soonest start first), then finished ones (most recent first).
+    const rank = (status: string) => (status === "LIVE" ? 0 : status === "REGISTRATION_OPEN" ? 1 : 2);
+    const start = (t: { matchStartsAt: string }) => new Date(t.matchStartsAt).getTime();
+    sorted.sort((a, b) => {
+      const ra = rank(a.status);
+      const rb = rank(b.status);
+      if (ra !== rb) return ra - rb;
+      return ra === 2 ? start(b) - start(a) : start(a) - start(b);
+    });
     return sorted;
-  }, [tournamentsRaw, prizeSort]);
+  }, [tournamentsRaw, prizeSort, statusKey]);
 
   const activeGame = games?.find((g) => g.slug === gameFilter);
   const activeFilterCount = [gameFilter, entryKey !== "ANY" ? entryKey : undefined, prizeSort !== "NONE" ? prizeSort : undefined].filter(
@@ -132,9 +145,11 @@ function TournamentsListing() {
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.key}
+            type="button"
+            aria-pressed={statusKey === tab.key}
             onClick={() => setStatusKey(tab.key)}
             className={cn(
-              "shrink-0 px-4 h-9 rounded-full text-sm font-semibold transition-colors",
+              "shrink-0 px-4 h-10 rounded-full text-sm font-semibold transition-colors",
               statusKey === tab.key ? "gradient-brand text-white" : "bg-white/5 text-white/60 border border-white/10"
             )}
           >
@@ -151,8 +166,9 @@ function TournamentsListing() {
       </div>
       <div className="sm:hidden mb-5">
         <button
+          type="button"
           onClick={() => setSheetOpen(true)}
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-full bg-white/5 border border-white/10 text-sm font-semibold text-white/70"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-white/5 border border-white/10 text-sm font-semibold text-white/70"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filters
