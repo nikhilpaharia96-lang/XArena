@@ -347,3 +347,52 @@ html[data-theme="light"] .hiw-card {
 }
 html[data-theme="light"] .hiw-img { filter: drop-shadow(0 8px 12px rgba(15, 23, 42, 0.22)); }
 html[data-theme="light"] .hiw-chevron { filter: none; }
+
+
+/* ==========================================================================
+ * UX / accessibility pass
+ * ========================================================================== */
+
+/* Visible keyboard focus everywhere (mouse and touch users never see it). */
+:where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-cobalt);
+  outline-offset: 2px;
+}
+
+/* Skip link: hidden until a keyboard user tabs to it. */
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 200;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--color-violet);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  transform: translateY(-200%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* Light mode: the faded text utilities (text-white/40 etc.) were too pale on
+   white. Map them to solid slate tones that meet 4.5:1 contrast. */
+html[data-theme="light"] :is(.text-white\/25, .text-white\/30, .text-white\/35, .text-white\/40, .text-white\/45, .text-white\/50) { color: #5B6B82; }
+html[data-theme="light"] :is(.text-white\/55, .text-white\/60, .text-white\/65, .text-white\/70) { color: #475569; }
+html[data-theme="light"] :is(input, textarea)::placeholder { color: #64748B; }
+
+/* Never trap people in motion: honour the OS "reduce motion" setting. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* iOS zooms the page when a focused input is under 16px; stop that on phones. */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
+}

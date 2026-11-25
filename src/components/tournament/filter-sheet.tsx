@@ -45,7 +45,7 @@ export function FilterSheet({
           >
             <div className="flex items-center justify-between px-5 h-14 border-b border-white/8">
               <span className="text-sm font-bold text-white">Filters</span>
-              <button onClick={onClose} aria-label="Close filters" className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center">
+              <button onClick={onClose} aria-label="Close filters" className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center">
                 <X className="h-4 w-4 text-white/70" />
               </button>
             </div>
