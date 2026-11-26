@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useLoyalty } from "@/hooks/use-loyalty";
+import { LevelCard } from "@/components/rewards/level-card";
 import { useLogout } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/lib/toast-store";
@@ -10,15 +12,14 @@ import { useTheme } from "@/lib/theme";
 import { Avatar, Panel, SectionTitle, SettingsRow } from "@/components/profile/parts";
 import {
   Settings, User, ShieldCheck, Wallet, BadgeCheck, Bell, Globe, Moon, Sun, Lock,
-  Headphones, FileText, Info, LogOut, ChevronRight, Copy, Crown, SlidersHorizontal, CircleHelp, Undo2,
+  Headphones, FileText, Info, LogOut, ChevronRight, Copy, SlidersHorizontal, CircleHelp, Undo2,
 } from "lucide-react";
-
-const XP_PER_LEVEL = 1000;
 
 export default function ProfilePage() {
   useRequireAuth();
   const { theme, setTheme } = useTheme();
   const { data, isLoading } = useProfile();
+  const { data: loyalty } = useLoyalty();
   const logout = useLogout();
 
   if (isLoading || !data) {
@@ -31,13 +32,8 @@ export default function ProfilePage() {
     );
   }
 
-  const { profile, stats } = data;
+  const { profile } = data;
   const name = profile.displayName ?? profile.username;
-  // Level is derived from activity: no separate XP column exists yet.
-  const xp = stats.matchesPlayed * 20 + stats.wins * 80 + stats.kills * 2;
-  const level = Math.floor(xp / XP_PER_LEVEL) + 1;
-  const xpInLevel = xp % XP_PER_LEVEL;
-
   const copyUid = async () => {
     try {
       await navigator.clipboard.writeText(profile.uid);
@@ -75,18 +71,9 @@ export default function ProfilePage() {
           </div>
           <ChevronRight className="h-5 w-5 text-white/50 shrink-0" />
         </Link>
-        <div className="flex items-center gap-3 px-4 pb-3.5 text-sm">
-          <span className="flex items-center gap-1.5 font-semibold text-gold whitespace-nowrap">
-            <Crown className="h-4 w-4" /> Level {level}
-          </span>
-          <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden" role="progressbar" aria-valuenow={xpInLevel} aria-valuemax={XP_PER_LEVEL}>
-            <div className="h-full rounded-full bg-cobalt" style={{ width: `${(xpInLevel / XP_PER_LEVEL) * 100}%` }} />
-          </div>
-          <span className="text-xs text-white/60 whitespace-nowrap">
-            {xpInLevel.toLocaleString("en-IN")} / {XP_PER_LEVEL.toLocaleString("en-IN")} XP
-          </span>
-        </div>
       </div>
+
+      {loyalty && <LevelCard data={loyalty} href="/rewards" className="mt-3" />}
 
       <SectionTitle icon={User}>Account</SectionTitle>
       <Panel>
