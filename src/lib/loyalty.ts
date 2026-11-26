@@ -1,54 +1,65 @@
 /**
- * XArena Rewards: shared (server + client) tier and target tables.
- * XP is earned only from approved deposits: Rs 1 deposited = 1 XP.
- * Rewards are credited to the BONUS wallet (play-only, never directly withdrawable).
- * All money is paise.
+ * XArena VIP: shared (server + client) level table.
+ *
+ * EXP comes from betting: every Rs 1 wagered (tournament entry fees + in-house and casino game bets,
+ * net of refunds) = 1 EXP. Rewards are settled once a month, at 2:00 AM India time on the 1st, and are
+ * credited to the BONUS wallet (play-only, never directly withdrawable). All money is paise.
  */
-export interface LoyaltyLevel { name: string; minXp: number; rewardPaise: number }
-
-export const LEVELS: readonly LoyaltyLevel[] = [
-  { name: "Bronze I", minXp: 0, rewardPaise: 0 },
-  { name: "Bronze II", minXp: 2_000, rewardPaise: 2_000 },
-  { name: "Bronze III", minXp: 5_000, rewardPaise: 5_000 },
-  { name: "Silver I", minXp: 10_000, rewardPaise: 10_000 },
-  { name: "Silver II", minXp: 20_000, rewardPaise: 20_000 },
-  { name: "Silver III", minXp: 35_000, rewardPaise: 35_000 },
-  { name: "Gold I", minXp: 60_000, rewardPaise: 60_000 },
-  { name: "Gold II", minXp: 100_000, rewardPaise: 100_000 },
-  { name: "Gold III", minXp: 150_000, rewardPaise: 150_000 },
-  { name: "Platinum", minXp: 250_000, rewardPaise: 250_000 },
-  { name: "Diamond", minXp: 500_000, rewardPaise: 500_000 },
-];
-
-/** Monthly deposit targets (calendar month, India time) and the rebate for hitting each. */
-export interface MonthlyTarget { targetPaise: number; rewardPaise: number }
-export const MONTHLY_TARGETS: readonly MonthlyTarget[] = [
-  { targetPaise: 200_000, rewardPaise: 2_000 },
-  { targetPaise: 1_000_000, rewardPaise: 12_000 },
-  { targetPaise: 5_000_000, rewardPaise: 75_000 },
-];
-
-export const xpFromPaise = (paise: number) => Math.floor(paise / 100);
-
-export function levelIndexForXp(xp: number): number {
-  let idx = 0;
-  for (let i = 0; i < LEVELS.length; i++) if (xp >= LEVELS[i].minXp) idx = i;
-  return idx;
+export interface VipLevel {
+  level: number;
+  expRequired: number;
+  /** One-time reward the first time the level is reached. */
+  levelUpRewardPaise: number;
+  /** Paid once per month if you wagered that month. */
+  monthlyRewardPaise: number;
+  /** Share of the month's wagering returned, in basis points (5 = 0.05%). */
+  rebateBps: number;
 }
 
-const IST_MS = 330 * 60_000;
+const r = (rupees: number) => rupees * 100;
 
-/** The IST calendar month containing `at`: key ("2026-11"), label, and its UTC instants. */
+export const VIP_LEVELS: readonly VipLevel[] = [
+  { level: 1, expRequired: 2_000, levelUpRewardPaise: r(20), monthlyRewardPaise: r(2), rebateBps: 5 },
+  { level: 2, expRequired: 20_000, levelUpRewardPaise: r(100), monthlyRewardPaise: r(10), rebateBps: 6 },
+  { level: 3, expRequired: 100_000, levelUpRewardPaise: r(400), monthlyRewardPaise: r(40), rebateBps: 8 },
+  { level: 4, expRequired: 400_000, levelUpRewardPaise: r(1_500), monthlyRewardPaise: r(150), rebateBps: 10 },
+  { level: 5, expRequired: 1_000_000, levelUpRewardPaise: r(4_000), monthlyRewardPaise: r(400), rebateBps: 12 },
+  { level: 6, expRequired: 2_500_000, levelUpRewardPaise: r(10_000), monthlyRewardPaise: r(1_000), rebateBps: 15 },
+  { level: 7, expRequired: 6_000_000, levelUpRewardPaise: r(25_000), monthlyRewardPaise: r(2_500), rebateBps: 18 },
+  { level: 8, expRequired: 15_000_000, levelUpRewardPaise: r(60_000), monthlyRewardPaise: r(6_000), rebateBps: 22 },
+  { level: 9, expRequired: 40_000_000, levelUpRewardPaise: r(150_000), monthlyRewardPaise: r(15_000), rebateBps: 26 },
+  { level: 10, expRequired: 100_000_000, levelUpRewardPaise: r(400_000), monthlyRewardPaise: r(40_000), rebateBps: 30 },
+];
+
+export const expFromPaise = (paise: number) => Math.max(0, Math.floor(paise / 100));
+
+/** 0 = not unlocked yet; otherwise 1..10. */
+export function levelForExp(exp: number): number {
+  let lvl = 0;
+  for (const l of VIP_LEVELS) if (exp >= l.expRequired) lvl = l.level;
+  return lvl;
+}
+
+export const vipLevel = (level: number): VipLevel | undefined => VIP_LEVELS[level - 1];
+
+const IST_MS = 330 * 60_000;
+const SETTLE_HOUR_IST = 2;
+
+/** The IST calendar month containing `at`: key ("2026-11"), label, its UTC bounds, and when it settles. */
 export function istMonth(at: Date) {
   const shifted = new Date(at.getTime() + IST_MS);
   const y = shifted.getUTCFullYear();
   const m = shifted.getUTCMonth();
   const start = new Date(Date.UTC(y, m, 1) - IST_MS);
   const end = new Date(Date.UTC(y, m + 1, 1) - IST_MS);
+  const settleAt = new Date(end.getTime() + SETTLE_HOUR_IST * 3_600_000);
   return {
     key: `${y}-${String(m + 1).padStart(2, "0")}`,
     label: new Date(Date.UTC(y, m, 1)).toLocaleString("en-IN", { month: "long", year: "numeric", timeZone: "UTC" }),
     startIso: start.toISOString(),
     endIso: end.toISOString(),
+    settleAtIso: settleAt.toISOString(),
+    /** e.g. "1 Dec, 2:00 AM" */
+    settleLabel: `${new Date(Date.UTC(y, m + 1, 1)).toLocaleString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" })}, 2:00 AM`,
   };
 }

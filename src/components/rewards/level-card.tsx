@@ -4,22 +4,24 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatPaise } from "@/lib/format";
-import type { LoyaltySummary } from "@/hooks/use-loyalty";
+import type { VipSummary } from "@/hooks/use-loyalty";
 
-/** Tier name, progress bar and "X XP to NEXT". Solid colours only (no transparency layers). */
-export function LevelCard({ data, href, className }: { data: LoyaltySummary; href?: string; className?: string }) {
-  const { level, next, progressPct, xp } = data;
+export const formatExp = (n: number) => n.toLocaleString("en-IN");
+
+/** VIP tier, EXP progress bar and "X EXP to VIP N". Solid colours only. */
+export function LevelCard({ data, href, className }: { data: VipSummary; href?: string; className?: string }) {
+  const { level, next, progressPct, exp } = data;
   const body = (
     <div className={cn("force-dark rounded-2xl border border-[#2A3555] bg-gradient-to-br from-[#2A1F2E] to-[#121A30] p-4", className)}>
       <div className="flex items-center justify-between">
-        <p className="text-lg font-black tracking-wide text-white uppercase">{level.name}</p>
+        <p className="text-lg font-black tracking-wide text-white uppercase">VIP {level}</p>
         {href && <ChevronRight className="h-5 w-5 text-white/50" />}
       </div>
       <div className="mt-3 flex items-center gap-3">
         <div
           className="h-2.5 flex-1 rounded-full bg-[#0B1224] overflow-hidden"
           role="progressbar"
-          aria-label="XP progress to next level"
+          aria-label="EXP progress to next VIP level"
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={Math.round(progressPct)}
@@ -29,16 +31,14 @@ export function LevelCard({ data, href, className }: { data: LoyaltySummary; hre
         <p className="shrink-0 text-xs text-white">
           {next ? (
             <>
-              <b>{formatXp(next.xpToNext)} XP</b> to <span className="text-white/70 uppercase">{next.name}</span>
+              <b>{formatExp(next.expToNext)} EXP</b> to <span className="text-white/70 uppercase">VIP {next.level}</span>
             </>
           ) : (
-            <b>Top level · {formatXp(xp)} XP</b>
+            <b>Top level · {formatExp(exp)} EXP</b>
           )}
         </p>
       </div>
-      {next && next.rewardPaise > 0 && (
-        <p className="mt-2 text-[11px] text-white/60">Reach {next.name} to get a {formatPaise(next.rewardPaise)} rebate in your bonus balance.</p>
-      )}
+      {next && <p className="mt-2 text-[11px] text-white/60">Reach VIP {next.level} for a {formatPaise(next.levelUpRewardPaise)} reward. Bet ₹1 = 1 EXP.</p>}
     </div>
   );
   return href ? (
@@ -49,5 +49,3 @@ export function LevelCard({ data, href, className }: { data: LoyaltySummary; hre
     body
   );
 }
-
-export const formatXp = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n % 1000 === 0 ? 0 : 2).replace(/0$/, "")}K` : String(n));

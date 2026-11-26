@@ -1,10 +1,12 @@
 import { db } from "@/server/db/client";
 import { fail, ok } from "@/server/lib/api-response";
 import { getCurrentUser } from "@/server/lib/current-user";
+import { settleVipRewardsThrottled } from "@/server/lib/loyalty";
 
 export async function GET() {
   try {
     const user = await getCurrentUser();
+    settleVipRewardsThrottled(db, user.id);
 
     const wallet = db
       .prepare("SELECT depositBalance, winningBalance, bonusBalance, lockedBalance FROM Wallet WHERE userId = ?")

@@ -2,16 +2,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { useCurrentUser } from "@/hooks/use-auth";
-import type { LoyaltySummary } from "@/server/lib/loyalty";
+import type { VipSummary } from "@/server/lib/loyalty";
 
-export type { LoyaltySummary };
+export type { VipSummary };
 
 export function useLoyalty() {
   const { data: me } = useCurrentUser();
-  return useQuery<LoyaltySummary>({
+  return useQuery<VipSummary>({
     queryKey: ["loyalty"],
     enabled: !!me,
     staleTime: 30_000,
-    queryFn: () => api.get<LoyaltySummary>("/api/loyalty"),
+    queryFn: () => api.get<VipSummary>("/api/loyalty"),
   });
 }

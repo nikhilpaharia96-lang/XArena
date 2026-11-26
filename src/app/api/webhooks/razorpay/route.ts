@@ -1,4 +1,3 @@
-import { awardForDeposit } from "@/server/lib/loyalty";
 import { db } from "@/server/db/client";
 import { createId, createReferenceId } from "@/server/lib/ids";
 import { verifyWebhookSignature } from "@/server/lib/razorpay";
@@ -88,7 +87,6 @@ export async function POST(req: Request) {
           JSON.stringify({ razorpayPaymentId: paymentId }),
           now
         );
-        awardForDeposit(db, deposit.userId, deposit.amount, now);
 
         db.prepare(
           `INSERT INTO Notification (id, userId, type, title, body, createdAt)

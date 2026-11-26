@@ -11,8 +11,6 @@ import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
-import { useLoyalty } from "@/hooks/use-loyalty";
-import { LevelCard } from "@/components/rewards/level-card";
 import { WalletTabs } from "@/components/wallet/wallet-tabs";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast-store";
@@ -35,7 +33,6 @@ function buildUpiLink(upiId: string, name: string, amount: number) {
 export default function DepositPage() {
   useRequireAuth();
   const { data: wallet } = useWallet();
-  const { data: loyalty } = useLoyalty();
   const { data: info, isLoading, isError, refetch } = usePaymentInfo();
   const submit = useSubmitDepositRequest();
 
@@ -250,13 +247,6 @@ export default function DepositPage() {
                 Proceed to Payment
               </Button>
             </Card>
-
-            {loyalty && (
-              <div>
-                <LevelCard data={loyalty} href="/rewards" />
-                <p className="mt-1.5 px-1 text-[11px] text-white/50">Every ₹1 you add earns 1 XP. Level up and hit the monthly target for rebates.</p>
-              </div>
-            )}
 
             <Card className="p-4">
               <p className="text-sm font-bold text-white mb-3 flex items-center gap-1.5">

@@ -291,18 +291,19 @@ CREATE TABLE IF NOT EXISTS Referral (
 );
 CREATE INDEX IF NOT EXISTS idx_referral_referrerId ON Referral(referrerId);
 
--- Level-up and monthly-target rebates. UNIQUE(userId, kind, rewardKey) makes every reward single-use.
-CREATE TABLE IF NOT EXISTS LoyaltyReward (
+-- VIP rewards, settled monthly. UNIQUE(userId, kind, rewardKey) makes every payout single-use:
+--   LEVEL   key = level number (one time)      MONTHLY key = "YYYY-MM"      REBATE key = "YYYY-MM"
+CREATE TABLE IF NOT EXISTS VipReward (
   id            TEXT PRIMARY KEY,
   userId        TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
-  kind          TEXT NOT NULL CHECK (kind IN ('LEVEL','MONTH')),
+  kind          TEXT NOT NULL CHECK (kind IN ('LEVEL','MONTHLY','REBATE')),
   rewardKey     TEXT NOT NULL,
   amount        INTEGER NOT NULL CHECK (amount > 0),
   transactionId TEXT REFERENCES "Transaction"(id),
   createdAt     TEXT NOT NULL,
   UNIQUE (userId, kind, rewardKey)
 );
-CREATE INDEX IF NOT EXISTS idx_loyalty_userId ON LoyaltyReward(userId);
+CREATE INDEX IF NOT EXISTS idx_vip_userId ON VipReward(userId);
 
 CREATE TABLE IF NOT EXISTS Notification (
   id        TEXT PRIMARY KEY,

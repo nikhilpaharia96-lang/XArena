@@ -16,8 +16,7 @@ const iconMap: Record<string, typeof Bell> = {
   RESULT_PUBLISHED: Trophy,
   WINNER_ANNOUNCEMENT: Trophy,
   REFERRAL_BONUS: Gift,
-  LEVEL_UP: Crown,
-  MONTHLY_TARGET: Crown,
+  VIP_REWARD: Crown,
   ANNOUNCEMENT: Megaphone,
   SYSTEM: Bell,
 };
