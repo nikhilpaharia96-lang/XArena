@@ -93,7 +93,7 @@ export default function RewardsPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className={cn("text-sm font-semibold", l.reached ? "text-white" : "text-white/60")}>
-                    {l.name} {current && <span className="ml-1 rounded-full bg-gold px-1.5 py-0.5 text-[10px] font-black text-black">YOU</span>}
+                    {l.name} {current && <span className="ml-1 rounded-full bg-gold px-1.5 py-0.5 text-[11px] font-black text-black">YOU</span>}
                   </p>
                   <p className="text-xs text-white/45">{l.minXp.toLocaleString("en-IN")} XP · ₹{l.minXp.toLocaleString("en-IN")} added</p>
                 </div>

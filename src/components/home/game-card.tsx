@@ -72,7 +72,7 @@ export function GameCard({ game, tournamentCount }: { game: Game; tournamentCoun
         {game.shortName ?? game.name}
       </p>
       {typeof tournamentCount === "number" && (
-        <p className="text-[10px] text-gold font-semibold text-center mt-0.5">{tournamentCount}+ Tournaments</p>
+        <p className="text-[11px] text-gold font-semibold text-center mt-0.5">{tournamentCount}+ Tournaments</p>
       )}
     </Link>
   );

@@ -169,7 +169,7 @@ export default function TeamsPage() {
             className={cn("h-9 rounded-full border px-4 text-xs font-semibold", tab === id ? "gradient-brand border-transparent text-white" : "border-white/10 bg-white/5 text-white/60")}
           >
             {label}
-            {id === "teams" && teamInvites > 0 && <span className="ml-1.5 rounded-full bg-crimson px-1.5 text-[10px] font-bold text-white">{teamInvites}</span>}
+            {id === "teams" && teamInvites > 0 && <span className="ml-1.5 rounded-full bg-crimson px-1.5 text-[11px] font-bold text-white">{teamInvites}</span>}
           </button>
         ))}
       </div>

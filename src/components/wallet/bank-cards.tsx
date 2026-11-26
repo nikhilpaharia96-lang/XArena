@@ -35,7 +35,7 @@ export function BankCard({
         <span className="flex items-center gap-2 pb-2 border-b border-white/30">
           <span className="text-base font-black tracking-wide">BANK {bank.slot}</span>
           {selected && (
-            <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 rounded-full px-2 py-0.5">Selected</span>
+            <span className="text-[11px] font-black uppercase tracking-wider bg-white/25 rounded-full px-2 py-0.5">Selected</span>
           )}
         </span>
         <span className="grid grid-cols-2 gap-x-4 gap-y-2 pt-2.5">
@@ -61,7 +61,7 @@ export function BankCard({
 function Field({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
   return (
     <span className={cn("block min-w-0", wide && "col-span-2")}>
-      <span className="block text-[10px] uppercase tracking-wide text-white/65">{label}</span>
+      <span className="block text-[11px] uppercase tracking-wide text-white/65">{label}</span>
       <span className="block text-sm font-bold break-words">{value}</span>
     </span>
   );

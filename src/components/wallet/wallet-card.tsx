@@ -39,7 +39,7 @@ export function WalletCard({
         {rows.map((r) => (
           <div key={r.label} className="bg-[#13265F] border border-[#2A3F86] rounded-2xl p-2.5 sm:p-3 min-w-0">
             <r.icon className={`h-4 w-4 mb-1.5 ${r.tone}`} />
-            <p className="text-[10px] text-white/60 uppercase tracking-wide truncate">{r.label}</p>
+            <p className="text-[11px] text-white/60 uppercase tracking-wide truncate">{r.label}</p>
             <p className="text-sm font-bold text-white font-mono truncate">{formatPaise(r.value)}</p>
           </div>
         ))}

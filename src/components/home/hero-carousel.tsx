@@ -129,10 +129,10 @@ export function HeroCarousel() {
 
           {/* Badge row */}
           <div className="relative flex flex-wrap items-center gap-2 mb-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-gold">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-gold">
               <Trophy className="h-3 w-3" /> The Ultimate Gaming Arena
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-signal/40 bg-signal/10 px-3 py-1 text-[10px] font-bold text-signal">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-signal/40 bg-signal/10 px-3 py-1 text-[11px] font-bold text-signal">
               <ShieldCheck className="h-3 w-3" /> Fair &amp; Verified
             </span>
           </div>
@@ -187,7 +187,7 @@ export function HeroCarousel() {
           <div className="absolute inset-0 bg-gradient-to-r from-void via-void/88 sm:via-void/80 to-void/15 sm:to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-void via-void/15 to-transparent" />
 
-          <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[10px] font-bold tracking-widest text-gold mb-2">
+          <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[11px] font-bold tracking-widest text-gold mb-2">
             <Zap className="h-3 w-3" /> JOIN THE ARENA
           </span>
 
@@ -261,7 +261,7 @@ export function HeroCarousel() {
           <div className="absolute inset-0 bg-gradient-to-r from-void via-void/85 sm:via-void/75 to-void/10 sm:to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-void via-void/15 to-transparent" />
 
-          <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[10px] font-bold tracking-widest text-gold mb-2">
+          <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[11px] font-bold tracking-widest text-gold mb-2">
             <Crown className="h-3 w-3" /> BIGGEST GAMING TOURNAMENTS
           </span>
 
@@ -332,7 +332,7 @@ export function HeroCarousel() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-void via-void/60 to-black/10" />
 
-              <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-gold mb-3">
+              <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-gold mb-3">
                 <Zap className="h-3 w-3" /> Featured Tournament
               </span>
 

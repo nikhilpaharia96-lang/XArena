@@ -40,7 +40,7 @@ export function NewsSection() {
               </div>
               <div className="p-3.5">
                 <p className="text-sm font-bold text-white leading-snug line-clamp-2">{n.title}</p>
-                <p className="text-[10px] text-white/40 mt-1.5">{formatRelativeTime(n.createdAt)}</p>
+                <p className="text-[11px] text-white/40 mt-1.5">{formatRelativeTime(n.createdAt)}</p>
               </div>
             </Link>
           ))}

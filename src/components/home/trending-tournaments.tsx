@@ -73,7 +73,7 @@ export function TrendingTournaments() {
                         {label === "HOT" && <span className="h-1.5 w-1.5 rounded-full bg-white live-dot" />}
                         {label}
                       </Badge>
-                      <span className="relative z-10 ml-auto text-[10px] font-bold uppercase tracking-wider text-white/80 bg-[#0B1224] rounded-full px-2 py-1">
+                      <span className="relative z-10 ml-auto text-[11px] font-bold uppercase tracking-wider text-white/80 bg-[#0B1224] rounded-full px-2 py-1">
                         {t.gameName}
                       </span>
                     </div>

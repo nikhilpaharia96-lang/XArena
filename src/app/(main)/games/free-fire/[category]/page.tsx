@@ -160,7 +160,7 @@ function CategoryView({ cat }: { cat: NonNullable<ReturnType<typeof findCategory
           ].map((s) => (
             <div key={s.label} className="rounded-xl bg-black/35 border border-white/10 p-2.5">
               <p className="text-sm font-bold text-white truncate">{s.value}</p>
-              <p className="text-[10px] text-white/55">{s.label}</p>
+              <p className="text-[11px] text-white/55">{s.label}</p>
             </div>
           ))}
         </div>
@@ -204,7 +204,7 @@ function CategoryView({ cat }: { cat: NonNullable<ReturnType<typeof findCategory
         >
           <SlidersHorizontal className="h-3.5 w-3.5" /> Filters
           {activeFilterCount > 0 && (
-            <span className="h-4 min-w-4 px-1 rounded-full bg-violet text-[10px] font-bold flex items-center justify-center text-white">{activeFilterCount}</span>
+            <span className="h-4 min-w-4 px-1 rounded-full bg-violet text-[11px] font-bold flex items-center justify-center text-white">{activeFilterCount}</span>
           )}
         </button>
       </div>

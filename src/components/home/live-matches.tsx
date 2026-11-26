@@ -23,7 +23,7 @@ export function LiveMatches() {
         title="Live Matches"
         href="/tournaments?status=LIVE"
         badge={
-          <span className="inline-flex items-center gap-1 rounded-full bg-crimson px-2 py-0.5 text-[10px] font-bold text-white">
+          <span className="inline-flex items-center gap-1 rounded-full bg-crimson px-2 py-0.5 text-[11px] font-bold text-white">
             <Radio className="h-2.5 w-2.5" /> LIVE
           </span>
         }

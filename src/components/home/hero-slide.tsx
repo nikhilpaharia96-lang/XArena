@@ -58,7 +58,7 @@ export function HeroSlide({ slide, className, priority }: { slide: HeroSlideCont
       <div className="absolute inset-0 bg-gradient-to-t from-void via-void/10 to-transparent" />
 
       {slide.badgeText && (
-        <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-gold mb-2">
+        <span className="relative inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/50 bg-gold/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-gold mb-2">
           <Zap className="h-3 w-3" /> {slide.badgeText}
         </span>
       )}

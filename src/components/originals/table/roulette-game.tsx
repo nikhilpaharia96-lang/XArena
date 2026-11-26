@@ -88,7 +88,7 @@ export function RouletteGame({ cfg, balance }: { cfg: OriginalGame; balance: num
         className={cn("relative h-9 rounded-md text-[11px] font-bold text-white border flex items-center justify-center", cls ?? "bg-surface-2", hit ? "border-gold ring-1 ring-gold" : "border-white/15", extra)}
       >
         {label}
-        {amt > 0 && <span className="absolute -top-1.5 -right-1 min-w-4 h-4 px-1 rounded-full bg-gold text-[9px] leading-4 text-black font-black">{amt / 100}</span>}
+        {amt > 0 && <span className="absolute -top-1.5 -right-1 min-w-4 h-4 px-1 rounded-full bg-gold text-[10px] leading-4 text-black font-black">{amt / 100}</span>}
       </button>
     );
   };

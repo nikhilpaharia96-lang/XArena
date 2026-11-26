@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { Bell, Menu, Plus, Wallet as WalletIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowLeft, Bell, Menu, Plus, Wallet as WalletIcon } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
 import { formatPaise } from "@/lib/format";
@@ -19,6 +19,10 @@ const navLinks = [
   { href: "/referral", label: "Refer & Earn" },
 ];
 
+// Tab roots keep the menu button; pages that draw their own back arrow don't get a second one.
+const ROOTS = new Set(["/", "/tournaments", "/teams", "/wallet", "/profile"]);
+const OWN_BACK = [/^\/tournaments\/[^/]+/, /^\/wallet\/.+/, /^\/profile\/account/];
+
 const iconBtn =
   "relative h-10 w-10 rounded-full flex items-center justify-center text-white/80 hover:bg-white/8 active:bg-white/12 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet/60";
 
@@ -28,15 +32,24 @@ export function TopBar() {
   const pathname = usePathname();
   const unread = notifData?.unreadCount ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+  const showBack = !ROOTS.has(pathname) && !OWN_BACK.some((r) => r.test(pathname));
+  const goBack = () => (window.history.length > 1 ? router.back() : router.push("/"));
 
   return (
     <>
       <header className="app-topbar sticky top-0 z-30 border-b border-white/[0.07] safe-top shadow-[0_1px_0_0_rgba(37,99,235,0.18)]">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-2 pl-1.5 pr-3 sm:px-4 h-14 sm:h-16">
           <div className="flex items-center gap-0.5 sm:gap-3 min-w-0">
-            <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className={cn(iconBtn, "sm:hidden")}>
-              <Menu className="h-[22px] w-[22px]" />
-            </button>
+            {showBack ? (
+              <button onClick={goBack} aria-label="Go back" className={cn(iconBtn, "sm:hidden")}>
+                <ArrowLeft className="h-[22px] w-[22px]" />
+              </button>
+            ) : (
+              <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className={cn(iconBtn, "sm:hidden")}>
+                <Menu className="h-[22px] w-[22px]" />
+              </button>
+            )}
             <Link href="/" aria-label="XArena home" className="flex items-center shrink-0">
               <Image
                 src="/images/xarena-logo.webp"
@@ -92,7 +105,7 @@ export function TopBar() {
                 >
                   <Bell className="h-5 w-5" />
                   {unread > 0 && (
-                    <span className="absolute top-1 right-1 h-4 min-w-4 px-1 rounded-full bg-crimson text-[9px] font-bold flex items-center justify-center text-white ring-2 ring-[var(--topbar-bg)]">
+                    <span className="absolute top-1 right-1 h-4 min-w-4 px-1 rounded-full bg-crimson text-[10px] font-bold flex items-center justify-center text-white ring-2 ring-[var(--topbar-bg)]">
                       {unread > 9 ? "9+" : unread}
                     </span>
                   )}

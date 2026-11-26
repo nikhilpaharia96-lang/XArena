@@ -400,3 +400,25 @@ html[data-theme="light"] :is(input, textarea)::placeholder { color: #64748B; }
 @media (max-width: 639px) {
   input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
 }
+
+/* ---------- App mode (installed PWA) ---------- */
+/* Page-to-page fade so navigation feels like an app, not a reload. */
+@keyframes page-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.page-enter { animation: page-enter 0.22s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+
+/* Press feedback on everything tappable. */
+a, button, [role="button"] { touch-action: manipulation; }
+@media (hover: none) {
+  a:active, button:not(:disabled):active { opacity: 0.8; }
+}
+
+[data-app="standalone"] .site-footer { display: none; }
+[data-app="standalone"] body { overscroll-behavior-y: none; }
+[data-app="standalone"] body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+[data-app="standalone"] input, [data-app="standalone"] textarea, [data-app="standalone"] [contenteditable],
+[data-app="standalone"] .selectable { -webkit-user-select: text; user-select: text; }
+
+/* Invisible hit-area growth so small links/buttons reach 44px without changing the layout. */
+.hit-44 { position: relative; }
+.hit-44::after { content: ""; position: absolute; inset: -12px -8px; }

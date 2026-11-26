@@ -254,15 +254,15 @@ export default function RegisterPage({ params }: { params: Promise<{ slug: strin
           <h1 className="text-xl sm:text-2xl font-black text-white leading-tight break-words">{t.title}</h1>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="rounded-xl bg-black/40 backdrop-blur px-2 py-2">
-              <p className="text-[10px] uppercase tracking-wide text-white/45">Tournament ID</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/45">Tournament ID</p>
               <p className="text-xs font-mono font-bold text-white mt-0.5 truncate">{shortId(t.id)}</p>
             </div>
             <div className="rounded-xl bg-black/40 backdrop-blur px-2 py-2">
-              <p className="text-[10px] uppercase tracking-wide text-white/45">Entry Fee</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/45">Entry Fee</p>
               <p className="text-xs font-bold text-gold mt-0.5">{isPaid ? formatPaise(t.entryFee) : "Free"}</p>
             </div>
             <div className="rounded-xl bg-black/40 backdrop-blur px-2 py-2">
-              <p className="text-[10px] uppercase tracking-wide text-white/45">Prize Pool</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/45">Prize Pool</p>
               <p className="text-xs font-bold text-white mt-0.5 flex items-center justify-center gap-1">
                 <Trophy className="h-3 w-3 text-gold" /> {formatPaise(t.prizePool)}
               </p>

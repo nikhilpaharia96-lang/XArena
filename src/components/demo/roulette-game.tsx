@@ -72,7 +72,7 @@ function BoardCell({ k, label, cls, aria, bets, disabled, onPlace }: { k: string
     <button type="button" disabled={disabled} onClick={() => onPlace(k)} aria-label={aria} className={cn("relative flex items-center justify-center border border-white/25 text-xs font-bold text-white active:brightness-125 disabled:opacity-70", cls)}>
       {label}
       {bets[k] ? (
-        <span className="absolute -right-1 -top-1 z-10 flex h-5 min-w-5 items-center justify-center rounded-full border border-amber-200 bg-amber-400 px-1 text-[9px] font-black text-black shadow">{bets[k]}</span>
+        <span className="absolute -right-1 -top-1 z-10 flex h-5 min-w-5 items-center justify-center rounded-full border border-amber-200 bg-amber-400 px-1 text-[10px] font-black text-black shadow">{bets[k]}</span>
       ) : null}
     </button>
   );
@@ -262,7 +262,7 @@ export function RouletteGame() {
                 const n = r + 3 * c;
                 return <BoardCell bets={bets} disabled={spinning} onPlace={place} key={n} k={`n:${n}`} label={n} cls={cn("h-10", BG[colorOf(n)])} aria={`Bet on ${n}`} />;
               })}
-              <BoardCell bets={bets} disabled={spinning} onPlace={place} k={`c${r === 3 ? 3 : r === 2 ? 2 : 1}`} label="2:1" cls="h-10 bg-[#0b5d3b] text-[10px]" aria={`Bet on column ${r === 3 ? 3 : r === 2 ? 2 : 1}`} />
+              <BoardCell bets={bets} disabled={spinning} onPlace={place} k={`c${r === 3 ? 3 : r === 2 ? 2 : 1}`} label="2:1" cls="h-10 bg-[#0b5d3b] text-[11px]" aria={`Bet on column ${r === 3 ? 3 : r === 2 ? 2 : 1}`} />
             </div>
           ))}
           {(["d1", "d2", "d3"] as const).map((k, i) => (
