@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Users, LogIn, Trophy } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-auth";
@@ -12,6 +12,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FriendsPanel } from "@/components/friends/friends-panel";
+import { cn } from "@/lib/cn";
 
 /**
  * XArena doesn't have a dedicated Team entity (no roster management,
@@ -22,10 +24,10 @@ import { EmptyState } from "@/components/ui/empty-state";
  * player has actually competed under, grouped from their tournament
  * history, with a link back into each tournament.
  */
-export default function TeamsPage() {
-  const { data: me, isLoading: meLoading } = useCurrentUser();
+function SquadsSection() {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: games } = useGames();
+
 
   const gameNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -46,38 +48,9 @@ export default function TeamsPage() {
 
   const soloCount = (profile?.tournamentHistory ?? []).filter((e) => !e.teamName).length;
 
-  if (meLoading) {
-    return (
-      <div className="space-y-3">
-        <Skeleton className="h-8 w-40" />
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-2xl" />
-        ))}
-      </div>
-    );
-  }
-
-  if (!me) {
-    return (
-      <EmptyState
-        icon={LogIn}
-        title="Log in to see your teams"
-        description="Your squads are built from the tournaments you've registered for."
-        action={
-          <Link href="/login">
-            <Button size="sm">Login</Button>
-          </Link>
-        }
-      />
-    );
-  }
-
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-black text-white">My Teams</h1>
-        <p className="text-sm text-white/45 mt-0.5">Squads you&apos;ve entered tournaments under</p>
-      </div>
+      <p className="text-sm text-white/45">Squad names you&apos;ve entered tournaments under</p>
 
       {profileLoading ? (
         <div className="space-y-3">
@@ -136,6 +109,60 @@ export default function TeamsPage() {
           Plus {soloCount} solo {soloCount === 1 ? "entry" : "entries"} with no team name.
         </p>
       )}
+    </div>
+  );
+}
+
+export default function TeamsPage() {
+  const { data: me, isLoading: meLoading } = useCurrentUser();
+  const [tab, setTab] = useState<"friends" | "squads">("friends");
+
+  if (meLoading) {
+    return (
+      <div className="space-y-3">
+        <Skeleton className="h-8 w-40" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 rounded-2xl" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!me) {
+    return (
+      <EmptyState
+        icon={LogIn}
+        title="Log in to see your teams"
+        description="Add friends, chat with them and see the squads you've played with."
+        action={
+          <Link href="/login">
+            <Button size="sm">Login</Button>
+          </Link>
+        }
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-xl font-black text-white">My Teams</h1>
+        <p className="text-sm text-white/45 mt-0.5">Friends, chat and your squads</p>
+      </div>
+
+      <div className="flex gap-2">
+        {([["friends", "Friends & Chat"], ["squads", "My Squads"]] as const).map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={cn("h-9 rounded-full border px-4 text-xs font-semibold", tab === id ? "gradient-brand border-transparent text-white" : "border-white/10 bg-white/5 text-white/60")}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "friends" ? <FriendsPanel meId={me.user.id} /> : <SquadsSection />}
     </div>
   );
 }

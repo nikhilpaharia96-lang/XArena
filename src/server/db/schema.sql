@@ -564,3 +564,29 @@ CREATE INDEX IF NOT EXISTS idx_gr_created ON GameRound(createdAt);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_gr_one_active ON GameRound(userId, gameKey) WHERE status = 'ACTIVE';
 -- Double-click / retry protection for bet placement.
 CREATE UNIQUE INDEX IF NOT EXISTS uq_gr_request ON GameRound(userId, requestId) WHERE requestId IS NOT NULL;
+
+-- Friends & direct chat. One row per user pair (pairKey = the two ids sorted, joined with ':'),
+-- so A->B and B->A can never coexist. Declined/cancelled/removed = row deleted (messages cascade).
+CREATE TABLE IF NOT EXISTS Friendship (
+  id          TEXT PRIMARY KEY,
+  pairKey     TEXT NOT NULL UNIQUE,
+  requesterId TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  addresseeId TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  status      TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','ACCEPTED')),
+  createdAt   TEXT NOT NULL,
+  updatedAt   TEXT NOT NULL,
+  CHECK (requesterId <> addresseeId)
+);
+CREATE INDEX IF NOT EXISTS idx_friendship_requester ON Friendship(requesterId, status);
+CREATE INDEX IF NOT EXISTS idx_friendship_addressee ON Friendship(addresseeId, status);
+
+CREATE TABLE IF NOT EXISTS DirectMessage (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  friendshipId TEXT NOT NULL REFERENCES Friendship(id) ON DELETE CASCADE,
+  senderId     TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  body         TEXT NOT NULL CHECK (length(body) BETWEEN 1 AND 1000),
+  createdAt    TEXT NOT NULL,
+  readAt       TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_dm_conversation ON DirectMessage(friendshipId, id);
+CREATE INDEX IF NOT EXISTS idx_dm_unread ON DirectMessage(friendshipId, senderId, readAt);
