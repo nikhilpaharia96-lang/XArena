@@ -138,6 +138,7 @@ export interface JoinPayload {
   ign: string;
   gameUid: string;
   teamName?: string;
+  teamId?: string;
   acceptRules: boolean;
 }
 export interface JoinResult {

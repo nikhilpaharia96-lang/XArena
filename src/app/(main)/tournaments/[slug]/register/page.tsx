@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, ArrowLeft, CheckCircle2, Gamepad2, Info, Lock, ScrollText, Ticket, Trophy, Users, Wallet } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useTeams } from "@/hooks/use-teams";
 import { useJoinTournament, useSlotBoard, useTournamentDetail, type JoinResult } from "@/hooks/use-tournaments";
 import { ApiClientError } from "@/lib/api-client";
 import { toast } from "@/lib/toast-store";
@@ -54,8 +55,14 @@ export default function RegisterPage({ params }: { params: Promise<{ slug: strin
   // only become local state once the player edits them — no effect needed to copy server data.
   const [ignEdit, setIgnEdit] = useState<string | null>(null);
   const [uidEdit, setUidEdit] = useState<string | null>(null);
-  const ign = ignEdit ?? board?.profile.ign ?? "";
-  const gameUid = uidEdit ?? board?.profile.gameUid ?? "";
+  // Playing "as" one of my teams for this game (defaults to it when I have one): its saved IGN/UID prefill the form.
+  const { data: teamsData } = useTeams();
+  const [teamPick, setTeamPick] = useState<string | null | undefined>(undefined); // undefined = untouched → default team
+  const gameTeams = (teamsData?.teams ?? []).filter((x) => x.game.slug === t?.gameSlug);
+  const chosenTeam = teamPick === undefined ? (gameTeams[0] ?? null) : (gameTeams.find((x) => x.id === teamPick) ?? null);
+
+  const ign = ignEdit ?? chosenTeam?.myIgn ?? board?.profile.ign ?? "";
+  const gameUid = uidEdit ?? chosenTeam?.myGameUid ?? board?.profile.gameUid ?? "";
   const setIgn = (v: string) => setIgnEdit(v);
   const setGameUid = (v: string) => setUidEdit(v);
 
@@ -103,7 +110,8 @@ export default function RegisterPage({ params }: { params: Promise<{ slug: strin
         position: selected?.position,
         ign: ign.trim(),
         gameUid: gameUid.trim(),
-        teamName: teamName.trim() || undefined,
+        teamId: chosenTeam?.id,
+        teamName: chosenTeam ? undefined : teamName.trim() || undefined,
         acceptRules: accepted,
       },
       {
@@ -274,7 +282,22 @@ export default function RegisterPage({ params }: { params: Promise<{ slug: strin
             <label htmlFor="uid" className="text-xs font-semibold text-white/60 mb-1.5 block">Game UID *</label>
             <Input id="uid" value={gameUid} maxLength={40} inputMode={["free-fire-max", "bgmi", "pubg-mobile", "cod-mobile"].includes(gameSlug) ? "numeric" : "text"} autoComplete="off" error={uidError ?? undefined} onChange={(e) => setGameUid(e.target.value)} onBlur={() => setTouched(true)} placeholder="e.g. 123456789" />
           </div>
-          {board.layout.teamSize > 1 && (
+          {board.layout.teamSize > 1 && gameTeams.length > 0 && (
+            <div className="sm:col-span-2">
+              <label htmlFor="play-as" className="text-xs font-semibold text-white/60 mb-1.5 block">Play as team</label>
+              <select
+                id="play-as"
+                value={chosenTeam?.id ?? ""}
+                onChange={(e) => setTeamPick(e.target.value || null)}
+                className="w-full rounded-xl bg-surface-2 border border-white/10 px-4 h-12 text-sm text-white outline-none focus:border-violet/60"
+              >
+                {gameTeams.map((x) => <option key={x.id} value={x.id}>{x.name} [{x.tag}]</option>)}
+                <option value="">No team — enter a name</option>
+              </select>
+              {chosenTeam && <p className="mt-1.5 text-xs text-white/40">Your teammates should join this tournament too, under the same team.</p>}
+            </div>
+          )}
+          {board.layout.teamSize > 1 && !chosenTeam && (
             <div className="sm:col-span-2">
               <label htmlFor="team" className="text-xs font-semibold text-white/60 mb-1.5 block">Team name (optional)</label>
               <Input id="team" value={teamName} maxLength={40} onChange={(e) => setTeamName(e.target.value)} placeholder="Your squad's name" />

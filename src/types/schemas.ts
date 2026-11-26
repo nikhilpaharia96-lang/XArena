@@ -40,6 +40,8 @@ export type LoginInput = z.infer<typeof loginSchema>;
 
 export const joinTournamentSchema = z.object({
   teamName: z.string().trim().max(40).optional(),
+  // Enter under one of the player's own teams (must play this tournament's game). Overrides teamName.
+  teamId: z.string().trim().max(100).optional(),
   // Slot/position the player picked (omitted when the tournament auto-assigns slots).
   slotNumber: z.number().int().min(1).optional(),
   position: z.number().int().min(1).max(16).optional(),

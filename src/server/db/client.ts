@@ -86,13 +86,14 @@ function openConnection(): Database.Database {
 
   // Slot/position registration columns (older DB files won't have them yet).
   const partCols = db.prepare("PRAGMA table_info(TournamentParticipant)").all() as { name: string }[];
-  for (const col of ["slotNumber INTEGER", "position INTEGER", "ign TEXT", "gameUid TEXT"]) {
+  for (const col of ["slotNumber INTEGER", "position INTEGER", "ign TEXT", "gameUid TEXT", "teamId TEXT"]) {
     if (!partCols.some((c) => c.name === col.split(" ")[0])) db.exec(`ALTER TABLE TournamentParticipant ADD COLUMN ${col}`);
   }
   // The DB-level guarantee that a slot position can never be taken twice.
   db.exec(
     "CREATE UNIQUE INDEX IF NOT EXISTS uq_participant_slot ON TournamentParticipant(tournamentId, slotNumber, position) WHERE slotNumber IS NOT NULL"
   );
+  db.exec("CREATE INDEX IF NOT EXISTS idx_participant_teamId ON TournamentParticipant(teamId)");
   backfillSlots(db);
 
   return db;

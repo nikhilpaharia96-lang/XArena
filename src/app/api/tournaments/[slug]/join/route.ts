@@ -6,6 +6,7 @@ import { checkRateLimit, getClientKey } from "@/server/lib/rate-limit";
 import { registrationBlock, type TournamentSlotRow } from "@/server/lib/slots";
 import { joinTournamentSchema } from "@/types/schemas";
 import { validateGameUid } from "@/lib/game-uid";
+import { resolveTeamEntry } from "@/server/lib/teams";
 import { buildLayout, firstFreePosition, positionLabel, positionsInSlot, slotKey, slotLabel } from "@/lib/slot-layout";
 
 interface WalletRow {
@@ -37,8 +38,8 @@ export async function POST(req: Request, context: { params: Promise<{ slug: stri
     const input = joinTournamentSchema.parse(await req.json().catch(() => ({})));
 
     const head = db
-      .prepare(`SELECT t.id, g.slug AS gameSlug FROM Tournament t JOIN Game g ON g.id = t.gameId WHERE t.slug = ? AND t.status != 'DRAFT'`)
-      .get(slug) as { id: string; gameSlug: string } | undefined;
+      .prepare(`SELECT t.id, t.gameId, g.slug AS gameSlug FROM Tournament t JOIN Game g ON g.id = t.gameId WHERE t.slug = ? AND t.status != 'DRAFT'`)
+      .get(slug) as { id: string; gameId: string; gameSlug: string } | undefined;
     if (!head) throw new ApiError(404, "Tournament not found.", "NOT_FOUND");
 
     const uidProblem = validateGameUid(head.gameSlug, input.gameUid);
@@ -100,12 +101,15 @@ export async function POST(req: Request, context: { params: Promise<{ slug: stri
         throw new ApiError(409, `${label} was just taken. Please choose another slot.`, "SLOT_TAKEN");
       }
 
+      // Entering as one of my teams: membership + same-game are re-checked here, inside the write lock.
+      const team = input.teamId ? resolveTeamEntry(db, user.id, input.teamId, head.gameId) : null;
+
       // Reserve the seat first (the unique index rejects a duplicate even under a race).
       const participantId = createId("part");
       db.prepare(
-        `INSERT INTO TournamentParticipant (id, tournamentId, userId, teamName, status, entryTxnId, slotNumber, position, ign, gameUid, joinedAt)
-         VALUES (?, ?, ?, ?, 'REGISTERED', NULL, ?, ?, ?, ?, ?)`
-      ).run(participantId, t.id, user.id, input.teamName ?? null, slotNumber, position, input.ign, input.gameUid, nowIso);
+        `INSERT INTO TournamentParticipant (id, tournamentId, userId, teamName, teamId, status, entryTxnId, slotNumber, position, ign, gameUid, joinedAt)
+         VALUES (?, ?, ?, ?, ?, 'REGISTERED', NULL, ?, ?, ?, ?, ?)`
+      ).run(participantId, t.id, user.id, team?.name ?? input.teamName ?? null, team?.id ?? null, slotNumber, position, input.ign, input.gameUid, nowIso);
 
       // 3. Charge the entry fee — only after the seat is secured.
       let entryTxnId: string | null = null;

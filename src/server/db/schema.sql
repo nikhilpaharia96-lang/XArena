@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS TournamentParticipant (
   position     INTEGER,
   ign          TEXT,
   gameUid      TEXT,
+  teamId       TEXT,                 -- Team this player entered under (NULL = solo / free-text squad name)
   joinedAt     TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(tournamentId, userId)
 );
@@ -590,3 +591,40 @@ CREATE TABLE IF NOT EXISTS DirectMessage (
 );
 CREATE INDEX IF NOT EXISTS idx_dm_conversation ON DirectMessage(friendshipId, id);
 CREATE INDEX IF NOT EXISTS idx_dm_unread ON DirectMessage(friendshipId, senderId, readAt);
+
+-- Teams (squads). A player can be in at most ONE team per game (UNIQUE(userId, gameId) on TeamMember).
+-- Joining is by captain invite to an accepted friend; membership rows carry the player's IGN + Game UID for that game.
+CREATE TABLE IF NOT EXISTS Team (
+  id         TEXT PRIMARY KEY,
+  name       TEXT NOT NULL,
+  nameKey    TEXT NOT NULL UNIQUE,         -- lower-cased, whitespace-collapsed name: names are unique case-insensitively
+  tag        TEXT NOT NULL,
+  gameId     TEXT NOT NULL REFERENCES Game(id),
+  captainId  TEXT NOT NULL REFERENCES User(id),
+  createdAt  TEXT NOT NULL,
+  updatedAt  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_team_game ON Team(gameId);
+
+CREATE TABLE IF NOT EXISTS TeamMember (
+  teamId   TEXT NOT NULL REFERENCES Team(id) ON DELETE CASCADE,
+  userId   TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  gameId   TEXT NOT NULL REFERENCES Game(id),
+  role     TEXT NOT NULL DEFAULT 'MEMBER' CHECK (role IN ('CAPTAIN','MEMBER')),
+  ign      TEXT,
+  gameUid  TEXT,
+  joinedAt TEXT NOT NULL,
+  PRIMARY KEY (teamId, userId),
+  UNIQUE (userId, gameId)
+);
+CREATE INDEX IF NOT EXISTS idx_teammember_user ON TeamMember(userId);
+
+CREATE TABLE IF NOT EXISTS TeamInvite (
+  id          TEXT PRIMARY KEY,
+  teamId      TEXT NOT NULL REFERENCES Team(id) ON DELETE CASCADE,
+  inviteeId   TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  invitedById TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  createdAt   TEXT NOT NULL,
+  UNIQUE (teamId, inviteeId)
+);
+CREATE INDEX IF NOT EXISTS idx_teaminvite_invitee ON TeamInvite(inviteeId);
