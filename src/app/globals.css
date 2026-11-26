@@ -13,6 +13,7 @@
   --color-void: #05070E;       /* app background, deep ink-navy */
   --color-surface: #0C1223;    /* card / raised surface navy */
   --color-surface-2: #131C36;
+  --color-elevated: #111A31;   /* raised cards on top of surface */
   --color-border-glow: rgba(37, 99, 235, 0.28);
 
   --color-violet: #2563EB;     /* primary brand blue (was violet #7C5CF6) */
@@ -70,6 +71,7 @@ html[data-theme="light"] {
   --color-void: #F1F5F9;
   --color-surface: #FFFFFF;
   --color-surface-2: #E6ECF4;
+  --color-elevated: #FFFFFF;
   --color-border-glow: rgba(37, 99, 235, 0.22);
   --color-signal: #16A34A;
   --color-crimson: #DC2626;
@@ -99,6 +101,7 @@ html[data-theme="light"] {
 /* Solid brand-coloured fills keep white text in light mode. */
 .gradient-brand,
 .gradient-cta,
+.gradient-cta-blue,
 .bg-violet,
 .bg-cobalt,
 .bg-gold,
@@ -114,6 +117,7 @@ html[data-theme="light"] {
   --color-void: #05070E;
   --color-surface: #0C1223;
   --color-surface-2: #131C36;
+  --color-elevated: #111A31;
   --color-border-glow: rgba(37, 99, 235, 0.28);
   --color-signal: #22C55E;
   --color-crimson: #EF4444;
@@ -422,3 +426,15 @@ a, button, [role="button"] { touch-action: manipulation; }
 /* Invisible hit-area growth so small links/buttons reach 44px without changing the layout. */
 .hit-44 { position: relative; }
 .hit-44::after { content: ""; position: absolute; inset: -12px -8px; }
+
+/* Free Fire category cards: soft neon edge driven by --accent (rgb triplet).
+   These two were dropped from this file by accident, which left the Games
+   cards with no background and an invisible button in light mode. */
+.neon-card {
+  border: 1px solid rgba(var(--accent), 0.35);
+  box-shadow: 0 0 0 1px rgba(var(--accent), 0.08), 0 10px 28px -14px rgba(var(--accent), 0.55);
+}
+.gradient-cta-blue {
+  background: linear-gradient(135deg, #2563FF 0%, #1D4ED8 100%);
+  box-shadow: 0 6px 18px -8px rgba(37, 99, 255, 0.85);
+}
