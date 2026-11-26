@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useFriendBadge } from "@/hooks/use-friends";
 import { House, Trophy, UsersRound, WalletCards, UserRound, type LucideIcon } from "lucide-react";
 
 interface NavItem {
@@ -26,6 +27,7 @@ const items: NavItem[] = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const friendBadge = useFriendBadge();
 
   return (
     <nav aria-label="Primary" className="nav-flat fixed bottom-0 left-0 right-0 z-40 sm:hidden safe-bottom">
@@ -47,6 +49,11 @@ export function BottomNav() {
                   className="absolute top-0 h-[3px] w-9 rounded-b-full bg-gradient-to-r from-cobalt to-violet shadow-[0_2px_10px_rgba(59,130,246,0.7)]"
                   transition={{ type: "spring", stiffness: 500, damping: 36 }}
                 />
+              )}
+              {item.href === "/teams" && friendBadge > 0 && (
+                <span className="absolute left-1/2 top-1.5 ml-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-crimson px-1 text-[10px] font-bold leading-none text-white" aria-label={`${friendBadge} new`}>
+                  {friendBadge > 9 ? "9+" : friendBadge}
+                </span>
               )}
               <Icon
                 className="h-6 w-6 transition-colors"

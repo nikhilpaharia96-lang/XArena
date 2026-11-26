@@ -1,5 +1,5 @@
 "use client";
-import { Bell, Trophy, Wallet, Gift, KeyRound, Megaphone, Crown } from "lucide-react";
+import { Bell, Trophy, Wallet, Gift, KeyRound, Megaphone, Crown, UserPlus } from "lucide-react";
 import { formatRelativeTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import type { NotificationRow } from "@/hooks/use-notifications";
@@ -18,6 +18,8 @@ const iconMap: Record<string, typeof Bell> = {
   REFERRAL_BONUS: Gift,
   LEVEL_UP: Crown,
   MONTHLY_TARGET: Crown,
+  FRIEND_REQUEST: UserPlus,
+  FRIEND_ACCEPTED: UserPlus,
   ANNOUNCEMENT: Megaphone,
   SYSTEM: Bell,
 };
