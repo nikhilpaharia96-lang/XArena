@@ -8,7 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatPaise, formatDateTime } from "@/lib/format";
 import { toast } from "@/lib/toast-store";
-import { Copy, Users, Gift, MessageCircle, Send } from "lucide-react";
+import { Copy, Users, Gift, MessageCircle, Send, Check, Trophy } from "lucide-react";
+import { cn } from "@/lib/cn";
 
 export default function ReferralPage() {
   useRequireAuth();
@@ -28,7 +29,7 @@ export default function ReferralPage() {
     );
   }
 
-  const shareText = `Join me on XArena and get a bonus! Use my referral code ${data.referralCode} or sign up here: ${data.referralLink}`;
+  const shareText = `Join me on XArena and get a ${formatPaise(data.config.friendRewardPaise)} bonus! Use my referral code ${data.referralCode} or sign up here: ${data.referralLink}`;
 
   return (
     <div className="space-y-6">
@@ -37,7 +38,7 @@ export default function ReferralPage() {
           <Gift className="h-7 w-7 text-gold" />
         </div>
         <h1 className="text-xl font-black text-white">Refer & Earn</h1>
-        <p className="text-sm text-white/50 mt-1">Earn ₹50 for every friend who joins</p>
+        <p className="text-sm text-white/50 mt-1">Earn {formatPaise(data.config.referrerRewardPaise)} when a friend joins and adds {formatPaise(data.config.minDepositPaise)}</p>
       </div>
 
       <Card className="p-5 glow-border">
@@ -72,16 +73,47 @@ export default function ReferralPage() {
         </a>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-black text-white font-mono">{data.totalInvites}</p>
-          <p className="text-[11px] text-white/40 uppercase mt-1">Friends Invited</p>
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="p-3 text-center">
+          <p className="text-2xl font-black text-white font-mono">{data.qualified}</p>
+          <p className="text-[10px] text-white/40 uppercase mt-1">Rewarded</p>
         </Card>
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-black text-signal font-mono">{formatPaise(data.totalEarned)}</p>
-          <p className="text-[11px] text-white/40 uppercase mt-1">Total Earned</p>
+        <Card className="p-3 text-center">
+          <p className="text-2xl font-black text-white font-mono">{data.pending}</p>
+          <p className="text-[10px] text-white/40 uppercase mt-1">Pending</p>
+        </Card>
+        <Card className="p-3 text-center">
+          <p className="text-xl leading-8 font-black text-signal font-mono">{formatPaise(data.totalEarned)}</p>
+          <p className="text-[10px] text-white/40 uppercase mt-1">Earned</p>
         </Card>
       </div>
+
+      <Card className="p-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Trophy className="h-4 w-4 text-gold" />
+          <h2 className="font-bold text-white text-sm">Milestone bonuses</h2>
+        </div>
+        <p className="text-xs text-white/50 mb-3">Extra one-time bonus as more friends join and add money.</p>
+        <ul className="space-y-2">
+          {data.milestones.map((m) => (
+            <li key={m.count} className={cn("force-dark flex items-center gap-3 rounded-xl border px-3 py-2.5", m.reached ? "border-signal/40 bg-[#10261B]" : "border-[#26314F] bg-[#0B1224]")}>
+              <span className={cn("h-7 w-7 rounded-full flex items-center justify-center shrink-0", m.reached ? "bg-signal text-black" : "bg-[#1B2440] text-white/50")}>
+                {m.reached ? <Check className="h-4 w-4" /> : <Users className="h-4 w-4" />}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white">{m.count} friends</p>
+                <p className="text-xs text-white/55">{m.reached ? "Bonus credited" : `${m.count - data.qualified} more to go`}</p>
+              </div>
+              <span className="text-sm font-black text-gold">+{formatPaise(m.rewardPaise)}</span>
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card className="p-4 text-xs text-white/55 leading-relaxed">
+        You earn {formatPaise(data.config.referrerRewardPaise)} and your friend gets {formatPaise(data.config.friendRewardPaise)} once their deposits reach {formatPaise(data.config.minDepositPaise)}.
+        Rewards are added to your bonus balance (play only). Fake or self-referred accounts are not rewarded and may lead to account action.
+      </Card>
 
       <div>
         <h2 className="font-bold text-white text-sm mb-3">Invite History</h2>
@@ -96,7 +128,11 @@ export default function ReferralPage() {
                   <p className="text-sm font-semibold text-white">{inv.username}</p>
                   <p className="text-xs text-white/40">Joined {formatDateTime(inv.createdAt)}</p>
                 </div>
-                <span className="text-sm font-mono font-bold text-signal">+{formatPaise(inv.bonusAmount)}</span>
+                {inv.bonusPaidAt ? (
+                  <span className="text-sm font-mono font-bold text-signal">+{formatPaise(inv.bonusAmount)}</span>
+                ) : (
+                  <span className="text-[11px] font-semibold text-white/50">Waiting for deposit</span>
+                )}
               </div>
             ))}
           </Card>

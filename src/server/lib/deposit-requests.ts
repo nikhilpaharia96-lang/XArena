@@ -5,6 +5,7 @@ import { writeAuditLog } from "@/server/lib/audit";
 import { matchDepositByUtr } from "@/server/lib/deposit-matching";
 import { normalizeUtr } from "@/server/lib/deposit-requests-shared";
 import { awardForDeposit } from "@/server/lib/loyalty";
+import { awardReferralForDeposit } from "@/server/lib/referral";
 
 export type DepositRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -232,6 +233,7 @@ function approveInTx(params: { id: string; adminId: string; ipAddress?: string |
 
     // 7b. XP / level-up and monthly-target rebates (never blocks the deposit)
     awardForDeposit(db, req.userId, req.amount, now);
+    awardReferralForDeposit(db, req.userId, now);
 
     // 8. user notification + audit trail (same transaction)
     insertNotification(

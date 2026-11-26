@@ -1,6 +1,8 @@
 import { db } from "@/server/db/client";
 import { fail, ok } from "@/server/lib/api-response";
 import { getCurrentUser } from "@/server/lib/current-user";
+import { referralSummary } from "@/server/lib/referral";
+import { FRIEND_REWARD_PAISE, MIN_QUALIFY_DEPOSIT_PAISE, REFERRER_REWARD_PAISE } from "@/lib/referral";
 
 export async function GET() {
   try {
@@ -18,18 +20,18 @@ export async function GET() {
       )
       .all(user.id);
 
-    const totals = db
-      .prepare(
-        `SELECT COUNT(*) as totalInvites, COALESCE(SUM(bonusAmount), 0) as totalEarned
-         FROM Referral WHERE referrerId = ?`
-      )
-      .get(user.id);
+    const s = referralSummary(db, user.id);
 
     return ok({
       referralCode: userRow.referralCode,
       referralLink: `https://xarena.app/signup?ref=${userRow.referralCode}`,
       invites,
-      ...(totals as object),
+      totalInvites: s.qualified + s.pending,
+      totalEarned: s.earnedPaise,
+      qualified: s.qualified,
+      pending: s.pending,
+      milestones: s.milestones,
+      config: { referrerRewardPaise: REFERRER_REWARD_PAISE, friendRewardPaise: FRIEND_REWARD_PAISE, minDepositPaise: MIN_QUALIFY_DEPOSIT_PAISE },
     });
   } catch (error) {
     return fail(error);

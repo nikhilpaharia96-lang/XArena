@@ -319,6 +319,17 @@ CREATE TABLE IF NOT EXISTS VipReward (
 );
 CREATE INDEX IF NOT EXISTS idx_vip_userId ON VipReward(userId);
 
+-- Referral milestone bonuses (5 / 10 / 25 / 50 qualified friends). UNIQUE makes each one single-use.
+CREATE TABLE IF NOT EXISTS ReferralReward (
+  id            TEXT PRIMARY KEY,
+  userId        TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  rewardKey     TEXT NOT NULL,
+  amount        INTEGER NOT NULL CHECK (amount > 0),
+  transactionId TEXT REFERENCES "Transaction"(id),
+  createdAt     TEXT NOT NULL,
+  UNIQUE (userId, rewardKey)
+);
+
 CREATE TABLE IF NOT EXISTS Notification (
   id        TEXT PRIMARY KEY,
   userId    TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,

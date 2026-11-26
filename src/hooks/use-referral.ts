@@ -8,6 +8,10 @@ export interface ReferralData {
   referralLink: string;
   totalInvites: number;
   totalEarned: number;
+  qualified: number;
+  pending: number;
+  milestones: { count: number; rewardPaise: number; reached: boolean; paid: boolean }[];
+  config: { referrerRewardPaise: number; friendRewardPaise: number; minDepositPaise: number };
   invites: { id: string; username: string; avatarUrl: string | null; bonusAmount: number; bonusPaidAt: string | null; createdAt: string }[];
 }
 

@@ -1,4 +1,5 @@
 import { awardForDeposit } from "@/server/lib/loyalty";
+import { awardReferralForDeposit } from "@/server/lib/referral";
 import { db } from "@/server/db/client";
 import { createId, createReferenceId } from "@/server/lib/ids";
 import { verifyWebhookSignature } from "@/server/lib/razorpay";
@@ -89,6 +90,7 @@ export async function POST(req: Request) {
           now
         );
         awardForDeposit(db, deposit.userId, deposit.amount, now);
+        awardReferralForDeposit(db, deposit.userId, now);
 
         db.prepare(
           `INSERT INTO Notification (id, userId, type, title, body, createdAt)

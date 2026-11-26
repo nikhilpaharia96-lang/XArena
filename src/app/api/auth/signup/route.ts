@@ -1,12 +1,10 @@
 import { db } from "@/server/db/client";
 import { ApiError, fail, ok } from "@/server/lib/api-response";
 import { hashPassword, signAccessToken, createRefreshTokenValue, refreshTokenExpiry, ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from "@/server/lib/auth";
-import { createId, createReferenceId, createReferralCode } from "@/server/lib/ids";
+import { createId, createReferralCode } from "@/server/lib/ids";
 import { checkRateLimit, getClientKey } from "@/server/lib/rate-limit";
 import { signupSchema } from "@/types/schemas";
 import { cookies } from "next/headers";
-
-const SIGNUP_REFERRAL_BONUS_PAISE = 5000; // ₹50 credited to the referrer
 
 export async function POST(req: Request) {
   try {
@@ -71,42 +69,11 @@ export async function POST(req: Request) {
       ).run(createId("stat"), userId, now);
 
       if (referrer) {
+        // Reward is paid later, when this friend adds real money (see awardReferralForDeposit).
         db.prepare(
           `INSERT INTO Referral (id, referrerId, referredUserId, bonusAmount, bonusPaidAt, createdAt)
-           VALUES (?, ?, ?, ?, ?, ?)`
-        ).run(createId("ref"), referrer.id, userId, SIGNUP_REFERRAL_BONUS_PAISE, now, now);
-
-        db.prepare(
-          `UPDATE Wallet SET bonusBalance = bonusBalance + ?, updatedAt = ? WHERE userId = ?`
-        ).run(SIGNUP_REFERRAL_BONUS_PAISE, now, referrer.id);
-
-        const referrerWallet = db
-          .prepare("SELECT depositBalance, winningBalance, bonusBalance FROM Wallet WHERE userId = ?")
-          .get(referrer.id) as { depositBalance: number; winningBalance: number; bonusBalance: number };
-        const total = referrerWallet.depositBalance + referrerWallet.winningBalance + referrerWallet.bonusBalance;
-
-        db.prepare(
-          `INSERT INTO "Transaction" (id, userId, type, status, amount, balanceAfter, referenceId, description, createdAt)
-           VALUES (?, ?, 'REFERRAL_BONUS', 'COMPLETED', ?, ?, ?, ?, ?)`
-        ).run(
-          createId("txn"),
-          referrer.id,
-          SIGNUP_REFERRAL_BONUS_PAISE,
-          total,
-          createReferenceId("REF"),
-          "Referral signup bonus",
-          now
-        );
-
-        db.prepare(
-          `INSERT INTO Notification (id, userId, type, title, body, createdAt) VALUES (?, ?, 'REFERRAL_BONUS', ?, ?, ?)`
-        ).run(
-          createId("notif"),
-          referrer.id,
-          "Referral bonus credited! 🎉",
-          `You earned ₹50 because ${input.username} joined using your referral code.`,
-          now
-        );
+           VALUES (?, ?, ?, 0, NULL, ?)`
+        ).run(createId("ref"), referrer.id, userId, now);
       }
     });
     tx();

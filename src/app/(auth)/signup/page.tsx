@@ -14,6 +14,8 @@ import { useSignup } from "@/hooks/use-auth";
 import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
 import { COUNTRY_CODES } from "@/lib/phone";
+import { formatPaise } from "@/lib/format";
+import { FRIEND_REWARD_PAISE, MIN_QUALIFY_DEPOSIT_PAISE } from "@/lib/referral";
 import { signupSchema } from "@/types/schemas";
 import { motion } from "framer-motion";
 
@@ -140,6 +142,7 @@ function SignupForm() {
         <div>
           <label className={label}>Signup Code (optional)</label>
           <Input placeholder="Enter Signup Code" autoCapitalize="characters" {...register("signupCode")} error={errors.signupCode?.message} />
+          <p className="text-[11px] text-white/45 -mt-1">Have a code? You get {formatPaise(FRIEND_REWARD_PAISE)} bonus after your first {formatPaise(MIN_QUALIFY_DEPOSIT_PAISE)} deposit.</p>
         </div>
 
         <p className="text-xs leading-relaxed text-white/60">

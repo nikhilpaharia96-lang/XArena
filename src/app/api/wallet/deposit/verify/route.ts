@@ -1,4 +1,5 @@
 import { awardForDeposit } from "@/server/lib/loyalty";
+import { awardReferralForDeposit } from "@/server/lib/referral";
 import { db } from "@/server/db/client";
 import { ApiError, fail, ok } from "@/server/lib/api-response";
 import { getCurrentUser } from "@/server/lib/current-user";
@@ -86,6 +87,7 @@ export async function POST(req: Request) {
         now
       );
       awardForDeposit(db, user.id, deposit.amount, now);
+      awardReferralForDeposit(db, user.id, now);
 
       db.prepare(
         `INSERT INTO Notification (id, userId, type, title, body, createdAt)
