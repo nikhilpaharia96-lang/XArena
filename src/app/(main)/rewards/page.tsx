@@ -123,6 +123,11 @@ export default function RewardsPage() {
         </Card>
       )}
 
+      <Link href="/vip" className="block rounded-2xl border border-[#26314F] bg-[#0B1224] p-4 force-dark">
+        <p className="font-bold text-white">VIP levels: earn on every bet</p>
+        <p className="mt-0.5 text-xs text-white/60">Bet ₹1 = 1 EXP. VIP 1 to 10 with monthly rewards and rebates, settled at 2:00 AM on the 1st.</p>
+      </Link>
+
       <p className="text-[11px] text-white/45 leading-relaxed">
         XP comes from approved deposits only. Rebates are added to your bonus balance, which you can use to play but cannot withdraw directly; anything you win from it is yours.
         Monthly targets count deposits made from the 1st to the last day of the month (India time). Rewards can change or be withdrawn at any time. 18+ only.

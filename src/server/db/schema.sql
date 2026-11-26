@@ -305,6 +305,20 @@ CREATE TABLE IF NOT EXISTS LoyaltyReward (
 );
 CREATE INDEX IF NOT EXISTS idx_loyalty_userId ON LoyaltyReward(userId);
 
+-- VIP (bet-based) rewards, settled monthly. Separate from LoyaltyReward (deposit-based Rewards).
+--   LEVEL   key = level number (one time)      MONTHLY key = "YYYY-MM"      REBATE key = "YYYY-MM"
+CREATE TABLE IF NOT EXISTS VipReward (
+  id            TEXT PRIMARY KEY,
+  userId        TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  kind          TEXT NOT NULL CHECK (kind IN ('LEVEL','MONTHLY','REBATE')),
+  rewardKey     TEXT NOT NULL,
+  amount        INTEGER NOT NULL CHECK (amount > 0),
+  transactionId TEXT REFERENCES "Transaction"(id),
+  createdAt     TEXT NOT NULL,
+  UNIQUE (userId, kind, rewardKey)
+);
+CREATE INDEX IF NOT EXISTS idx_vip_userId ON VipReward(userId);
+
 CREATE TABLE IF NOT EXISTS Notification (
   id        TEXT PRIMARY KEY,
   userId    TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,

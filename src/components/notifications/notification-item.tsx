@@ -18,6 +18,7 @@ const iconMap: Record<string, typeof Bell> = {
   REFERRAL_BONUS: Gift,
   LEVEL_UP: Crown,
   MONTHLY_TARGET: Crown,
+  VIP_REWARD: Crown,
   FRIEND_REQUEST: UserPlus,
   FRIEND_ACCEPTED: UserPlus,
   TEAM_INVITE: Users,
