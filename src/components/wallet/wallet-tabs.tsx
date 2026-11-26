@@ -9,8 +9,8 @@ export function WalletTabs({ active }: { active: "deposit" | "withdraw" }) {
       replace
       aria-current={active === key ? "page" : undefined}
       className={cn(
-        "flex-1 text-center py-3 text-sm font-black tracking-wide border-b-2 transition-colors",
-        active === key ? "text-white border-gold" : "text-white/40 border-transparent"
+        "flex-1 text-center py-3.5 text-sm font-black tracking-wide border-b-2 transition-colors focus-visible:outline-none focus-visible:bg-white/5",
+        active === key ? "text-white border-gold" : "text-white/60 border-transparent"
       )}
     >
       {label}

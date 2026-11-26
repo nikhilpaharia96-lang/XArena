@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Headset, LifeBuoy, Copy, Download, Eye, ImagePlus, IndianRupee, Loader2, QrCode, ShieldCheck, X } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Headset, LifeBuoy, Copy, Download, Eye, ImagePlus, IndianRupee, Loader2, QrCode, ShieldCheck, Smartphone, X } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useWallet, usePaymentInfo, useSubmitDepositRequest } from "@/hooks/use-wallet";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,13 @@ const MAX_FILE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 type Step = "amount" | "pay" | "details" | "done";
+const STEP_LABELS = ["Amount", "Pay", "Confirm"];
+
+/** Opens GPay / PhonePe / Paytm etc. on a phone with the amount pre-filled. */
+function buildUpiLink(upiId: string, name: string, amount: number) {
+  const q = new URLSearchParams({ pa: upiId, pn: name || "XArena", am: String(amount), cu: "INR", tn: "XArena deposit" });
+  return `upi://pay?${q.toString()}`;
+}
 
 export default function DepositPage() {
   useRequireAuth();
@@ -38,6 +45,11 @@ export default function DepositPage() {
   const [submittedCode, setSubmittedCode] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
   const inflight = useRef(false);
+
+  // Each step is a new "screen": start it from the top, like a page change.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
 
   const preview = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   useEffect(() => {
@@ -161,11 +173,16 @@ export default function DepositPage() {
       {header}
 
       {step !== "done" && (
-        <div className="flex items-center gap-2" aria-label={`Step ${stepIdx + 1} of 3`}>
-          {steps.map((s, i) => (
-            <div key={s} className={`h-1.5 flex-1 rounded-full ${i <= stepIdx ? "gradient-brand" : "bg-white/10"}`} />
+        <ol className="flex items-start gap-2" aria-label="Deposit progress">
+          {STEP_LABELS.map((label, i) => (
+            <li key={label} className="flex-1" aria-current={i === stepIdx ? "step" : undefined}>
+              <div className={`h-1.5 rounded-full ${i <= stepIdx ? "gradient-brand" : "bg-white/10"}`} />
+              <span className={`mt-1.5 block text-[11px] font-semibold ${i === stepIdx ? "text-white" : "text-white/50"}`}>
+                {i + 1}. {label}
+              </span>
+            </li>
           ))}
-        </div>
+        </ol>
       )}
 
       <AnimatePresence mode="wait">
@@ -179,6 +196,56 @@ export default function DepositPage() {
               <div className="h-11 w-11 rounded-2xl gradient-brand flex items-center justify-center">
                 <IndianRupee className="h-5 w-5 text-white" />
               </div>
+            </Card>
+
+            <Card className="p-5">
+              <p className="text-xs font-semibold text-white/60 mb-3">Quick Amount</p>
+              <div className="grid grid-cols-3 gap-2 mb-5">
+                {QUICK_AMOUNTS.filter((a) => a >= min && a <= max).map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    aria-pressed={amount === a}
+                    onClick={() => setAmount(a)}
+                    className={`h-11 rounded-xl text-sm font-semibold border transition-colors ${
+                      amount === a ? "gradient-brand text-white border-transparent" : "bg-white/5 border-white/10 text-white/80"
+                    }`}
+                  >
+                    ₹{a.toLocaleString("en-IN")}
+                  </button>
+                ))}
+              </div>
+
+              <label htmlFor="amt" className="text-xs font-semibold text-white/60 mb-2 block">Custom Amount</label>
+              <div className="flex items-center gap-2 bg-surface-2 rounded-2xl border border-white/10 px-4 h-14 focus-within:border-violet/60">
+                <IndianRupee className="h-5 w-5 text-white/40 shrink-0" />
+                <input
+                  id="amt"
+                  inputMode="numeric"
+                  aria-invalid={amount !== "" && amountError ? true : undefined}
+                  value={amount}
+                  onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, "").slice(0, 7);
+                    setAmount(v ? Number(v) : "");
+                  }}
+                  placeholder="Enter amount"
+                  className="min-w-0 flex-1 bg-transparent text-xl font-black text-white outline-none font-mono placeholder:text-white/25 placeholder:font-normal placeholder:text-base"
+                />
+              </div>
+              {amount !== "" && amountError ? (
+                <p role="alert" className="text-xs text-crimson mt-1.5">{amountError}</p>
+              ) : (
+                <p className="text-[11px] text-white/35 mt-1.5">Min ₹{min} · Max ₹{max.toLocaleString("en-IN")}</p>
+              )}
+
+              {amount !== "" && !amountError && (
+                <p className="text-center text-sm text-white/70 mt-4">
+                  You will pay <span className="font-black text-white">₹{amount.toLocaleString("en-IN")}</span>
+                </p>
+              )}
+              <Button fullWidth size="lg" className="mt-4" disabled={amountError !== null} onClick={() => setStep("pay")}>
+                Proceed to Payment
+              </Button>
             </Card>
 
             <Card className="p-4">
@@ -201,53 +268,6 @@ export default function DepositPage() {
                 <LifeBuoy className="h-3.5 w-3.5 shrink-0" /> Stuck or paid but not credited? Contact support with your UTR.
               </p>
             </Card>
-
-            <Card className="p-5">
-              <p className="text-xs font-semibold text-white/60 mb-3">Quick Amount</p>
-              <div className="grid grid-cols-3 gap-2 mb-5">
-                {QUICK_AMOUNTS.filter((a) => a >= min && a <= max).map((a) => (
-                  <button
-                    key={a}
-                    onClick={() => setAmount(a)}
-                    className={`h-11 rounded-xl text-sm font-semibold border transition-colors ${
-                      amount === a ? "gradient-brand text-white border-transparent" : "bg-white/5 border-white/10 text-white/80"
-                    }`}
-                  >
-                    ₹{a.toLocaleString("en-IN")}
-                  </button>
-                ))}
-              </div>
-
-              <label htmlFor="amt" className="text-xs font-semibold text-white/60 mb-2 block">Custom Amount</label>
-              <div className="flex items-center gap-2 bg-surface-2 rounded-2xl border border-white/10 px-4 h-14 focus-within:border-violet/60">
-                <IndianRupee className="h-5 w-5 text-white/40 shrink-0" />
-                <input
-                  id="amt"
-                  inputMode="numeric"
-                  value={amount}
-                  onChange={(e) => {
-                    const v = e.target.value.replace(/\D/g, "").slice(0, 7);
-                    setAmount(v ? Number(v) : "");
-                  }}
-                  placeholder="Enter amount"
-                  className="min-w-0 flex-1 bg-transparent text-xl font-black text-white outline-none font-mono placeholder:text-white/25 placeholder:font-normal placeholder:text-base"
-                />
-              </div>
-              {amount !== "" && amountError ? (
-                <p className="text-xs text-crimson mt-1.5">{amountError}</p>
-              ) : (
-                <p className="text-[11px] text-white/35 mt-1.5">Min ₹{min} · Max ₹{max.toLocaleString("en-IN")}</p>
-              )}
-
-              {amount !== "" && !amountError && (
-                <p className="text-center text-sm text-white/70 mt-4">
-                  You will pay <span className="font-black text-white">₹{amount.toLocaleString("en-IN")}</span>
-                </p>
-              )}
-              <Button fullWidth size="lg" className="mt-4" disabled={amountError !== null} onClick={() => setStep("pay")}>
-                Proceed to Payment
-              </Button>
-            </Card>
           </motion.div>
         )}
 
@@ -256,6 +276,18 @@ export default function DepositPage() {
             <Card className="p-5 glow-border text-center">
               <p className="text-[11px] uppercase tracking-wider text-white/50 font-semibold">Pay via UPI</p>
               <p className="text-3xl font-black font-mono text-white mt-1">₹{amount.toLocaleString("en-IN")}</p>
+
+              {info.upiId && (
+                <div className="mt-4">
+                  <a
+                    href={buildUpiLink(info.upiId, info.accountName, amount)}
+                    className="flex items-center justify-center gap-2 h-12 rounded-xl gradient-brand text-white font-bold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt"
+                  >
+                    <Smartphone className="h-4 w-4" /> Pay ₹{amount.toLocaleString("en-IN")} with UPI app
+                  </a>
+                  <p className="text-[11px] text-white/45 mt-1.5">Opens GPay, PhonePe or Paytm on your phone. On a computer, scan the QR instead.</p>
+                </div>
+              )}
 
               {info.hasQr && (
                 <div className="mt-4">
@@ -267,7 +299,7 @@ export default function DepositPage() {
                     <Button size="sm" variant="secondary" onClick={() => setShowQr(true)}><Eye className="h-4 w-4" /> View QR</Button>
                     <a
                       href="/api/payment-settings/qr?download=1"
-                      className="inline-flex items-center justify-center gap-2 h-9 px-3 text-sm font-semibold rounded-xl bg-surface-2 text-white border border-white/10"
+                      className="inline-flex items-center justify-center gap-2 h-10 px-3 text-sm font-semibold rounded-xl bg-surface-2 text-white border border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt"
                     >
                       <Download className="h-4 w-4" /> Download QR
                     </a>
@@ -329,7 +361,7 @@ export default function DepositPage() {
                   className="font-mono"
                   error={touched ? utrError ?? undefined : undefined}
                 />
-                <p className="text-[11px] text-white/35 mt-1.5">Usually a 12-digit number shown in your UPI app after payment.</p>
+                <p className="text-[11px] text-white/35 mt-1.5">Find it in your UPI app under payment details — usually 12 digits.</p>
               </div>
 
               <div>
@@ -339,16 +371,17 @@ export default function DepositPage() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={preview} alt="Payment screenshot preview" className="w-full max-h-72 object-contain" />
                     <button
+                      type="button"
                       onClick={() => setFile(null)}
                       aria-label="Remove screenshot"
-                      className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/70 flex items-center justify-center text-white"
+                      className="absolute top-2 right-2 h-10 w-10 rounded-full bg-black/70 flex items-center justify-center text-white"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
                   <label
-                    className={`flex flex-col items-center justify-center gap-2 h-32 rounded-2xl border border-dashed cursor-pointer bg-white/[0.02] ${
+                    className={`flex flex-col items-center justify-center gap-2 h-32 rounded-2xl border border-dashed cursor-pointer bg-white/[0.02] focus-within:ring-2 focus-within:ring-cobalt ${
                       touched && fileError ? "border-crimson/60" : "border-white/20"
                     }`}
                   >

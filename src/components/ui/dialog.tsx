@@ -18,6 +18,11 @@ export function Dialog({
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  // Keep the latest onClose in a ref so an inline callback doesn't re-run the focus effect.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
@@ -33,14 +38,14 @@ export function Dialog({
     returnFocusRef.current = document.activeElement as HTMLElement | null;
     panelRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       returnFocusRef.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (typeof document === "undefined") return null;
 

@@ -354,9 +354,13 @@ html[data-theme="light"] .hiw-chevron { filter: none; }
  * ========================================================================== */
 
 /* Visible keyboard focus everywhere (mouse and touch users never see it). */
-:where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
-  outline: 2px solid var(--color-cobalt);
-  outline-offset: 2px;
+/* In the base layer so utility classes (e.g. outline-none on an input that sits
+   inside a wrapper with its own focus style) still win over it. */
+@layer base {
+  :where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 2px;
+  }
 }
 
 /* Skip link: hidden until a keyboard user tabs to it. */
