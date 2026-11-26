@@ -496,11 +496,11 @@ INSERT OR IGNORE INTO GameConfig (gameKey, isEnabled, houseEdgeBps, minBet, maxB
   ('CRASH',    0, 200, 1000, 100000, 2000000, 'REAL'),
   ('SLOT',     0, 530, 1000, 100000, 2000000, 'BOTH'),
   ('COINS',    0, 605, 1000, 100000, 2000000, 'BOTH'),
-  -- Table-style games ship as demo-only AND off; an admin has to opt in to real money.
-  ('COLOR',    0, 400, 1000, 100000, 2000000, 'DEMO'),
-  ('AVIATOR',  0, 300, 1000, 100000, 2000000, 'DEMO'),
-  ('ROULETTE', 0, 270, 1000, 100000, 2000000, 'DEMO'),
-  ('GEMS',     0, 600, 1000, 100000, 2000000, 'DEMO');
+  -- Table-style games: live, with demo credits AND wallet play (admin can switch each to Demo only / Real only / Off).
+  ('COLOR',    1, 400, 1000, 100000, 2000000, 'BOTH'),
+  ('AVIATOR',  1, 300, 1000, 100000, 2000000, 'BOTH'),
+  ('ROULETTE', 1, 270, 1000, 100000, 2000000, 'BOTH'),
+  ('GEMS',     1, 600, 1000, 100000, 2000000, 'BOTH');
 
 CREATE TABLE IF NOT EXISTS FairSeed (
   userId         TEXT PRIMARY KEY REFERENCES User(id) ON DELETE CASCADE,

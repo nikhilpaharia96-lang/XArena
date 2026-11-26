@@ -54,11 +54,12 @@ beforeEach(() => {
 });
 
 describe("config & guards", () => {
-  it("games ship disabled", () => {
+  it("classic games ship disabled (the table games ship live)", () => {
     const fresh = makeDb();
     const s = createGameService(fresh);
     const user = seedUser(fresh, { deposit: 50_000 });
-    expect(s.listConfigs().every((c) => !c.isEnabled)).toBe(true);
+    const live = ["COLOR", "AVIATOR", "ROULETTE", "GEMS"];
+    expect(s.listConfigs().filter((c) => !live.includes(c.gameKey)).every((c) => !c.isEnabled)).toBe(true);
     return expectCode(() => s.playDice({ userId: user.userId, bet: 1000, direction: "UNDER", chanceBps: 5000 }), "GAME_DISABLED");
   });
   it("rejects bets outside min/max and non-integers, and leaves the wallet untouched", async () => {
@@ -425,11 +426,11 @@ describe("concurrency", () => {
 });
 
 describe("play mode (demo / real)", () => {
-  it("ships real-only except slot + coins (both) and the table games (demo)", () => {
+  it("ships real-only except slot + coins (both) and the table games (both)", () => {
     const fresh = makeDb();
     const s = createGameService(fresh);
     const modes = Object.fromEntries(s.listConfigs().map((c) => [c.gameKey, c.playMode]));
-    expect(modes).toEqual({ DICE: "REAL", COINFLIP: "REAL", MINES: "REAL", CRASH: "REAL", SLOT: "BOTH", COINS: "BOTH", COLOR: "DEMO", AVIATOR: "DEMO", ROULETTE: "DEMO", GEMS: "DEMO" });
+    expect(modes).toEqual({ DICE: "REAL", COINFLIP: "REAL", MINES: "REAL", CRASH: "REAL", SLOT: "BOTH", COINS: "BOTH", COLOR: "BOTH", AVIATOR: "BOTH", ROULETTE: "BOTH", GEMS: "BOTH" });
   });
 
   it("DEMO blocks wallet play but still allows demo spins", async () => {

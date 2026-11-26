@@ -45,6 +45,16 @@ function openConnection(): Database.Database {
 
   db.exec(schema);
 
+  // One-time: the four table games first shipped Off + Demo-only. Turn them on for wallet play too, but only
+  // for rows still at those shipped defaults, and only once, so later admin choices are never overwritten.
+  const liveFlag = "migration.table-games-live";
+  if (!db.prepare("SELECT 1 FROM Setting WHERE key = ?").get(liveFlag)) {
+    db.exec(
+      "UPDATE GameConfig SET isEnabled = 1, playMode = 'BOTH' WHERE gameKey IN ('COLOR','AVIATOR','ROULETTE','GEMS') AND isEnabled = 0 AND playMode = 'DEMO'"
+    );
+    db.prepare("INSERT INTO Setting (key, value) VALUES (?, '1')").run(liveFlag);
+  }
+
   // Lightweight in-place migrations for DB files created before a column existed
   // (CREATE TABLE IF NOT EXISTS won't add columns to an existing table).
   const tournamentCols = db.prepare("PRAGMA table_info(Tournament)").all() as { name: string }[];

@@ -74,17 +74,18 @@ describe("table-game maths", () => {
   });
 });
 
-describe("table games ship demo-only and off", () => {
+describe("table games ship live with demo + wallet", () => {
   it("defaults", () => {
     const s = createGameService(makeDb());
     for (const k of ["COLOR", "AVIATOR", "ROULETTE", "GEMS"] as const) {
       const c = s.getConfig(k);
-      expect(c.isEnabled).toBe(false);
-      expect(c.playMode).toBe("DEMO");
+      expect(c.isEnabled).toBe(true);
+      expect(c.playMode).toBe("BOTH");
     }
   });
 
-  it("wallet play is refused until an admin allows real money, demo works", () => {
+  it("when an admin sets Demo only, wallet play is refused and demo works", () => {
+    for (const k of ["COLOR", "ROULETTE", "GEMS", "AVIATOR"] as const) svc.updateConfig(k, { playMode: "DEMO" });
     const before = total(u.userId);
     expect(() => svc.playColor({ userId: u.userId, bet: 1000, pick: "GREEN" })).toThrow(GameError);
     expect(() => svc.playRoulette({ userId: u.userId, bets: [{ type: "RED", amount: 1000 }] })).toThrow(GameError);
