@@ -38,13 +38,17 @@ export function TransactionItem({ txn }: { txn: TransactionRow }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-white">{txn.type === "DEPOSIT" && txn.description ? txn.description : meta.label}</p>
-        <p className="text-xs text-white/40 font-mono truncate">{txn.referenceId} • {formatDateTime(txn.createdAt)}</p>
+        <p className="text-xs text-white/55">{formatDateTime(txn.createdAt)}</p>
+        <p className="text-[11px] text-white/40 font-mono truncate">{txn.referenceId}</p>
       </div>
       <div className="text-right shrink-0">
         <p className={`text-sm font-bold font-mono ${meta.credit ? "text-signal" : "text-white"}`}>
           {meta.credit ? "+" : "-"}{formatPaise(txn.amount)}
         </p>
-        <Badge tone={statusTone[txn.status] ?? "neutral"} className="mt-0.5">{txn.status}</Badge>
+        {/* Completed is the normal case, so only call out the ones that need attention. */}
+        {txn.status !== "COMPLETED" && (
+          <Badge tone={statusTone[txn.status] ?? "neutral"} className="mt-0.5">{txn.status}</Badge>
+        )}
       </div>
     </div>
   );
