@@ -2,6 +2,7 @@
 import { TopBar } from "./top-bar";
 import { BottomNav } from "./bottom-nav";
 import { SiteFooter } from "./site-footer";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SiteFooter />
       </main>
       <BottomNav />
+      <InstallPrompt />
     </div>
   );
 }
