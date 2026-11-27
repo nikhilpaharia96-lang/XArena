@@ -42,6 +42,10 @@ export function SiteFooter() {
         with what you can afford. Availability of paid contests can depend on your state&apos;s laws; please check the rules that apply to you
         before joining.
       </p>
+      <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+        Free Fire is a trademark of Garena. XArena is an independent tournament platform and is not affiliated with, sponsored or endorsed by Garena.
+        All other game names and logos belong to their respective owners.
+      </p>
       <p className="mt-2 text-[11px] text-white/35">© {new Date().getFullYear()} XArena. All rights reserved.</p>
     </footer>
   );

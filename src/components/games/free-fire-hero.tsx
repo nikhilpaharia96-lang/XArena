@@ -42,8 +42,9 @@ export function FreeFireHero({ stats, isLoading }: { stats?: FreeFireStats; isLo
       <div className="absolute inset-0 bg-gradient-to-r from-void/70 via-transparent to-transparent" />
 
       <div className="relative flex min-h-[340px] flex-col justify-end p-4 sm:min-h-[420px] sm:p-7">
-        <h2 id="ff-hero-title" className="font-display text-[44px] font-black italic leading-[0.9] tracking-tight text-white drop-shadow-[0_4px_18px_rgba(0,0,0,0.8)] sm:text-6xl">
-          FREE FIRE
+        <h2 id="ff-hero-title" className="m-0">
+          <span className="sr-only">Free Fire</span>
+          <Image src="/brand/free-fire-logo-white.webp" alt="" width={720} height={176} priority className="h-auto w-[min(78%,300px)] drop-shadow-[0_4px_18px_rgba(0,0,0,0.8)]" />
         </h2>
         <p className="mt-1.5 font-display text-xl font-extrabold italic tracking-tight text-gold drop-shadow-[0_2px_10px_rgba(255,122,0,0.5)] sm:text-3xl">
           TOURNAMENT ARENA
@@ -61,6 +62,9 @@ export function FreeFireHero({ stats, isLoading }: { stats?: FreeFireStats; isLo
             </div>
           ))}
         </dl>
+        <p className="mt-3 text-[10px] leading-snug text-white/45">
+          Free Fire is a trademark of Garena. XArena is an independent platform, not affiliated with or endorsed by Garena.
+        </p>
       </div>
     </motion.section>
   );
