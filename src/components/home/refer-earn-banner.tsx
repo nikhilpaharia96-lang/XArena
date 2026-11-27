@@ -51,7 +51,7 @@ export function ReferEarnBanner() {
             <Users className="h-4 w-4 text-gold shrink-0" />
             <div className="min-w-0">
               <p className="text-sm font-bold text-white leading-none">{formatPaise(REFERRER_REWARD_PAISE)}</p>
-              <p className="text-[10px] text-white/60 mt-0.5">Per Friend</p>
+              <p className="text-[11px] text-white/60 mt-0.5">Per Friend</p>
             </div>
           </div>
           <div className="flex-1 sm:flex-none flex items-center gap-2 rounded-xl bg-black/40 border border-white/15 px-3 py-2 backdrop-blur-sm">

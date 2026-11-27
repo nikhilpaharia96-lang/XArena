@@ -57,7 +57,7 @@ export function FreeFireHero({ stats, isLoading }: { stats?: FreeFireStats; isLo
               <dd className="mt-1.5 truncate text-lg font-extrabold leading-none text-white">
                 {isLoading ? <Skeleton className="h-5 w-12" /> : t.value}
               </dd>
-              <dt className="mt-1 text-[10px] leading-tight text-[#94A3B8]">{t.label}</dt>
+              <dt className="mt-1 text-[11px] leading-tight text-[#94A3B8]">{t.label}</dt>
             </div>
           ))}
         </dl>

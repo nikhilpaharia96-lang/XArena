@@ -34,7 +34,7 @@ export function ModeBar({ w, disabled }: { w: ReturnType<typeof useDemoWallet>; 
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 border border-white/10 px-3 py-2">
       <div className="min-w-0">
-        <p className="text-[10px] uppercase tracking-wide text-white/40">{w.demo ? "Demo credits · no cash value" : "Wallet balance"}</p>
+        <p className="text-[11px] uppercase tracking-wide text-white/40">{w.demo ? "Demo credits · no cash value" : "Wallet balance"}</p>
         <p className={cn("font-black tabular-nums", w.demo ? "text-violet" : "text-white")}>{formatPaiseExact(w.shown)}</p>
       </div>
       {w.canSwitch ? (
@@ -52,7 +52,7 @@ export function ModeBar({ w, disabled }: { w: ReturnType<typeof useDemoWallet>; 
           ))}
         </div>
       ) : (
-        <span className="shrink-0 rounded-full border border-white/10 bg-surface px-2.5 py-1 text-[10px] font-bold tracking-wide text-white/70">{w.demo ? "DEMO ONLY" : "REAL MONEY"}</span>
+        <span className="shrink-0 rounded-full border border-white/10 bg-surface px-2.5 py-1 text-[11px] font-bold tracking-wide text-white/70">{w.demo ? "DEMO ONLY" : "REAL MONEY"}</span>
       )}
     </div>
   );

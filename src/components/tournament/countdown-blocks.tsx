@@ -47,7 +47,7 @@ export function CountdownBlocks({ target, onExpire, className }: { target: strin
         <div key={u.label} className="flex items-center gap-1.5">
           <div className="flex flex-col items-center">
             <span className="font-mono font-black text-xl sm:text-2xl text-white tabular-nums leading-none">{pad(u.value)}</span>
-            <span className="text-[9px] font-semibold text-white/40 tracking-wide mt-1">{u.label}</span>
+            <span className="text-[10px] font-semibold text-white/40 tracking-wide mt-1">{u.label}</span>
           </div>
           {i < units.length - 1 && <span className="text-lg font-bold text-white/25 -mt-3">:</span>}
         </div>

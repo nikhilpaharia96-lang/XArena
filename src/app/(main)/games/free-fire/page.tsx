@@ -178,7 +178,7 @@ export default function FreeFirePage() {
                 chip,
                 "min-w-[64px]",
                 filter === f.key
-                  ? "border-cobalt bg-gradient-to-b from-[#2F6BFF] to-[#1D4ED8] text-white shadow-[0_0_16px_-4px_rgba(37,99,255,0.9)]"
+                  ? "border-cobalt bg-gradient-to-b from-[#2F6BFF] to-[#1D4ED8] text-white [--color-white:#FFFFFF] shadow-[0_0_16px_-4px_rgba(37,99,255,0.9)]"
                   : "border-white/10 bg-elevated text-white/75 hover:border-cobalt/40"
               )}
             >

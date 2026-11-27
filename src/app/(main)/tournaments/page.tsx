@@ -173,7 +173,7 @@ function TournamentsListing() {
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="h-4 min-w-4 px-1 rounded-full bg-violet text-[10px] font-bold flex items-center justify-center text-white">
+            <span className="h-4 min-w-4 px-1 rounded-full bg-violet text-[11px] font-bold flex items-center justify-center text-white">
               {activeFilterCount}
             </span>
           )}

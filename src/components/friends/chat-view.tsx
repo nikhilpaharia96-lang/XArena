@@ -32,7 +32,7 @@ function Bubble({ m, mine }: { m: ChatMessage; mine: boolean }) {
         )}
       >
         {m.body}
-        <span className={cn("mt-1 flex items-center justify-end gap-1 text-[10px]", mine ? "text-white/70" : "text-white/40")}>
+        <span className={cn("mt-1 flex items-center justify-end gap-1 text-[11px]", mine ? "text-white/70" : "text-white/40")}>
           {timeOf(m.createdAt)}
           {mine && (m.readAt ? <CheckCheck className="h-3 w-3" aria-label="Seen" /> : <Check className="h-3 w-3" aria-label="Sent" />)}
         </span>

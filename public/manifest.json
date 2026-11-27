@@ -1,12 +1,24 @@
 {
+  "id": "/",
   "name": "XArena — Play. Compete. Win.",
   "short_name": "XArena",
   "description": "India's premium esports tournament platform",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#08090C",
-  "theme_color": "#08090C",
+  "orientation": "portrait",
+  "background_color": "#05070E",
+  "theme_color": "#05070E",
+  "lang": "en-IN",
+  "categories": ["games", "entertainment", "sports"],
   "icons": [
-    { "src": "/icon", "sizes": "32x32", "type": "image/png" }
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Tournaments", "url": "/tournaments", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Wallet", "url": "/wallet", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "My Teams", "url": "/teams", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

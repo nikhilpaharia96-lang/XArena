@@ -46,7 +46,7 @@ export function NotificationItem({ notification, onClick }: { notification: Noti
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-white">{notification.title}</p>
         <p className="text-xs text-white/50 mt-0.5">{notification.body}</p>
-        <p className="text-[10px] text-white/30 mt-1">{formatRelativeTime(notification.createdAt)}</p>
+        <p className="text-[11px] text-white/30 mt-1">{formatRelativeTime(notification.createdAt)}</p>
       </div>
       {!notification.isRead && <span className="h-2 w-2 rounded-full bg-violet shrink-0 mt-1" />}
     </button>

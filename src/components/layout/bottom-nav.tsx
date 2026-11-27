@@ -41,6 +41,7 @@ export function BottomNav() {
               href={item.href}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
+              onClick={() => { if (!active) navigator.vibrate?.(8); }}
               className="relative flex flex-col items-center justify-center gap-1 pt-2.5 pb-2 min-h-[60px] focus-visible:outline-none focus-visible:bg-white/5 active:opacity-70 transition-opacity"
             >
               {active && (
@@ -51,7 +52,7 @@ export function BottomNav() {
                 />
               )}
               {item.href === "/teams" && friendBadge > 0 && (
-                <span className="absolute left-1/2 top-1.5 ml-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-crimson px-1 text-[10px] font-bold leading-none text-white" aria-label={`${friendBadge} new`}>
+                <span className="absolute left-1/2 top-1.5 ml-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-crimson px-1 text-[11px] font-bold leading-none text-white" aria-label={`${friendBadge} new`}>
                   {friendBadge > 9 ? "9+" : friendBadge}
                 </span>
               )}

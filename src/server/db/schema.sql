@@ -654,3 +654,30 @@ CREATE TABLE IF NOT EXISTS TeamInvite (
   UNIQUE (teamId, inviteeId)
 );
 CREATE INDEX IF NOT EXISTS idx_teaminvite_invitee ON TeamInvite(inviteeId);
+
+-- Web Push. One row per browser/device that opted in (endpoint is unique per device).
+CREATE TABLE IF NOT EXISTS PushSubscription (
+  id         TEXT PRIMARY KEY,
+  userId     TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  endpoint   TEXT NOT NULL UNIQUE,
+  p256dh     TEXT NOT NULL,
+  auth       TEXT NOT NULL,
+  userAgent  TEXT,
+  createdAt  TEXT NOT NULL,
+  lastSeenAt TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_pushsub_user ON PushSubscription(userId);
+
+-- Every Notification row (created from ~20 places) is queued for push by this trigger, so no call site
+-- has to remember to send one. A background dispatcher drains the queue (retries survive restarts).
+CREATE TABLE IF NOT EXISTS PushOutbox (
+  notificationId TEXT PRIMARY KEY REFERENCES Notification(id) ON DELETE CASCADE,
+  attempts       INTEGER NOT NULL DEFAULT 0,
+  lockedUntil    TEXT,
+  createdAt      TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS trg_notification_push AFTER INSERT ON Notification
+WHEN EXISTS (SELECT 1 FROM PushSubscription WHERE userId = NEW.userId)
+BEGIN
+  INSERT OR IGNORE INTO PushOutbox (notificationId, createdAt) VALUES (NEW.id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+END;

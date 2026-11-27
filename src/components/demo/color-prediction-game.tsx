@@ -450,19 +450,19 @@ export function ColorPredictionGame() {
             <div className="grid grid-cols-[88px_1fr] items-center pt-1">
               <span className="text-sm">Numbers</span>
               <div className="grid grid-cols-10 text-center">
-                {stats.map((s) => <span key={s.d} className="mx-auto flex h-5 w-5 items-center justify-center rounded-full border border-red-400 text-[10px] text-red-300">{s.d}</span>)}
+                {stats.map((s) => <span key={s.d} className="mx-auto flex h-5 w-5 items-center justify-center rounded-full border border-red-400 text-[11px] text-red-300">{s.d}</span>)}
               </div>
             </div>
           </div>
           {history.slice(0, 8).map((h) => (
-            <div key={h.id} className="grid grid-cols-[88px_1fr_24px] items-center gap-1 border-t border-white/5 px-3 py-2 text-[10px]">
+            <div key={h.id} className="grid grid-cols-[88px_1fr_24px] items-center gap-1 border-t border-white/5 px-3 py-2 text-[11px]">
               <span className="tabular-nums text-white/70">{h.id.slice(-9)}</span>
               <div className="grid grid-cols-10 text-center">
                 {Array.from({ length: 10 }, (_, d) => (
-                  <span key={d} className={cn("mx-auto flex h-5 w-5 items-center justify-center rounded-full border text-[10px]", d === h.n ? "border-transparent font-bold text-white" : "border-white/25 text-white/50")} style={d === h.n ? { background: ballBackground(h.n) } : undefined}>{d}</span>
+                  <span key={d} className={cn("mx-auto flex h-5 w-5 items-center justify-center rounded-full border text-[11px]", d === h.n ? "border-transparent font-bold text-white" : "border-white/25 text-white/50")} style={d === h.n ? { background: ballBackground(h.n) } : undefined}>{d}</span>
                 ))}
               </div>
-              <span className={cn("flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-[#06204a]", sizeOf(h.n) === "big" ? "bg-amber-400" : "bg-sky-400")}>{sizeOf(h.n) === "big" ? "B" : "S"}</span>
+              <span className={cn("flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-[#06204a]", sizeOf(h.n) === "big" ? "bg-amber-400" : "bg-sky-400")}>{sizeOf(h.n) === "big" ? "B" : "S"}</span>
             </div>
           ))}
         </div>

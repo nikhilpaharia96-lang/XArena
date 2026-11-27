@@ -369,7 +369,7 @@ export function FortuneGemsGame() {
       <div className="flex items-center gap-3 border-y-2 border-[#7a4a08] bg-gradient-to-b from-[#6b4a26] to-[#4a3018] px-3 py-2">
         <button type="button" onClick={() => setShowInfo((v) => !v)} aria-label="Paytable" className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-amber-300/80 bg-black/30"><Info className="h-4 w-4 text-amber-200" /></button>
         <p className="flex-1 bg-gradient-to-b from-[#fff3b0] to-[#e0a100] bg-clip-text text-center text-2xl font-black italic text-transparent">Fortune Gems</p>
-        <p className="rounded-md bg-[#7a1020] px-2 py-1 text-center text-[10px] font-black leading-tight text-amber-200">WIN<br />MULTIPLIER</p>
+        <p className="rounded-md bg-[#7a1020] px-2 py-1 text-center text-[11px] font-black leading-tight text-amber-200">WIN<br />MULTIPLIER</p>
       </div>
 
       {/* board */}
@@ -405,7 +405,7 @@ export function FortuneGemsGame() {
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-[#ffd84d] to-[#e08a00] text-base font-black text-[#4a2a00]">{spinning ? "…" : "SPIN"}</span>
           </button>
           <button type="button" onClick={() => setAuto((a) => (a > 0 ? 0 : 10))} aria-label="Autoplay" className={cn("flex h-11 w-11 flex-col items-center justify-center rounded-full border-2 border-amber-200/40 shadow", auto > 0 ? "bg-red-700" : "bg-[#8a6a42]")}>
-            <Repeat className="h-4 w-4" />{auto > 0 && <span className="text-[10px] font-black leading-none">{auto}</span>}
+            <Repeat className="h-4 w-4" />{auto > 0 && <span className="text-[11px] font-black leading-none">{auto}</span>}
           </button>
           <button type="button" onClick={toggleTurbo} aria-pressed={turbo} aria-label="Turbo" className={cn("flex h-11 w-11 items-center justify-center rounded-full border-2 border-amber-200/40 shadow", turbo ? "bg-amber-500 text-black" : "bg-[#8a6a42]")}><Zap className="h-5 w-5" /></button>
         </div>

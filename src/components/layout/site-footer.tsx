@@ -17,14 +17,14 @@ const LEGAL = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-12 border-t border-white/10 pt-6 pb-2">
+    <footer className="site-footer mt-12 border-t border-white/10 pt-6 pb-2">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <Link href="/" aria-label="XArena home">
           <Image src="/images/xarena-logo.webp" alt="XArena" width={360} height={106} className="h-7 w-auto" />
         </Link>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-4 gap-y-1">
           {LINKS.map((l) => (
-            <Link key={l.href} href={l.href} className="text-xs font-semibold text-white/60 hover:text-white py-1.5">
+            <Link key={l.href} href={l.href} className="text-xs font-semibold text-white/60 hover:text-white py-3">
               {l.label}
             </Link>
           ))}
@@ -32,7 +32,7 @@ export function SiteFooter() {
       </div>
       <nav aria-label="Legal" className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
         {LEGAL.map((l) => (
-          <Link key={l.href} href={l.href} className="text-[11px] font-semibold text-white/55 hover:text-white py-1.5">
+          <Link key={l.href} href={l.href} className="text-[11px] font-semibold text-white/55 hover:text-white py-3">
             {l.label}
           </Link>
         ))}

@@ -117,9 +117,9 @@ export default function VipPage() {
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div className="force-dark rounded-xl bg-[#0B1224] border border-[#26314F] px-2 py-2.5">
-      <p className="text-[10px] uppercase tracking-wide text-white/50">{label}</p>
+      <p className="text-[11px] uppercase tracking-wide text-white/50">{label}</p>
       <p className="mt-0.5 text-sm font-black text-gold">{value}</p>
-      {note && <p className="text-[10px] text-white/45">{note}</p>}
+      {note && <p className="text-[11px] text-white/45">{note}</p>}
     </div>
   );
 }

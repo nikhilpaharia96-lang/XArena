@@ -18,7 +18,7 @@ export function LiveMatchCard({ tournament }: { tournament: TournamentListItem }
             <span className="text-[11px] font-bold text-white/60 uppercase tracking-wide truncate max-w-[160px]">
               {t.title}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-crimson/15 border border-crimson/30 px-2 py-0.5 text-[10px] font-bold text-crimson">
+            <span className="inline-flex items-center gap-1 rounded-full bg-crimson/15 border border-crimson/30 px-2 py-0.5 text-[11px] font-bold text-crimson">
               <span className="h-1.5 w-1.5 rounded-full bg-crimson live-dot" /> LIVE
             </span>
           </div>
@@ -31,7 +31,7 @@ export function LiveMatchCard({ tournament }: { tournament: TournamentListItem }
               <p className="text-[11px] text-white/70 mt-1 truncate">{t.gameName}</p>
             </div>
             <div className="px-3 text-center">
-              <p className="text-[10px] text-white/40">{gameModeLabel(t.mode)}</p>
+              <p className="text-[11px] text-white/40">{gameModeLabel(t.mode)}</p>
               <p className="text-xs font-bold text-white/70">VS</p>
             </div>
             <div className="text-center flex-1">

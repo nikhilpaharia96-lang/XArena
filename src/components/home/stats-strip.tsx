@@ -44,7 +44,7 @@ export function StatsStrip() {
         <div key={s.label} className="rounded-2xl bg-surface border border-white/8 flex flex-col items-center justify-center text-center py-3 px-1">
           <s.icon className="h-4 w-4 text-gold mb-1.5" />
           <p className="text-sm sm:text-base font-extrabold text-white leading-none">{s.value}</p>
-          <p className="text-[9px] sm:text-[10px] text-white/45 mt-1 leading-tight">{s.label}</p>
+          <p className="text-[10px] sm:text-[11px] text-white/45 mt-1 leading-tight">{s.label}</p>
         </div>
       ))}
     </div>

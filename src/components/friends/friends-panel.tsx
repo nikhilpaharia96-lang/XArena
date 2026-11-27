@@ -34,7 +34,7 @@ function ChatRow({ f, active, meId, onOpen }: { f: FriendItem; active: boolean; 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <p className="truncate text-sm font-bold text-white">{displayNameOf(f.user)}</p>
-          {f.lastMessage && <span className="shrink-0 text-[10px] text-white/35">{formatRelativeTime(f.lastMessage.createdAt)}</span>}
+          {f.lastMessage && <span className="shrink-0 text-[11px] text-white/35">{formatRelativeTime(f.lastMessage.createdAt)}</span>}
         </div>
         <p className={cn("truncate text-xs", f.unread ? "font-semibold text-white" : "text-white/45")}>{preview}</p>
       </div>
@@ -157,7 +157,7 @@ export function FriendsPanel({ meId }: { meId: string }) {
               className={cn("flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-xs font-semibold", tab === t.id ? "gradient-brand border-transparent text-white" : "border-white/10 bg-white/5 text-white/60")}
             >
               {t.label}
-              {!!t.badge && <span className="rounded-full bg-crimson px-1.5 text-[10px] font-bold text-white">{t.badge}</span>}
+              {!!t.badge && <span className="rounded-full bg-crimson px-1.5 text-[11px] font-bold text-white">{t.badge}</span>}
             </button>
           ))}
         </div>

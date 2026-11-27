@@ -103,7 +103,7 @@ export function TournamentCard({ tournament, className }: { tournament: Tourname
                   <Trophy className="h-2.5 w-2.5 text-white/80" />
                 </span>
               )}
-              <span className="truncate text-[10px] font-bold uppercase tracking-wider text-white/90">{t.gameName}</span>
+              <span className="truncate text-[11px] font-bold uppercase tracking-wider text-white/90">{t.gameName}</span>
             </span>
 
             {t.isJoined && kind !== "upcoming" && (
@@ -134,13 +134,13 @@ export function TournamentCard({ tournament, className }: { tournament: Tourname
             {/* Money row */}
             <div className="grid grid-cols-2 gap-2">
               <div className="rounded-xl bg-white/[0.04] border border-white/8 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-white/45">Prize Pool</p>
+                <p className="text-[11px] uppercase tracking-wide text-white/45">Prize Pool</p>
                 <p className={cn("text-[15px] font-extrabold font-mono leading-tight mt-0.5", kind === "cancelled" ? "text-white/40 line-through" : "gradient-text")}>
                   {formatPaise(t.prizePool)}
                 </p>
               </div>
               <div className="rounded-xl bg-white/[0.04] border border-white/8 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-wide text-white/45">Entry Fee</p>
+                <p className="text-[11px] uppercase tracking-wide text-white/45">Entry Fee</p>
                 <p className={cn("text-[15px] font-extrabold font-mono leading-tight mt-0.5", t.format === "FREE" ? "text-signal" : "text-gold")}>
                   {t.format === "FREE" ? "Free" : formatPaise(t.entryFee)}
                 </p>

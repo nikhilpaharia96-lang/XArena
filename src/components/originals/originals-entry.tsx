@@ -77,7 +77,7 @@ export function OriginalsEntry() {
                 </div>
               )}
               {demoOnly.has(k) && (
-                <span className="absolute top-2 left-2 rounded-full bg-[#0B1224] border border-[#26314F] px-2 py-0.5 text-[10px] font-bold tracking-wide text-white/90">DEMO</span>
+                <span className="absolute top-2 left-2 rounded-full bg-[#0B1224] border border-[#26314F] px-2 py-0.5 text-[11px] font-bold tracking-wide text-white/90">DEMO</span>
               )}
             </Link>
           );

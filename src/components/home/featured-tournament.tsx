@@ -46,7 +46,7 @@ function Countdown({ target }: { target: string }) {
   const value = useCountdown(target);
   return (
     <div className="flex-[1.25] md:flex-none min-w-0 rounded-2xl border border-white/10 bg-black/45 backdrop-blur-md px-3 py-2 md:px-3.5 md:py-2.5">
-      <p className="flex items-center gap-1.5 text-[9px] md:text-[11px] font-bold uppercase tracking-wider text-gold">
+      <p className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-gold">
         <Clock className="h-3.5 w-3.5 shrink-0" /> {value ? "Starts in" : "Status"}
       </p>
       <p className="mt-0.5 font-black tabular-nums leading-tight text-gold text-[15px] sm:text-xl md:text-2xl whitespace-nowrap">
@@ -98,7 +98,7 @@ function FeaturedCard({ t }: { t: TournamentListItem }) {
           <div className="relative flex min-h-[inherit] flex-col justify-between gap-3.5 p-3.5 sm:p-4 md:flex-row md:items-end md:p-6 lg:p-7">
             {/* Left: identity + facts */}
             <div className="flex min-w-0 flex-col gap-2.5 md:gap-3 md:max-w-[62%]">
-              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/70 bg-gold/10 px-2.5 py-1 md:px-3 md:py-1.5 text-[10px] md:text-xs font-bold uppercase tracking-wide text-orange-300 shadow-[0_0_18px_rgba(249,115,22,0.35)]">
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-gold/70 bg-gold/10 px-2.5 py-1 md:px-3 md:py-1.5 text-[11px] md:text-xs font-bold uppercase tracking-wide text-orange-300 shadow-[0_0_18px_rgba(249,115,22,0.35)]">
                 <Crown className="h-3.5 w-3.5 text-gold" /> Featured
               </span>
 
@@ -136,7 +136,7 @@ function FeaturedCard({ t }: { t: TournamentListItem }) {
                   <p className="font-black text-[30px] md:text-5xl bg-gradient-to-b from-amber-300 to-orange-500 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(249,115,22,0.35)]">
                     {formatPaise(t.prizePool)}
                   </p>
-                  <p className="mt-0.5 text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/80">Prize Pool</p>
+                  <p className="mt-0.5 text-[11px] md:text-xs font-bold uppercase tracking-wider text-white/80">Prize Pool</p>
                 </div>
               </div>
 

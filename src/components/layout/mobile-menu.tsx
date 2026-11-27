@@ -17,10 +17,12 @@ import {
   Search,
   Sun,
   Moon,
+  Download,
 } from "lucide-react";
 import { useCurrentUser, useLogout } from "@/hooks/use-auth";
 import { cn } from "@/lib/cn";
 import { useTheme } from "@/lib/theme";
+import { useInstallApp } from "@/hooks/use-pwa";
 
 const links = [
   { href: "/search", label: "Search", icon: Search },
@@ -38,6 +40,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
   const pathname = usePathname();
   const logout = useLogout();
   const { theme, toggleTheme } = useTheme();
+  const app = useInstallApp();
   const isAdmin = me && ["ADMIN", "SUPER_ADMIN", "MODERATOR"].includes(me.user.role);
 
   return (
@@ -111,6 +114,16 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
                   </Link>
                 );
               })}
+              {app.canPrompt && (
+                <button
+                  type="button"
+                  onClick={() => { onClose(); void app.install(); }}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-white/75 hover:bg-white/5"
+                >
+                  <Download className="h-4.5 w-4.5" />
+                  Install app
+                </button>
+              )}
               <button
                 type="button"
                 onClick={toggleTheme}

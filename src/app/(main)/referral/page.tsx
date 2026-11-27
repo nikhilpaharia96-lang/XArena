@@ -76,15 +76,15 @@ export default function ReferralPage() {
       <div className="grid grid-cols-3 gap-3">
         <Card className="p-3 text-center">
           <p className="text-2xl font-black text-white font-mono">{data.qualified}</p>
-          <p className="text-[10px] text-white/40 uppercase mt-1">Rewarded</p>
+          <p className="text-[11px] text-white/40 uppercase mt-1">Rewarded</p>
         </Card>
         <Card className="p-3 text-center">
           <p className="text-2xl font-black text-white font-mono">{data.pending}</p>
-          <p className="text-[10px] text-white/40 uppercase mt-1">Pending</p>
+          <p className="text-[11px] text-white/40 uppercase mt-1">Pending</p>
         </Card>
         <Card className="p-3 text-center">
           <p className="text-xl leading-8 font-black text-signal font-mono">{formatPaise(data.totalEarned)}</p>
-          <p className="text-[10px] text-white/40 uppercase mt-1">Earned</p>
+          <p className="text-[11px] text-white/40 uppercase mt-1">Earned</p>
         </Card>
       </div>
 

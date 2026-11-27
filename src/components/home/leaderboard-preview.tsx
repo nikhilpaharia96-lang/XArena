@@ -68,7 +68,7 @@ export function LeaderboardPreview() {
                 </span>
 
                 <p className="relative text-[11px] font-bold text-white truncate w-full">{r.username}</p>
-                <p className="relative flex items-center justify-center gap-1 text-[10px] text-gold font-semibold mt-1">
+                <p className="relative flex items-center justify-center gap-1 text-[11px] text-gold font-semibold mt-1">
                   <Trophy className="h-3 w-3" /> {(r.wins ?? 0).toLocaleString("en-IN")}
                 </p>
               </Link>
