@@ -1,4 +1,5 @@
 import { db } from "@/server/db/client";
+import { releaseDueRooms } from "@/server/lib/room-release";
 import { ApiError, fail, ok } from "@/server/lib/api-response";
 import { verifyAccessToken, ACCESS_COOKIE_NAME } from "@/server/lib/auth";
 import { cookies } from "next/headers";
@@ -38,6 +39,7 @@ interface TournamentDetailRow {
 export async function GET(req: Request, context: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await context.params;
+    releaseDueRooms(db); // backup to the 30s timer: players never see a stale 'not released' room
 
     const t = db
       .prepare(

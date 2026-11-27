@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RegistrationManager } from "@/components/admin/registration-manager";
 import { formatPaise, formatDateTime, statusLabel } from "@/lib/format";
 import { toast } from "@/lib/toast-store";
-import { ArrowLeft, KeyRound, Pencil } from "lucide-react";
+import { ArrowLeft, KeyRound, Pencil, Trophy } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -30,6 +30,7 @@ export default function AdminTournamentDetailPage({ params }: { params: Promise<
   const [dialogOpen, setDialogOpen] = useState(false);
   const [roomId, setRoomId] = useState("");
   const [roomPassword, setRoomPassword] = useState("");
+  const [autoMinutes, setAutoMinutes] = useState("");
 
   if (isLoading || !data) {
     return <Skeleton className="h-96 rounded-2xl" />;
@@ -46,11 +47,17 @@ export default function AdminTournamentDetailPage({ params }: { params: Promise<
       toast({ title: "Enter both room ID and password", tone: "error" });
       return;
     }
+    const mins = autoMinutes.trim() === "" ? undefined : Number(autoMinutes);
+    if (mins !== undefined && (!Number.isInteger(mins) || mins < 0 || mins > 240)) {
+      toast({ title: "Minutes must be a whole number from 0 to 240", tone: "error" });
+      return;
+    }
     releaseRoom.mutate(
-      { roomId, roomPassword },
+      { roomId, roomPassword, releaseMinutesBefore: mins },
       {
-        onSuccess: () => {
-          toast({ title: "Room released to all participants", tone: "success" });
+        onSuccess: (res) => {
+          const r = res as { released: boolean; releaseAt: string | null };
+          toast({ title: r.released ? "Room released to all participants" : `Room saved. Players get it automatically at ${formatDateTime(r.releaseAt ?? "")}`, tone: "success" });
           setDialogOpen(false);
         },
       }
@@ -75,6 +82,13 @@ export default function AdminTournamentDetailPage({ params }: { params: Promise<
             <Link href={`/admin/tournaments/${id}/edit`}>
               <Button variant="secondary">
                 <Pencil className="h-4 w-4" /> Edit
+              </Button>
+            </Link>
+          )}
+          {t.status !== "COMPLETED" && t.status !== "CANCELLED" && t.status !== "DRAFT" && (
+            <Link href={`/admin/tournaments/${id}/results`}>
+              <Button variant="secondary">
+                <Trophy className="h-4 w-4" /> Enter Results
               </Button>
             </Link>
           )}
@@ -118,9 +132,17 @@ export default function AdminTournamentDetailPage({ params }: { params: Promise<
             <label className="text-xs font-semibold text-white/60 mb-1.5 block">Password</label>
             <Input value={roomPassword} onChange={(e) => setRoomPassword(e.target.value)} placeholder="pass123" />
           </div>
-          <p className="text-[11px] text-white/35">This will notify all {t.slotsFilled} joined participants instantly.</p>
+          <div>
+            <label className="text-xs font-semibold text-white/60 mb-1.5 block">Auto-release (minutes before match start)</label>
+            <Input value={autoMinutes} onChange={(e) => setAutoMinutes(e.target.value.replace(/\D/g, ""))} placeholder="Leave blank to release now, e.g. 10" inputMode="numeric" />
+          </div>
+          <p className="text-[11px] text-white/35">
+            {autoMinutes.trim() === ""
+              ? `This will notify all ${t.slotsFilled} joined participants instantly.`
+              : `Room stays hidden. All ${t.slotsFilled} joined participants get it automatically ${autoMinutes} min before ${formatDateTime(t.matchStartsAt)}.`}
+          </p>
           <Button fullWidth loading={releaseRoom.isPending} onClick={handleReleaseRoom}>
-            Release to Participants
+            {autoMinutes.trim() === "" ? "Release to Participants" : "Save & Auto-release"}
           </Button>
         </div>
       </Dialog>

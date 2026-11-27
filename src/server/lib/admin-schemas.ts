@@ -134,6 +134,8 @@ export const updateTournamentSchema = tournamentBase.partial().extend({
 export const releaseRoomSchema = z.object({
   roomId: z.string().trim().min(1),
   roomPassword: z.string().trim().min(1),
+  /** Blank = release to players now. A number = hold the details and release them automatically this many minutes before the match starts. */
+  releaseMinutesBefore: z.number().int().min(0).max(240).optional(),
 });
 
 export const walletAdjustSchema = z.object({

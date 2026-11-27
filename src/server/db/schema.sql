@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS Tournament (
   roomId               TEXT,
   roomPassword         TEXT,
   roomReleasedAt       TEXT,
+  roomReleaseAt        TEXT,
   adminNotes           TEXT,
   isFeatured           INTEGER NOT NULL DEFAULT 0,
   slotSelection        INTEGER NOT NULL DEFAULT 1,

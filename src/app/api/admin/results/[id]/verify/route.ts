@@ -1,7 +1,7 @@
 import { db } from "@/server/db/client";
 import { ApiError, fail, ok } from "@/server/lib/api-response";
 import { getCurrentUser, requireRole } from "@/server/lib/current-user";
-import { createId, createReferenceId } from "@/server/lib/ids";
+import { applyPayout } from "@/server/lib/match-settlement";
 import { writeAuditLog } from "@/server/lib/audit";
 
 interface ResultRow {
@@ -73,63 +73,15 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       );
       db.prepare("UPDATE Match SET status = 'RESULT_VERIFIED', updatedAt = ? WHERE id = ?").run(now, match.id);
 
-      // Player stats: every verified result counts as a played match.
-      db.prepare(
-        `UPDATE PlayerStats SET matchesPlayed = matchesPlayed + 1, kills = kills + ?,
-         wins = wins + ?, losses = losses + ?, totalEarnings = totalEarnings + ?, updatedAt = ?
-         WHERE userId = ?`
-      ).run(result.kills, prizeAmount > 0 ? 1 : 0, prizeAmount > 0 ? 0 : 1, prizeAmount, now, result.userId);
-
-      if (prizeAmount > 0) {
-        db.prepare("UPDATE Wallet SET winningBalance = winningBalance + ?, updatedAt = ? WHERE userId = ?").run(
-          prizeAmount,
-          now,
-          result.userId
-        );
-
-        const wallet = db
-          .prepare("SELECT depositBalance, winningBalance, bonusBalance FROM Wallet WHERE userId = ?")
-          .get(result.userId) as { depositBalance: number; winningBalance: number; bonusBalance: number };
-        const total = wallet.depositBalance + wallet.winningBalance + wallet.bonusBalance;
-
-        db.prepare(
-          `INSERT INTO "Transaction" (id, userId, type, status, amount, balanceAfter, referenceId, description, metadata, createdAt)
-           VALUES (?, ?, 'TOURNAMENT_PRIZE', 'COMPLETED', ?, ?, ?, ?, ?, ?)`
-        ).run(
-          createId("txn"),
-          result.userId,
-          prizeAmount,
-          total,
-          createReferenceId("PRZ"),
-          `Prize for placement #${result.placement}`,
-          JSON.stringify({ tournamentId: tournament.id, placement: result.placement }),
-          now
-        );
-
-        db.prepare(
-          `INSERT INTO Notification (id, userId, type, title, body, data, createdAt)
-           VALUES (?, ?, 'WINNER_ANNOUNCEMENT', ?, ?, ?, ?)`
-        ).run(
-          createId("notif"),
-          result.userId,
-          "You won! 🏆",
-          `Congratulations! You placed #${result.placement} and won ₹${prizeAmount / 100}.`,
-          JSON.stringify({ tournamentId: tournament.id }),
-          now
-        );
-      } else {
-        db.prepare(
-          `INSERT INTO Notification (id, userId, type, title, body, data, createdAt)
-           VALUES (?, ?, 'RESULT_PUBLISHED', ?, ?, ?, ?)`
-        ).run(
-          createId("notif"),
-          result.userId,
-          "Result verified",
-          "Your submitted result has been reviewed and verified.",
-          JSON.stringify({ tournamentId: tournament.id }),
-          now
-        );
-      }
+      applyPayout(db, {
+        adminId: admin.id,
+        tournamentId: tournament.id,
+        userId: result.userId,
+        placement: result.placement,
+        kills: result.kills,
+        prizeAmount,
+        now,
+      });
     })();
 
     writeAuditLog({

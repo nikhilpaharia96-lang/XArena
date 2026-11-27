@@ -1,7 +1,7 @@
 import { db } from "@/server/db/client";
 import { ApiError, fail, ok } from "@/server/lib/api-response";
 import { getCurrentUser, requireRole } from "@/server/lib/current-user";
-import { createId } from "@/server/lib/ids";
+import { saveRoom } from "@/server/lib/room-release";
 import { releaseRoomSchema } from "@/server/lib/admin-schemas";
 import { writeAuditLog } from "@/server/lib/audit";
 
@@ -27,38 +27,13 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     if (!tournament) throw new ApiError(404, "Tournament not found.", "NOT_FOUND");
 
     const now = new Date().toISOString();
+    const result = db.transaction(() =>
+      saveRoom(db, { tournamentId: id, roomId: input.roomId, roomPassword: input.roomPassword, releaseMinutesBefore: input.releaseMinutesBefore, now })
+    )();
 
-    db.transaction(() => {
-      db.prepare(
-        `UPDATE Tournament SET roomId = ?, roomPassword = ?, roomReleasedAt = ?, status = 'LIVE', updatedAt = ? WHERE id = ?`
-      ).run(input.roomId, input.roomPassword, now, now, id);
+    writeAuditLog({ actorId: user.id, action: result.released ? "ROOM_RELEASED" : "ROOM_SCHEDULED", targetType: "Tournament", targetId: id });
 
-      const participants = db
-        .prepare("SELECT userId FROM TournamentParticipant WHERE tournamentId = ?")
-        .all(id) as { userId: string }[];
-
-      // TODO(FCM): also send a push notification via Firebase Cloud
-      // Messaging here once FCM_SERVER_KEY / service account is configured
-      // (see src/server/lib/push.ts). The in-app Notification row below is
-      // fully functional today and will show up in the bell icon regardless.
-      for (const p of participants) {
-        db.prepare(
-          `INSERT INTO Notification (id, userId, type, title, body, data, createdAt)
-           VALUES (?, ?, 'ROOM_RELEASED', ?, ?, ?, ?)`
-        ).run(
-          createId("notif"),
-          p.userId,
-          "Room ID released! 🔑",
-          "Your match room details are now available. Head to the tournament page to join.",
-          JSON.stringify({ tournamentId: id }),
-          now
-        );
-      }
-    })();
-
-    writeAuditLog({ actorId: user.id, action: "ROOM_RELEASED", targetType: "Tournament", targetId: id });
-
-    return ok({ released: true });
+    return ok({ released: result.released, releaseAt: result.releaseAt });
   } catch (error) {
     if (error instanceof Error && error.name === "ZodError") {
       return fail(new ApiError(400, "Invalid input.", "VALIDATION_ERROR"));

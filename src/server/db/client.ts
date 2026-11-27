@@ -70,6 +70,9 @@ function openConnection(): Database.Database {
   if (!tournamentCols.some((c) => c.name === "slotSelection")) {
     db.exec("ALTER TABLE Tournament ADD COLUMN slotSelection INTEGER NOT NULL DEFAULT 1");
   }
+  if (!tournamentCols.some((c) => c.name === "roomReleaseAt")) {
+    db.exec("ALTER TABLE Tournament ADD COLUMN roomReleaseAt TEXT");
+  }
   db.exec("CREATE INDEX IF NOT EXISTS idx_tournament_category ON Tournament(category)");
 
   // Hero-banner content columns (older DB files created the Banner table without them).
