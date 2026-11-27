@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, CheckCircle2, Headset, LifeBuoy, Copy, Download, Eye, ImagePlus, IndianRupee, Loader2, QrCode, ShieldCheck, Smartphone, X } from "lucide-react";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useWallet, usePaymentInfo, useSubmitDepositRequest } from "@/hooks/use-wallet";
+import { useWallet, usePaymentInfo, useSubmitDepositRequest, useBonuses } from "@/hooks/use-wallet";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { useLoyalty } from "@/hooks/use-loyalty";
 import { LevelCard } from "@/components/rewards/level-card";
+import { BonusOffers, BonusProgress, bonusFor } from "@/components/wallet/bonus-offers";
 import { WalletTabs } from "@/components/wallet/wallet-tabs";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast-store";
@@ -38,10 +39,14 @@ export default function DepositPage() {
   const { data: loyalty } = useLoyalty();
   const { data: info, isLoading, isError, refetch } = usePaymentInfo();
   const submit = useSubmitDepositRequest();
+  const { data: bonuses } = useBonuses();
+  const [offerId, setOfferId] = useState<string | null>(null);
 
   const [step, setStep] = useState<Step>("amount");
   const [amount, setAmount] = useState<number | "">("");
   const [utr, setUtr] = useState("");
+  const offer = bonuses?.offers.find((o) => o.id === offerId) ?? null;
+  const bonusGet = offer && amount !== "" ? bonusFor(offer, amount) : 0;
   const [file, setFile] = useState<File | null>(null);
   const [showQr, setShowQr] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -99,7 +104,7 @@ export default function DepositPage() {
     if (inflight.current) return; // hard guard against double taps
     inflight.current = true;
     submit.mutate(
-      { amountRupees: amount, utr: utrClean, screenshot: file },
+      { amountRupees: amount, utr: utrClean, screenshot: file, offerId: bonusGet > 0 ? offerId : null },
       {
         onSuccess: (res) => {
           setSubmittedCode(res.code);
@@ -251,6 +256,9 @@ export default function DepositPage() {
               </Button>
             </Card>
 
+            {bonuses && <BonusProgress grants={bonuses.grants} />}
+            {bonuses && <BonusOffers offers={bonuses.offers} amount={amount} selected={offerId} onSelect={setOfferId} />}
+
             {loyalty && (
               <div>
                 <LevelCard data={loyalty} href="/rewards" />
@@ -357,6 +365,7 @@ export default function DepositPage() {
                 <p className="text-sm font-bold text-white">Payment Details</p>
                 <p className="text-xs text-white/50 mt-0.5">Amount Paid</p>
                 <p className="text-2xl font-black font-mono text-white">₹{amount.toLocaleString("en-IN")}</p>
+                {bonusGet > 0 && <p className="text-xs font-bold text-signal mt-0.5">+ ₹{(bonusGet / 100).toLocaleString("en-IN")} {offer?.title} after approval</p>}
               </div>
 
               <div>

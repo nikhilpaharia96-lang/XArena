@@ -6,6 +6,7 @@ import { matchDepositByUtr } from "@/server/lib/deposit-matching";
 import { normalizeUtr } from "@/server/lib/deposit-requests-shared";
 import { awardForDeposit } from "@/server/lib/loyalty";
 import { awardReferralForDeposit } from "@/server/lib/referral";
+import { grantDepositBonus } from "@/server/lib/deposit-bonus";
 
 export type DepositRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -82,6 +83,7 @@ export function createDepositRequest(input: {
   amountPaise: number;
   utr: string;
   screenshotKey: string;
+  offerId?: string | null;
 }): { id: string; code: string } {
   const now = new Date().toISOString();
   const id = createId("depreq");
@@ -90,10 +92,10 @@ export function createDepositRequest(input: {
     return db.transaction(() => {
       const res = db
         .prepare(
-          `INSERT INTO DepositRequest (id, userId, amount, utr, screenshotUrl, paymentMethod, status, createdAt, updatedAt)
-           VALUES (?, ?, ?, ?, ?, 'UPI', 'PENDING', ?, ?)`
+          `INSERT INTO DepositRequest (id, userId, amount, utr, screenshotUrl, paymentMethod, status, offerId, createdAt, updatedAt)
+           VALUES (?, ?, ?, ?, ?, 'UPI', 'PENDING', ?, ?, ?)`
         )
-        .run(id, input.userId, input.amountPaise, input.utr, input.screenshotKey, now, now);
+        .run(id, input.userId, input.amountPaise, input.utr, input.screenshotKey, input.offerId ?? null, now, now);
 
       const code = `XA${10000 + Number(res.lastInsertRowid)}`;
       db.prepare("UPDATE DepositRequest SET code = ? WHERE id = ?").run(code, id);
@@ -234,6 +236,7 @@ function approveInTx(params: { id: string; adminId: string; ipAddress?: string |
     // 7b. XP / level-up and monthly-target rebates (never blocks the deposit)
     awardForDeposit(db, req.userId, req.amount, now);
     awardReferralForDeposit(db, req.userId, now);
+    grantDepositBonus(db, req.id, now);
 
     // 8. user notification + audit trail (same transaction)
     insertNotification(

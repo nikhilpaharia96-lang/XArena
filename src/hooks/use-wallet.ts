@@ -124,16 +124,18 @@ export function useMyDeposits() {
 export function useSubmitDepositRequest() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { amountRupees: number; utr: string; screenshot: File }) => {
+    mutationFn: (input: { amountRupees: number; utr: string; screenshot: File; offerId?: string | null }) => {
       const form = new FormData();
       form.set("amountRupees", String(input.amountRupees));
       form.set("utr", input.utr);
       form.set("screenshot", input.screenshot);
+      if (input.offerId) form.set("offerId", input.offerId);
       return api.postForm<{ id: string; code: string; status: string }>("/api/wallet/deposits", form);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-deposits"] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
+      qc.invalidateQueries({ queryKey: ["bonuses"] });
     },
   });
 }
@@ -184,5 +186,21 @@ export function useDeleteBank() {
   return useMutation({
     mutationFn: (id: string) => api.delete(`/api/wallet/banks/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["banks"] }),
+  });
+}
+
+export interface BonusOfferItem {
+  id: string; title: string; bonusPercent: number; rollingX: number; maxBonus: number; minDeposit: number; validDays: number;
+}
+export interface BonusGrantItem {
+  id: string; title: string; bonusAmount: number; rollingX: number; requiredWager: number; wagered: number;
+  startedAt: string; expiresAt: string | null; status: "ACTIVE" | "COMPLETED" | "EXPIRED";
+}
+
+export function useBonuses() {
+  return useQuery<{ offers: BonusOfferItem[]; grants: BonusGrantItem[] }>({
+    queryKey: ["bonuses"],
+    queryFn: () => api.get("/api/wallet/bonuses"),
+    staleTime: 15_000,
   });
 }

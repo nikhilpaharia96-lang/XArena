@@ -1,5 +1,6 @@
 import { db } from "@/server/db/client";
 import { fail, ok } from "@/server/lib/api-response";
+import { settleBonusGrants } from "@/server/lib/deposit-bonus";
 import { getCurrentUser } from "@/server/lib/current-user";
 
 export async function GET() {
@@ -13,6 +14,7 @@ export async function GET() {
       )
       .get(user.id);
 
+    settleBonusGrants(db, user.id); // unlock / expire deposit bonuses before reporting balances
     const wallet = db
       .prepare("SELECT depositBalance, winningBalance, bonusBalance, lockedBalance FROM Wallet WHERE userId = ?")
       .get(user.id);

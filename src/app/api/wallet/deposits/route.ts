@@ -1,3 +1,4 @@
+import { assertOfferUsable } from "@/server/lib/deposit-bonus";
 import { db } from "@/server/db/client";
 import { ApiError, fail, ok } from "@/server/lib/api-response";
 import { getCurrentUser } from "@/server/lib/current-user";
@@ -81,12 +82,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // --- optional bonus offer ---
+    const offerId = String(form.get("offerId") ?? "").trim() || null;
+    if (offerId) assertOfferUsable(db, offerId, rupeesToPaise(amountRupees));
+
     screenshotKey = await saveImageUpload(file, "deposits");
     const created = createDepositRequest({
       userId: user.id,
       amountPaise: rupeesToPaise(amountRupees),
       utr,
       screenshotKey,
+      offerId,
     });
 
     return ok({ id: created.id, code: created.code, status: "PENDING" }, 201);

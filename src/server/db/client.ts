@@ -43,6 +43,11 @@ function openConnection(): Database.Database {
     db.exec("UPDATE GameConfig SET playMode = 'BOTH' WHERE gameKey IN ('SLOT','COINS')");
   }
 
+  const depReqCols = db.prepare("PRAGMA table_info(DepositRequest)").all() as { name: string }[];
+  if (depReqCols.length > 0 && !depReqCols.some((c) => c.name === "offerId")) {
+    db.exec("ALTER TABLE DepositRequest ADD COLUMN offerId TEXT");
+  }
+
   db.exec(schema);
 
   // One-time: the four table games first shipped Off + Demo-only. Turn them on for wallet play too, but only

@@ -234,6 +234,7 @@ CREATE TABLE IF NOT EXISTS DepositRequest (
   reviewedById  TEXT REFERENCES User(id),
   reviewedAt    TEXT,
   transactionId TEXT REFERENCES "Transaction"(id),
+  offerId       TEXT,
   createdAt     TEXT NOT NULL DEFAULT (datetime('now')),
   updatedAt     TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -681,3 +682,39 @@ WHEN EXISTS (SELECT 1 FROM PushSubscription WHERE userId = NEW.userId)
 BEGIN
   INSERT OR IGNORE INTO PushOutbox (notificationId, createdAt) VALUES (NEW.id, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
 END;
+
+-- Deposit bonus offers shown on the deposit page (admin-editable). Amounts in paise.
+CREATE TABLE IF NOT EXISTS DepositBonusOffer (
+  id              TEXT PRIMARY KEY,
+  sortOrder       INTEGER NOT NULL DEFAULT 0,
+  title           TEXT NOT NULL,
+  bonusPercent    INTEGER NOT NULL CHECK (bonusPercent BETWEEN 1 AND 100),
+  rollingX        INTEGER NOT NULL DEFAULT 0 CHECK (rollingX >= 0),   -- wager this many times the bonus to unlock it
+  maxBonus        INTEGER NOT NULL CHECK (maxBonus > 0),
+  minDeposit      INTEGER NOT NULL DEFAULT 0,
+  validDays       INTEGER NOT NULL DEFAULT 0,                          -- 0 = no expiry (instant)
+  active          INTEGER NOT NULL DEFAULT 1,
+  createdAt       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+INSERT OR IGNORE INTO DepositBonusOffer (id, sortOrder, title, bonusPercent, rollingX, maxBonus, minDeposit, validDays) VALUES
+  ('dbo_instant', 1, 'Instant Bonus', 2, 0, 50000, 10000, 0),
+  ('dbo_23x', 2, 'Mega Bonus', 23, 23, 100000, 10000, 3),
+  ('dbo_15x', 3, 'Value Bonus', 10, 15, 100000, 10000, 3);
+
+-- One row per credited deposit bonus; tracks the rolling (wagering) requirement.
+CREATE TABLE IF NOT EXISTS BonusGrant (
+  id               TEXT PRIMARY KEY,
+  userId           TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  depositRequestId TEXT UNIQUE NOT NULL,
+  offerId          TEXT NOT NULL,
+  title            TEXT NOT NULL,
+  depositAmount    INTEGER NOT NULL,
+  bonusAmount      INTEGER NOT NULL,
+  rollingX         INTEGER NOT NULL,
+  requiredWager    INTEGER NOT NULL,
+  startedAt        TEXT NOT NULL,
+  expiresAt        TEXT,
+  status           TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE','COMPLETED','EXPIRED')),
+  settledAt        TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_bonusgrant_user ON BonusGrant(userId, status);
