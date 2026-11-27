@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, Bell, Menu, Plus, Wallet as WalletIcon } from "lucide-react";
+import { ArrowLeft, Bell, Menu, Wallet as WalletIcon } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useNotifications } from "@/hooks/use-notifications";
 import { formatPaise } from "@/lib/format";
@@ -87,15 +87,12 @@ export function TopBar() {
               <>
                 <Link
                   href="/wallet"
-                  aria-label="Wallet balance, add money"
-                  className="mx-0.5 flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/10 pl-2.5 pr-1 h-9 max-[379px]:pl-2 hover:bg-white/10 active:bg-white/12 transition-colors"
+                  aria-label="Wallet balance"
+                  className="mx-0.5 flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/10 pl-2.5 pr-3 h-9 max-[379px]:px-2 hover:bg-white/10 active:bg-white/12 transition-colors"
                 >
                   <WalletIcon className="h-4 w-4 text-signal shrink-0" />
                   <span className="text-[13px] font-mono font-bold text-white tabular-nums max-[379px]:text-xs">
                     {formatPaise(me.wallet.depositBalance + me.wallet.winningBalance + me.wallet.bonusBalance)}
-                  </span>
-                  <span className="h-7 w-7 rounded-full gradient-cta flex items-center justify-center shadow-[0_4px_12px_-4px_rgba(249,115,22,0.7)]">
-                    <Plus className="h-4 w-4 text-white" strokeWidth={2.75} />
                   </span>
                 </Link>
                 <Link
