@@ -14,21 +14,27 @@ import { Testimonials } from "@/components/home/testimonials";
 import { FaqSection } from "@/components/home/faq-section";
 import { AppDownloadBanner } from "@/components/home/app-download-banner";
 import { SupportCta } from "@/components/home/support-cta";
+import { PlayerDashboard } from "@/components/home/player-dashboard";
+import { useCurrentUser } from "@/hooks/use-auth";
 
 export default function HomePage() {
+  const { data: me } = useCurrentUser();
+  const member = !!me;
   return (
     <div className="space-y-10 sm:space-y-14">
+      {member && <PlayerDashboard />}
       <HeroCarousel />
       <PopularGames />
       <FeaturedTournament />
       <UpcomingTournaments />
-      <HowItWorks />
+      {/* Newcomers get the explainer; returning players get straight to the action. */}
+      {!member && <HowItWorks />}
       <TrendingTournaments />
       <ReferEarnBanner />
       <LeaderboardPreview />
       <NewsSection />
       <CommunityBanner />
-      <Testimonials />
+      {!member && <Testimonials />}
       <FaqSection />
       <AppDownloadBanner />
       <SupportCta />
