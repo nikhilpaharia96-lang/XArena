@@ -387,3 +387,34 @@ export function useRegistrationAction(id: string) {
     },
   });
 }
+
+// ---- Deposit bonus offers ----
+export interface AdminBonusOffer {
+  id: string; sortOrder: number; title: string; bonusPercent: number; rollingX: number;
+  maxBonus: number; minDeposit: number; validDays: number; active: number;
+}
+export interface AdminBonusOfferInput {
+  title: string; bonusPercent: number; rollingX: number; maxBonusRupees: number; minDepositRupees: number;
+  validDays: number; active: boolean; sortOrder: number;
+}
+
+export function useAdminBonusOffers() {
+  return useQuery<AdminBonusOffer[]>({ queryKey: ["admin", "bonus-offers"], queryFn: () => api.get("/api/admin/bonus-offers") });
+}
+
+export function useSaveBonusOffer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { id?: string; input: AdminBonusOfferInput }) =>
+      v.id ? api.put(`/api/admin/bonus-offers/${v.id}`, v.input) : api.post("/api/admin/bonus-offers", v.input),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin", "bonus-offers"] }); qc.invalidateQueries({ queryKey: ["bonuses"] }); },
+  });
+}
+
+export function useDeleteBonusOffer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/admin/bonus-offers/${id}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin", "bonus-offers"] }); qc.invalidateQueries({ queryKey: ["bonuses"] }); },
+  });
+}

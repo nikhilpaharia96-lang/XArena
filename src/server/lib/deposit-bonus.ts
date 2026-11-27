@@ -130,3 +130,39 @@ export function listGrants(db: Db, userId: string, now = new Date().toISOString(
     return { ...g, wagered: Math.min(wagered, g.requiredWager) };
   });
 }
+
+export interface OfferInput {
+  title: string; bonusPercent: number; rollingX: number; maxBonusRupees: number; minDepositRupees: number;
+  validDays: number; active: boolean; sortOrder: number;
+}
+
+function checkOffer(i: OfferInput) {
+  const int = (n: unknown) => typeof n === "number" && Number.isInteger(n);
+  if (typeof i.title !== "string" || i.title.trim().length < 2 || i.title.trim().length > 40) throw new ApiError(400, "Title must be 2–40 characters.", "VALIDATION_ERROR");
+  if (!int(i.bonusPercent) || i.bonusPercent < 1 || i.bonusPercent > 100) throw new ApiError(400, "Bonus % must be 1–100.", "VALIDATION_ERROR");
+  if (!int(i.rollingX) || i.rollingX < 0 || i.rollingX > 100) throw new ApiError(400, "Rolling must be 0–100x.", "VALIDATION_ERROR");
+  if (!int(i.maxBonusRupees) || i.maxBonusRupees < 1 || i.maxBonusRupees > 1_000_000) throw new ApiError(400, "Max bonus must be ₹1–₹10,00,000.", "VALIDATION_ERROR");
+  if (!int(i.minDepositRupees) || i.minDepositRupees < 0 || i.minDepositRupees > 1_000_000) throw new ApiError(400, "Invalid minimum deposit.", "VALIDATION_ERROR");
+  if (!int(i.validDays) || i.validDays < 0 || i.validDays > 365) throw new ApiError(400, "Validity must be 0–365 days.", "VALIDATION_ERROR");
+  if (i.rollingX > 0 && i.validDays === 0) throw new ApiError(400, "An offer with rolling needs a validity in days.", "VALIDATION_ERROR");
+  if (!int(i.sortOrder) || i.sortOrder < 0 || i.sortOrder > 1000) throw new ApiError(400, "Invalid order.", "VALIDATION_ERROR");
+}
+
+/** Admin: create (no id) or update an offer. Existing grants keep the terms they were given. */
+export function saveOffer(db: Db, input: OfferInput, id?: string): string {
+  checkOffer(input);
+  const vals = [input.title.trim(), input.bonusPercent, input.rollingX, input.maxBonusRupees * 100, input.minDepositRupees * 100, input.validDays, input.active ? 1 : 0, input.sortOrder] as const;
+  if (id) {
+    const r = db.prepare("UPDATE DepositBonusOffer SET title=?, bonusPercent=?, rollingX=?, maxBonus=?, minDeposit=?, validDays=?, active=?, sortOrder=? WHERE id = ?").run(...vals, id);
+    if (r.changes === 0) throw new ApiError(404, "Offer not found.", "NOT_FOUND");
+    return id;
+  }
+  const newId = createId("dbo");
+  db.prepare("INSERT INTO DepositBonusOffer (title, bonusPercent, rollingX, maxBonus, minDeposit, validDays, active, sortOrder, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").run(...vals, newId);
+  return newId;
+}
+
+export function deleteOffer(db: Db, id: string) {
+  // Pending requests that picked it simply get no bonus (grantDepositBonus skips a missing offer).
+  if (db.prepare("DELETE FROM DepositBonusOffer WHERE id = ?").run(id).changes === 0) throw new ApiError(404, "Offer not found.", "NOT_FOUND");
+}

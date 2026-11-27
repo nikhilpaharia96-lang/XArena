@@ -89,3 +89,23 @@ describe("grantDepositBonus", () => {
     expect(walletOf(db, u.userId).bonus).toBe(0);
   });
 });
+
+import { deleteOffer, saveOffer } from "../deposit-bonus";
+describe("admin offer editing", () => {
+  const base = { title: "Test", bonusPercent: 5, rollingX: 10, maxBonusRupees: 200, minDepositRupees: 100, validDays: 2, active: true, sortOrder: 9 };
+  it("creates, updates (rupees → paise) and deletes", () => {
+    const db = makeDb();
+    const id = saveOffer(db, base);
+    expect(db.prepare("SELECT maxBonus, minDeposit FROM DepositBonusOffer WHERE id=?").get(id)).toEqual({ maxBonus: 20000, minDeposit: 10000 });
+    saveOffer(db, { ...base, active: false }, id);
+    expect(listOffers(db, { activeOnly: true }).some((o) => o.id === id)).toBe(false);
+    deleteOffer(db, id);
+    expect(() => deleteOffer(db, id)).toThrow(/not found/);
+  });
+  it("rejects bad terms", () => {
+    const db = makeDb();
+    expect(() => saveOffer(db, { ...base, bonusPercent: 0 })).toThrow();
+    expect(() => saveOffer(db, { ...base, rollingX: 5, validDays: 0 })).toThrow(/validity/);
+    expect(() => saveOffer(db, { ...base, title: "" })).toThrow();
+  });
+});

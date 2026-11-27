@@ -20,6 +20,7 @@ import {
   FileDown,
   Dices,
   Menu,
+  Gift,
 } from "lucide-react";
 import { useState } from "react";
 import { useRequireAdmin } from "@/hooks/use-require-admin";
@@ -31,6 +32,7 @@ const NAV = [
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/deposit-requests", label: "Deposit Requests", icon: Landmark },
   { href: "/admin/payment-settings", label: "Payment Settings", icon: QrCode },
+  { href: "/admin/bonus-offers", label: "Bonus Offers", icon: Gift },
   { href: "/admin/deposits", label: "Razorpay Deposits", icon: ArrowDownCircle },
   { href: "/admin/withdrawals", label: "Withdrawals", icon: ArrowUpCircle },
   { href: "/admin/providers", label: "Game Provider", icon: Dices },
