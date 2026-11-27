@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import {
@@ -56,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar - desktop */}
       <aside className="admin-sidebar flex-col w-64 shrink-0 border-r border-white/8 glass p-4">
         <Link href="/admin" className="flex items-center gap-2 mb-8 px-2">
-          <div className="h-8 w-8 rounded-xl gradient-brand flex items-center justify-center font-black text-white text-sm">X</div>
+          <Image src="/images/xarena-mark.png" alt="" width={36} height={25} className="h-7 w-auto shrink-0" />
           <span className="font-display font-extrabold text-white">XArena Admin</span>
         </Link>
         <nav className="flex-1 space-y-1">
@@ -83,7 +84,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile top bar */}
       <div className="admin-topbar fixed top-0 left-0 right-0 z-40 glass border-b border-white/8 items-center justify-between px-4 h-14">
-        <span className="font-display font-extrabold text-white">XArena Admin</span>
+        <span className="flex items-center gap-2 font-display font-extrabold text-white">
+          <Image src="/images/xarena-mark.png" alt="" width={36} height={25} className="h-6 w-auto shrink-0" />
+          XArena Admin
+        </span>
         <div className="flex items-center gap-1">
           <ThemeToggle className="h-10 w-10 rounded-xl flex items-center justify-center text-white/80" />
           <button aria-label="Menu" onClick={() => setMobileOpen(!mobileOpen)} className="h-10 w-10 flex items-center justify-center">

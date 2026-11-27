@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
@@ -64,9 +65,7 @@ export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => vo
           >
             <div className="flex items-center justify-between px-5 h-16 border-b border-white/8">
               <Link href="/" onClick={onClose} className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-xl gradient-brand flex items-center justify-center font-display font-black text-white text-sm">
-                  X
-                </div>
+                <Image src="/images/xarena-mark.png" alt="" width={36} height={25} className="h-7 w-auto shrink-0" />
                 <span className="font-display font-extrabold text-lg tracking-tight text-white">XArena</span>
               </Link>
               <button
