@@ -18,6 +18,7 @@ import { formatPaise } from "@/lib/format";
 import { FRIEND_REWARD_PAISE, MIN_QUALIFY_DEPOSIT_PAISE } from "@/lib/referral";
 import { signupSchema } from "@/types/schemas";
 import { motion } from "framer-motion";
+import { GoogleButton, OrDivider } from "@/components/auth/google-button";
 
 type FormValues = z.input<typeof signupSchema>;
 
@@ -84,6 +85,14 @@ function SignupForm() {
         <h1 className="text-2xl font-black text-white">Create your account</h1>
         <p className="text-white/50 text-sm mt-1">Join thousands of players competing daily</p>
       </div>
+
+      <GoogleButton referralCode={searchParams.get("ref") ?? undefined} />
+      <p className="text-[11px] text-white/45 text-center mt-2">
+        By continuing you confirm you are 18+ and accept our{" "}
+        <Link href="/terms" className="text-cobalt font-semibold underline underline-offset-2">Terms</Link> and{" "}
+        <Link href="/privacy" className="text-cobalt font-semibold underline underline-offset-2">Privacy Policy</Link>.
+      </p>
+      <OrDivider />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>

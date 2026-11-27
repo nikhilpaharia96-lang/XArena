@@ -12,6 +12,17 @@ import { useLogin } from "@/hooks/use-auth";
 import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
+import { GoogleButton, OrDivider } from "@/components/auth/google-button";
+
+const GOOGLE_ERRORS: Record<string, string> = {
+  google_unavailable: "Google sign-in isn't set up yet. Please log in with email or phone.",
+  google_cancelled: "Google sign-in was cancelled.",
+  google_failed: "Couldn't sign in with Google. Please try again.",
+  account_banned: "This account has been banned. Contact support if you think this is a mistake.",
+  account_suspended: "This account is temporarily suspended.",
+  too_many: "Too many attempts. Try again in a minute.",
+};
 
 const schema = z.object({
   identifier: z.string().trim().min(1, "Enter your email or phone number"),
@@ -27,6 +38,12 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
+
+  // Google sends people back here with ?error=... when sign-in doesn't work out.
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("error");
+    if (code && GOOGLE_ERRORS[code]) toast({ title: "Google sign-in", description: GOOGLE_ERRORS[code], tone: "error" });
+  }, []);
 
   const onSubmit = (values: FormValues) => {
     login.mutate(values, {
@@ -50,6 +67,9 @@ export default function LoginPage() {
         <h1 className="text-2xl font-black text-white">Welcome back</h1>
         <p className="text-white/55 text-sm mt-1">Log in to join tournaments and manage your wallet.</p>
       </div>
+
+      <GoogleButton />
+      <OrDivider />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
