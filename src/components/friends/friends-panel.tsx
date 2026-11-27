@@ -28,7 +28,7 @@ function ChatRow({ f, active, meId, onOpen }: { f: FriendItem; active: boolean; 
   return (
     <button
       onClick={onOpen}
-      className={cn("flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors", active ? "bg-violet/15" : "hover:bg-white/5")}
+      className={cn("flex w-full min-h-[68px] items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors max-md:border max-md:border-white/10 max-md:bg-surface", active ? "bg-violet/15" : "hover:bg-white/5 active:bg-white/10")}
     >
       <UserAvatar user={f.user} />
       <div className="min-w-0 flex-1">
@@ -147,9 +147,9 @@ export function FriendsPanel({ meId }: { meId: string }) {
   const activeId = stillFriend ? openId : null;
 
   return (
-    <div className="grid overflow-hidden rounded-3xl border border-white/10 bg-surface md:grid-cols-[340px_1fr] h-[calc(100dvh-15rem)] min-h-[460px] md:h-[640px]">
-      <aside className={cn("flex min-h-0 flex-col border-white/10 md:border-r", activeId && "hidden md:flex")}>
-        <div className="flex gap-1.5 overflow-x-auto p-3 no-scrollbar">
+    <div className="md:grid md:h-[640px] md:grid-cols-[340px_1fr] md:overflow-hidden md:rounded-3xl md:border md:border-white/10 md:bg-surface">
+      <aside className={cn("flex flex-col border-white/10 md:min-h-0 md:border-r", activeId && "max-md:hidden")}>
+        <div className="flex gap-1.5 overflow-x-auto pb-3 md:p-3 no-scrollbar">
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -162,7 +162,7 @@ export function FriendsPanel({ meId }: { meId: string }) {
           ))}
         </div>
 
-        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto px-2 pb-3">
+        <div className="space-y-1 pb-3 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-2">
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="mx-1 h-16 rounded-2xl" />)
           ) : isError ? (
@@ -197,7 +197,7 @@ export function FriendsPanel({ meId }: { meId: string }) {
         </div>
       </aside>
 
-      <section className={cn("min-h-0", !activeId && "hidden md:flex md:items-center md:justify-center")}>
+      <section className={cn("md:min-h-0", activeId ? "max-md:fixed max-md:inset-0 max-md:z-[70] max-md:bg-void max-md:pt-[env(safe-area-inset-top)]" : "hidden md:flex md:items-center md:justify-center")}>
         {activeId ? (
           <ChatView key={activeId} friendshipId={activeId} meId={meId} onBack={() => setOpenId(null)} />
         ) : (

@@ -408,7 +408,8 @@ html[data-theme="light"] :is(input, textarea)::placeholder { color: #64748B; }
 /* ---------- App mode (installed PWA) ---------- */
 /* Page-to-page fade so navigation feels like an app, not a reload. */
 @keyframes page-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.page-enter { animation: page-enter 0.22s ease-out both; }
+/* `backwards` (not `both`): a lingering transform animation would trap position:fixed children (full-screen chat, sheets). */
+.page-enter { animation: page-enter 0.22s ease-out backwards; }
 @media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
 
 /* Press feedback on everything tappable. */

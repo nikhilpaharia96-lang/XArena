@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Users, LogIn, Trophy } from "lucide-react";
+import { Users, LogIn, MessageCircle, Trophy } from "lucide-react";
+import { useFriends } from "@/hooks/use-friends";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useProfile, type ProfileData } from "@/hooks/use-profile";
 import { useGames } from "@/hooks/use-tournaments";
@@ -126,6 +127,7 @@ export default function TeamsPage() {
   const { data: me, isLoading: meLoading } = useCurrentUser();
   const [tab, setTab] = useState<"friends" | "teams">("friends");
   const { data: teamsData } = useTeams();
+  const { data: friends } = useFriends();
   const teamInvites = teamsData?.invites.length ?? 0;
 
   if (meLoading) {
@@ -154,22 +156,34 @@ export default function TeamsPage() {
     );
   }
 
+  const friendCount = friends?.friends.length ?? 0;
+  const unread = (friends?.counts.unreadMessages ?? 0) + (friends?.counts.pendingRequests ?? 0);
+  const tabs = [
+    { id: "friends", label: "Friends & Chat", icon: MessageCircle, badge: unread },
+    { id: "teams", label: "My Teams", icon: Users, badge: teamInvites },
+  ] as const;
+
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-xl font-black text-white">My Teams</h1>
-        <p className="text-sm text-white/45 mt-0.5">Friends, chat and your teams</p>
+        <p className="text-sm text-white/60 mt-0.5">
+          {friendCount} friend{friendCount === 1 ? "" : "s"} · {teamsData?.teams.length ?? 0} team{(teamsData?.teams.length ?? 0) === 1 ? "" : "s"}
+        </p>
       </div>
 
-      <div className="flex gap-2">
-        {([["friends", "Friends & Chat"], ["teams", "My Teams"]] as const).map(([id, label]) => (
+      <div role="tablist" aria-label="Teams sections" className="grid grid-cols-2 gap-1 rounded-2xl border border-white/10 bg-surface p-1">
+        {tabs.map(({ id, label, icon: Icon, badge }) => (
           <button
             key={id}
+            role="tab"
+            aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={cn("h-9 rounded-full border px-4 text-xs font-semibold", tab === id ? "gradient-brand border-transparent text-white" : "border-white/10 bg-white/5 text-white/60")}
+            className={cn("relative flex h-11 items-center justify-center gap-2 rounded-xl text-sm font-bold transition-colors", tab === id ? "gradient-brand text-white shadow-[0_8px_20px_-10px_rgba(37,99,235,0.9)]" : "text-white/60 active:bg-white/5")}
           >
+            <Icon className="h-4 w-4" />
             {label}
-            {id === "teams" && teamInvites > 0 && <span className="ml-1.5 rounded-full bg-crimson px-1.5 text-[11px] font-bold text-white">{teamInvites}</span>}
+            {badge > 0 && <span className="rounded-full bg-crimson px-1.5 text-[11px] font-bold text-white">{badge}</span>}
           </button>
         ))}
       </div>
