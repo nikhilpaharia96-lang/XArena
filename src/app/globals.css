@@ -439,3 +439,10 @@ a, button, [role="button"] { touch-action: manipulation; }
   background: linear-gradient(135deg, #2563FF 0%, #1D4ED8 100%);
   box-shadow: 0 6px 18px -8px rgba(37, 99, 255, 0.85);
 }
+
+.text-gradient-brand {
+  background: linear-gradient(90deg, #60a5fa, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

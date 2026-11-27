@@ -12,7 +12,8 @@ import { useLogin } from "@/hooks/use-auth";
 import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { AlertCircle, Lock, User } from "lucide-react";
 import { GoogleButton, OrDivider } from "@/components/auth/google-button";
 
 const GOOGLE_ERRORS: Record<string, string> = {
@@ -30,7 +31,13 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
+/** Where to go after login: only same-site paths (blocks open-redirects like //evil.com). */
+function safeNext(raw: string | null): string {
+  return raw && /^\/(?!\/)[^\\]*$/.test(raw) ? raw : "/";
+}
+
 export default function LoginPage() {
+  const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
   const login = useLogin();
   const {
@@ -46,52 +53,58 @@ export default function LoginPage() {
   }, []);
 
   const onSubmit = (values: FormValues) => {
+    setFormError(null);
     login.mutate(values, {
       onSuccess: () => {
         toast({ title: "Welcome back!", tone: "success" });
-        router.push("/");
+        router.push(safeNext(new URLSearchParams(window.location.search).get("next")));
       },
       onError: (err) => {
-        toast({
-          title: "Login failed",
-          description: err instanceof ApiClientError ? err.message : "Please try again.",
-          tone: "error",
-        });
+        setFormError(err instanceof ApiClientError ? err.message : "Please try again.");
       },
     });
   };
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-black text-white">Welcome back</h1>
-        <p className="text-white/55 text-sm mt-1">Log in to join tournaments and manage your wallet.</p>
+      <div className="text-center mb-5">
+        <h1 className="text-[26px] leading-tight font-black text-white">Welcome back, <span className="text-gradient-brand">player</span></h1>
+        <p className="text-white/60 text-sm mt-1.5">Log in to join tournaments, win prizes and withdraw instantly.</p>
       </div>
 
       <GoogleButton />
       <OrDivider />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {formError && (
+        <div role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-crimson/40 bg-crimson/10 px-3 py-2.5 text-sm text-crimson">
+          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" /> <span>{formError}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>
-          <label className="text-xs font-semibold text-white/60 mb-1.5 block">Email or Phone no.</label>
+          <label htmlFor="identifier" className="text-xs font-semibold text-white/70 mb-1.5 block">Email or phone number</label>
           <Input
+            id="identifier"
+            leading={<User />}
+            enterKeyHint="next"
             type="text"
             inputMode="email"
             autoComplete="username"
             autoCapitalize="none"
-            placeholder="you@example.com or 9876543210"
+            placeholder="Email or 10-digit phone"
             {...register("identifier")}
             error={errors.identifier?.message}
           />
         </div>
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-semibold text-white/60">Password</label>
-            <Link href="/forgot-password" className="text-xs font-bold text-cobalt hover:underline py-1">
+            <label htmlFor="password" className="text-xs font-semibold text-white/70">Password</label>
+            <Link href="/forgot-password" className="text-xs font-bold text-cobalt hover:underline py-3 -my-3 pl-3">
               Forgot password?
             </Link>
           </div>
-          <PasswordInput autoComplete="current-password" placeholder="Enter your password" {...register("password")} error={errors.password?.message} />
+          <PasswordInput id="password" leading={<Lock />} enterKeyHint="go" autoComplete="current-password" placeholder="Enter your password" {...register("password")} error={errors.password?.message} />
         </div>
 
         <Button type="submit" fullWidth size="lg" loading={login.isPending}>
@@ -99,12 +112,12 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-white/55 mt-5">
-        New to XArena?{" "}
-        <Link href="/signup" className="text-violet font-semibold">
-          Create an account
+      <div className="mt-5 rounded-2xl bg-white/[0.04] border border-white/10 p-3.5 text-center">
+        <p className="text-sm text-white/60">New to XArena?</p>
+        <Link href="/signup" className="mt-2 flex h-11 items-center justify-center rounded-xl border border-violet/50 text-sm font-bold text-cobalt hover:bg-violet/10 active:bg-violet/15 transition-colors">
+          Create free account
         </Link>
-      </p>
+      </div>
     </motion.div>
   );
 }

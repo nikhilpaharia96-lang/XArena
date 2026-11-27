@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 /** Password field with a show/hide toggle (44px touch target). */
 export const PasswordInput = React.forwardRef<
   HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement> & { error?: string }
+  React.InputHTMLAttributes<HTMLInputElement> & { error?: string; leading?: React.ReactNode }
 >(({ className, error, ...props }, ref) => {
   const [show, setShow] = useState(false);
   return (
