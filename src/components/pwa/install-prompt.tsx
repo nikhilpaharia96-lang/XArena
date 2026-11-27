@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BellRing, Download, Share, SquarePlus, Smartphone, Zap } from "lucide-react";
+import { BellRing, Download, Smartphone, Zap } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { useInstallApp, usePush } from "@/hooks/use-pwa";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { IosInstallSteps } from "./install-steps";
 import { readPromptState, shouldShowInstall, writePromptState } from "@/lib/pwa";
 import { toast } from "@/lib/toast-store";
 
@@ -116,11 +117,7 @@ export function InstallPrompt() {
       ) : step === "ios" ? (
         <>
           <Hero title="Add XArena to your Home Screen" subtitle="Use it like an app — and get notifications on iPhone." />
-          <ol className="space-y-3 rounded-2xl bg-white/[0.04] p-4 text-sm text-white/80">
-            <li className="flex items-center gap-3"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cobalt/20 text-cobalt"><Share className="h-4 w-4" /></span><span>Tap the <b>Share</b> button in Safari&apos;s toolbar</span></li>
-            <li className="flex items-center gap-3"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cobalt/20 text-cobalt"><SquarePlus className="h-4 w-4" /></span><span>Choose <b>Add to Home Screen</b></span></li>
-            <li className="flex items-center gap-3"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cobalt/20 text-cobalt"><Download className="h-4 w-4" /></span><span>Tap <b>Add</b>, then open XArena from your Home Screen</span></li>
-          </ol>
+          <IosInstallSteps />
           <Button fullWidth size="lg" className="mt-4" onClick={close}>Got it</Button>
         </>
       ) : (

@@ -418,6 +418,7 @@ a, button, [role="button"] { touch-action: manipulation; }
 }
 
 [data-app="standalone"] .site-footer { display: none; }
+[data-app="standalone"] .hide-in-app { display: none; }
 [data-app="standalone"] body { overscroll-behavior-y: none; }
 [data-app="standalone"] body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 [data-app="standalone"] input, [data-app="standalone"] textarea, [data-app="standalone"] [contenteditable],
