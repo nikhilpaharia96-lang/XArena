@@ -88,7 +88,7 @@ export function ChatView({ friendshipId, meId, onBack }: { friendshipId: string;
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex items-center gap-3 border-b border-white/10 px-3 py-2.5">
-        <button onClick={onBack} aria-label="Back to chats" className="md:hidden h-9 w-9 flex items-center justify-center rounded-full hover:bg-white/5">
+        <button onClick={onBack} aria-label="Back to chats" className="md:hidden h-11 w-11 -ml-1 flex items-center justify-center rounded-full hover:bg-white/5 active:bg-white/10">
           <ArrowLeft className="h-5 w-5 text-white" />
         </button>
         {data ? (
@@ -104,11 +104,11 @@ export function ChatView({ friendshipId, meId, onBack }: { friendshipId: string;
         )}
         {confirmRemove ? (
           <div className="flex items-center gap-1.5 text-xs">
-            <button onClick={doRemove} disabled={remove.isPending} className="rounded-lg bg-crimson px-2.5 py-1.5 font-semibold text-white">Remove</button>
-            <button onClick={() => setConfirmRemove(false)} className="rounded-lg bg-white/10 px-2.5 py-1.5 text-white/70">Cancel</button>
+            <button onClick={doRemove} disabled={remove.isPending} className="rounded-lg bg-crimson px-3 py-2.5 font-semibold text-white">Remove</button>
+            <button onClick={() => setConfirmRemove(false)} className="rounded-lg bg-white/10 px-3 py-2.5 text-white/70">Cancel</button>
           </div>
         ) : (
-          <button onClick={() => setConfirmRemove(true)} aria-label="Remove friend" title="Remove friend" className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-white/5">
+          <button onClick={() => setConfirmRemove(true)} aria-label="Remove friend" title="Remove friend" className="h-11 w-11 flex items-center justify-center rounded-full hover:bg-white/5">
             <UserMinus className="h-4 w-4 text-white/50" />
           </button>
         )}
@@ -140,7 +140,7 @@ export function ChatView({ friendshipId, meId, onBack }: { friendshipId: string;
 
       <form
         onSubmit={(e) => { e.preventDefault(); submit(); }}
-        className="flex items-end gap-2 border-t border-white/10 p-3"
+        className="flex items-end gap-2 border-t border-white/10 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
       >
         <textarea
           value={text}
