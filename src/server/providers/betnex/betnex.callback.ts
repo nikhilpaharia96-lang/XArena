@@ -45,7 +45,8 @@ const callbackSchema = z.object({
   game_uid: text.refine((s) => s.length > 0 && s.length <= 128),
   game_round: text.refine((s) => s.length > 0 && s.length <= 128),
   serial_number: text.refine((s) => s.length > 0 && s.length <= 128),
-  currency_code: z.string().trim().min(1).max(10),
+  // Optional: the wallet is INR-only, so an absent currency means INR. A present, non-INR one is refused below.
+  currency_code: z.string().trim().min(1).max(10).optional(),
   bet_amount: money,
   win_amount: money,
 });
@@ -151,7 +152,7 @@ export function handleBetnexCallback(rawBody: string, clientIp: string | null, d
     log.warn("callback_api_key_mismatch");
     return done(reject("Invalid callback"), { outcome: "API_KEY_MISMATCH" });
   }
-  if (p.currency_code.toUpperCase() !== WALLET_CURRENCY) {
+  if (p.currency_code !== undefined && p.currency_code.toUpperCase() !== WALLET_CURRENCY) {
     return done(reject("Unsupported currency"), { outcome: "UNSUPPORTED_CURRENCY", error: p.currency_code });
   }
 
