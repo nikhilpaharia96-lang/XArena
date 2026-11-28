@@ -89,6 +89,31 @@ export interface BucketSplit {
   winning: number;
 }
 
+
+/**
+ * One settlement event of a provider that reports bets and wins as SEPARATE, possibly signed,
+ * callbacks (e.g. BETNEX: `new_balance = balance - bet_amount + win_amount`, negative = refund).
+ * The caller splits the signed numbers: bet>0 → stakePaise, bet<0 → stakeRefundPaise,
+ * win>0 → winPaise, win<0 → winReversalPaise. All integers >= 0.
+ */
+export interface ApplyEventInput {
+  provider: string;
+  providerTransactionId: string;
+  userId: string;
+  /** Groups the events of one game round (stake accounting is per round). */
+  roundKey: string;
+  providerGameId?: string | null;
+  currency: string;
+  stakePaise: number;
+  stakeRefundPaise: number;
+  winPaise: number;
+  winReversalPaise: number;
+  metadata?: Record<string, unknown>;
+}
+
+const ZERO = (): BucketSplit => ({ bonus: 0, deposit: 0, winning: 0 });
+const sumSplit = (s: BucketSplit) => s.bonus + s.deposit + s.winning;
+
 const MAX_PAISE = 1_000_000_000_00; // 1e9 rupees — sanity cap against corrupt/hostile payloads
 
 export function assertPaise(n: number, label: string): void {
@@ -360,7 +385,189 @@ export function createProviderWallet(database: Database.Database) {
     return run.immediate();
   }
 
-  return { getBalance, applyRound, rollback };
+
+  /** Stake still "out" in a round: what stakes took from each bucket minus what has been returned so far. */
+  function outstandingStake(provider: string, userId: string, roundKey: string): BucketSplit {
+    const rows = database
+      .prepare("SELECT metadata FROM ProviderTransaction WHERE provider = ? AND userId = ? AND roundId = ? AND status = 'APPLIED'")
+      .all(provider, userId, roundKey) as { metadata: string | null }[];
+    const out = ZERO();
+    for (const r of rows) {
+      if (!r.metadata) continue;
+      try {
+        const m = JSON.parse(r.metadata) as { stakeDebit?: BucketSplit; stakeReturn?: BucketSplit };
+        for (const k of ["bonus", "deposit", "winning"] as const) out[k] += (m.stakeDebit?.[k] ?? 0) - (m.stakeReturn?.[k] ?? 0);
+      } catch {
+        /* a malformed metadata row contributes nothing */
+      }
+    }
+    for (const k of ["bonus", "deposit", "winning"] as const) out[k] = Math.max(0, out[k]);
+    return out;
+  }
+
+  /**
+   * Round-aware settlement for providers that send the bet and the win in separate callbacks.
+   *
+   * The same accounting policy as applyRound, but kept per ROUND instead of per call, so it does not
+   * matter whether a round arrives as one callback or as bet + win later:
+   *  - stake is debited bonus -> deposit -> winning, and remembered per round and bucket;
+   *  - a win first returns the round's outstanding stake to the buckets it came from (pro rata);
+   *    only the profit beyond that stake is credited to winningBalance. So deposit/bonus money can
+   *    never become withdrawable just by being bet and "won back";
+   *  - a stake refund (negative bet) returns to the original buckets too;
+   *  - a win reversal (negative win) is clawed back winning -> deposit -> bonus; if the player has
+   *    already spent it we take what is there and record the shortfall (never a negative bucket).
+   * Idempotent on (provider, providerTransactionId), atomic in one transaction.
+   *
+   * ORDERING ASSUMPTION: within a round the stake arrives before its win (a provider only continues a
+   * round after our reply to the bet). A win that arrives with no stake on record is treated as pure
+   * profit — correct for provider-funded free rounds, and it is the only safe reading when we can't know.
+   */
+  function applyRoundEvent(input: ApplyEventInput): ApplyResult {
+    assertPaise(input.stakePaise, "stake");
+    assertPaise(input.stakeRefundPaise, "stake refund");
+    assertPaise(input.winPaise, "win");
+    assertPaise(input.winReversalPaise, "win reversal");
+    if (!input.providerTransactionId) throw new WalletError("INVALID_AMOUNT", "transaction id required");
+    if (!input.roundKey) throw new WalletError("INVALID_AMOUNT", "round key required");
+
+    const betRaw = input.stakePaise - input.stakeRefundPaise;
+    const winRaw = input.winPaise - input.winReversalPaise;
+
+    const run = database.transaction((): ApplyResult => {
+      const existing = findPtxn(input.provider, input.providerTransactionId);
+      if (existing) {
+        if (existing.status === "ROLLED_BACK") {
+          return { outcome: "IGNORED_ROLLED_BACK", balancePaise: total(readWallet(existing.userId)) };
+        }
+        if (existing.userId !== input.userId || existing.betAmount !== betRaw || existing.winAmount !== winRaw) {
+          throw new WalletError("TRANSACTION_CONFLICT", "Transaction id reused with a different payload");
+        }
+        return { outcome: "DUPLICATE", balancePaise: existing.balanceAfter ?? total(readWallet(existing.userId)) };
+      }
+
+      const nowIso = new Date().toISOString();
+      const start = readWallet(input.userId);
+      const w: WalletRow = { ...start };
+      const outstanding = outstandingStake(input.provider, input.userId, input.roundKey);
+
+      const debit = ZERO();
+      const credit = ZERO();
+      const stakeDebit = ZERO();
+      const stakeReturn = ZERO();
+      let profit = 0;
+      let unrecovered = 0;
+
+      // 1) stake placed
+      if (input.stakePaise > 0) {
+        if (total(w) < input.stakePaise) throw new WalletError("INSUFFICIENT_FUNDS", "Insufficient wallet balance");
+        let left = input.stakePaise;
+        for (const [bucket, key] of [["bonusBalance", "bonus"], ["depositBalance", "deposit"], ["winningBalance", "winning"]] as const) {
+          const take = Math.min(w[bucket], left);
+          w[bucket] -= take;
+          left -= take;
+          debit[key] += take;
+          stakeDebit[key] += take;
+          outstanding[key] += take;
+        }
+      }
+      const afterStake = total(start) - input.stakePaise;
+
+      // returns `amount` of outstanding stake to its original buckets; reports how much was actually stake
+      const returnStake = (amount: number): number => {
+        const back = Math.min(amount, sumSplit(outstanding));
+        const alloc = allocateProRata(back, outstanding);
+        for (const [bucket, key] of [["bonusBalance", "bonus"], ["depositBalance", "deposit"], ["winningBalance", "winning"]] as const) {
+          w[bucket] += alloc[key];
+          credit[key] += alloc[key];
+          stakeReturn[key] += alloc[key];
+          outstanding[key] -= alloc[key];
+        }
+        return back;
+      };
+
+      // 2) stake refunded — back to the buckets it came from; any excess (refund > known stake) stays play-only
+      if (input.stakeRefundPaise > 0) {
+        const back = returnStake(input.stakeRefundPaise);
+        const extra = input.stakeRefundPaise - back;
+        if (extra > 0) {
+          w.depositBalance += extra;
+          credit.deposit += extra;
+        }
+      }
+      const afterRefund = afterStake + input.stakeRefundPaise;
+
+      // 3) win paid — stake first, only the profit is withdrawable
+      if (input.winPaise > 0) {
+        const stakeBack = returnStake(input.winPaise);
+        profit = input.winPaise - stakeBack;
+        w.winningBalance += profit;
+        credit.winning += profit;
+      }
+      const afterWin = afterRefund + input.winPaise;
+
+      // 4) win reversed — claw back from winning first
+      if (input.winReversalPaise > 0) {
+        let left = input.winReversalPaise;
+        for (const [bucket, key] of [["winningBalance", "winning"], ["depositBalance", "deposit"], ["bonusBalance", "bonus"]] as const) {
+          const take = Math.min(w[bucket], left);
+          w[bucket] -= take;
+          left -= take;
+          debit[key] += take;
+        }
+        unrecovered = left;
+      }
+
+      const finalBalance = total(w);
+      writeWallet(input.userId, w, nowIso);
+
+      const prefix = input.provider.toUpperCase();
+      const meta = { provider: input.provider, providerTransactionId: input.providerTransactionId, roundId: input.roundKey, providerGameId: input.providerGameId ?? null };
+      if (input.stakePaise > 0) insertLedger(input.userId, "GAME_BET", input.stakePaise, afterStake, `${prefix}-${input.providerTransactionId}-BET`, "Casino game bet", meta, nowIso);
+      if (input.stakeRefundPaise > 0) insertLedger(input.userId, "GAME_ROLLBACK", input.stakeRefundPaise, afterRefund, `${prefix}-${input.providerTransactionId}-RFD`, "Casino bet refunded", meta, nowIso);
+      if (input.winPaise > 0) insertLedger(input.userId, "GAME_WIN", input.winPaise, afterWin, `${prefix}-${input.providerTransactionId}-WIN`, "Casino game win", { ...meta, profit }, nowIso);
+      if (input.winReversalPaise > 0) {
+        insertLedger(input.userId, "GAME_WIN_REVERSAL", input.winReversalPaise - unrecovered, finalBalance, `${prefix}-${input.providerTransactionId}-REV`, "Casino win reversed", { ...meta, unrecovered }, nowIso);
+      }
+
+      database
+        .prepare(
+          `INSERT INTO ProviderTransaction
+             (id, provider, providerTransactionId, userId, providerGameId, roundId, betAmount, winAmount, currency,
+              status, roundFinished, balanceAfter, metadata, createdAt, processedAt)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'APPLIED', 0, ?, ?, ?, ?)`
+        )
+        .run(
+          createId("ptx"),
+          input.provider,
+          input.providerTransactionId,
+          input.userId,
+          input.providerGameId ?? null,
+          input.roundKey,
+          betRaw,
+          winRaw,
+          input.currency,
+          finalBalance,
+          JSON.stringify({ ...(input.metadata ?? {}), debit, credit, stakeDebit, stakeReturn, profit, unrecovered }),
+          nowIso,
+          nowIso
+        );
+
+      return { outcome: "APPLIED", balancePaise: finalBalance };
+    });
+
+    try {
+      return run.immediate();
+    } catch (e) {
+      if (e instanceof Error && e.message.includes("UNIQUE constraint failed: ProviderTransaction")) {
+        const existing = findPtxn(input.provider, input.providerTransactionId);
+        if (existing) return { outcome: "DUPLICATE", balancePaise: existing.balanceAfter ?? total(readWallet(existing.userId)) };
+      }
+      throw e;
+    }
+  }
+
+  return { getBalance, applyRound, applyRoundEvent, rollback };
 }
 
 export type ProviderWallet = ReturnType<typeof createProviderWallet>;

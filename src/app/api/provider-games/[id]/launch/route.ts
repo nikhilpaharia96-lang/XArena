@@ -5,6 +5,10 @@ import { checkRateLimit, getClientKey } from "@/server/lib/rate-limit";
 import { createRuntimeClient } from "@/server/providers/astech/astech.runtime";
 import { getPublicAppUrl, isAsTechConfigured } from "@/server/providers/astech/astech.config";
 import { launchGame } from "@/server/providers/astech/astech.service";
+import { isBetnexConfigured } from "@/server/providers/betnex/betnex.config";
+import { createRuntimeClient as createBetnexClient } from "@/server/providers/betnex/betnex.runtime";
+import { launchBetnexGame } from "@/server/providers/betnex/betnex.service";
+import { providerWallet } from "@/server/providers/wallet.instance";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -22,21 +26,41 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
     const { allowed } = checkRateLimit(`launch:${getClientKey(req)}:${user.id}`, 10, 60_000);
     if (!allowed) throw new ApiError(429, "Too many requests. Please slow down.", "RATE_LIMITED");
 
-    if (!isAsTechConfigured()) throw new ApiError(503, "Games are not available yet.", "PROVIDER_NOT_CONFIGURED");
-
     const { id } = await context.params;
     const body = bodySchema.parse(await req.json().catch(() => ({})));
-    const row = db.prepare("SELECT uid FROM User WHERE id = ?").get(user.id) as { uid: string } | undefined;
-    if (!row) throw new ApiError(401, "Account not found.", "UNAUTHENTICATED");
 
-    const result = await launchGame({
-      db,
-      client: createRuntimeClient(),
-      user: { id: user.id, uid: row.uid },
-      gameId: id,
-      language: body.language,
-      appUrl: getPublicAppUrl(),
-    });
+    // The game row decides which provider launches it; the client never names a provider.
+    const game = db.prepare("SELECT provider FROM ProviderGame WHERE id = ?").get(id) as { provider: string } | undefined;
+    if (!game) throw new ApiError(404, "This game is not available.", "GAME_NOT_FOUND");
+
+    let result: { gameUrl: string; embeddable: boolean; singleUse: boolean; expiresIn: number | null; mode: string | null; category: string | null };
+
+    if (game.provider === "betnex") {
+      if (!isBetnexConfigured()) throw new ApiError(503, "Games are not available yet.", "PROVIDER_NOT_CONFIGURED");
+      const ua = req.headers.get("user-agent") ?? "";
+      result = await launchBetnexGame({
+        db,
+        client: createBetnexClient(),
+        wallet: providerWallet,
+        user: { id: user.id },
+        gameId: id,
+        language: body.language,
+        platform: /Mobi|Android|iPhone|iPad/i.test(ua) ? 2 : 1,
+        appUrl: getPublicAppUrl(),
+      });
+    } else {
+      if (!isAsTechConfigured()) throw new ApiError(503, "Games are not available yet.", "PROVIDER_NOT_CONFIGURED");
+      const row = db.prepare("SELECT uid FROM User WHERE id = ?").get(user.id) as { uid: string } | undefined;
+      if (!row) throw new ApiError(401, "Account not found.", "UNAUTHENTICATED");
+      result = await launchGame({
+        db,
+        client: createRuntimeClient(),
+        user: { id: user.id, uid: row.uid },
+        gameId: id,
+        language: body.language,
+        appUrl: getPublicAppUrl(),
+      });
+    }
 
     const res = ok({
       gameUrl: result.gameUrl,

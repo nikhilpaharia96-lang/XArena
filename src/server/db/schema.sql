@@ -482,6 +482,16 @@ CREATE INDEX IF NOT EXISTS idx_ptxn_status ON ProviderTransaction(status);
 CREATE INDEX IF NOT EXISTS idx_ptxn_round ON ProviderTransaction(provider, roundId);
 CREATE INDEX IF NOT EXISTS idx_ptxn_created ON ProviderTransaction(createdAt);
 
+-- Per-provider external login for a user (e.g. BETNEX needs lowercase alphanumeric usernames carrying our code).
+CREATE TABLE IF NOT EXISTS ProviderPlayer (
+  provider  TEXT NOT NULL,
+  userId    TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,
+  login     TEXT NOT NULL,
+  createdAt TEXT NOT NULL,
+  PRIMARY KEY (provider, userId),
+  UNIQUE (provider, login)
+);
+
 CREATE TABLE IF NOT EXISTS ProviderCallbackLog (
   id                    TEXT PRIMARY KEY,
   provider              TEXT NOT NULL,

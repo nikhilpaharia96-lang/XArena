@@ -105,3 +105,66 @@ export function useToggleGame() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "astech"] }),
   });
 }
+
+// ---------------------------------------------------------------------------
+// BETNEX
+// ---------------------------------------------------------------------------
+
+export interface BetnexStatus {
+  provider: string;
+  configured: boolean;
+  testMode: boolean;
+  config: {
+    apiBaseUrl: string;
+    apiKeyConfigured: boolean;
+    usernameCode: string | null;
+    usernamePosition: "prefix" | "suffix";
+    encryptionConfigured: boolean;
+    callbackIpCount: number;
+    publicAppUrl: string | null;
+    callbackUrl: string | null;
+    publicUrlIsHttps: boolean;
+  };
+  catalogue: {
+    total: number;
+    enabled: number;
+    available: number;
+    lastSync: { at: string; ok: boolean; providers: number; failedProviders: number; total: number; created: number; updated: number; markedUnavailable: number; error?: string } | null;
+  };
+  providers: { providerName: string; total: number; enabled: number }[];
+  categories: string[];
+  lastRequest: { ok: number; httpStatus: number | null; errorKind: string | null; createdAt: string } | null;
+  recentCallbacks: { outcome: string; httpStatus: number; error: string | null; createdAt: string }[];
+  problemCallbacks24h: number;
+  failedRequests24h: number;
+  notes: string[];
+}
+
+const bkey = ["admin", "betnex", "status"];
+
+export const useBetnexStatus = () => useQuery<BetnexStatus>({ queryKey: bkey, queryFn: () => api.get("/api/admin/providers/betnex") });
+
+export function useBetnexTest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<{ ok: boolean; durationMs: number; providerCount: number; error?: string; errorKind?: string }>("/api/admin/providers/betnex/test"),
+    onSettled: () => qc.invalidateQueries({ queryKey: bkey }),
+  });
+}
+
+export function useBetnexSync() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post("/api/admin/providers/betnex/sync"),
+    onSettled: () => qc.invalidateQueries({ queryKey: bkey }),
+  });
+}
+
+export function useBetnexEnable() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { enabled: boolean; providerName?: string; category?: string; all?: boolean }) =>
+      api.post<{ changed: number }>("/api/admin/providers/betnex/enable", input),
+    onSettled: () => qc.invalidateQueries({ queryKey: bkey }),
+  });
+}

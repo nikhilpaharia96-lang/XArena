@@ -2,6 +2,8 @@ import { db } from "@/server/db/client";
 import { fail, ok } from "@/server/lib/api-response";
 import { refreshCatalogueIfStale } from "@/server/providers/astech/astech.refresh";
 import { PROVIDER_ID, WALLET_CURRENCY } from "@/server/providers/astech/astech.config";
+import { PROVIDER_ID as BETNEX_ID, isBetnexConfigured } from "@/server/providers/betnex/betnex.config";
+import { refreshBetnexCatalogueIfStale } from "@/server/providers/betnex/betnex.refresh";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,9 @@ interface Row {
 export async function GET(req: Request) {
   try {
     refreshCatalogueIfStale();
+    refreshBetnexCatalogueIfStale();
+    // Games of every provider that is set up. BETNEX rows exist only once synced AND enabled by an admin.
+    const providers = isBetnexConfigured() ? [PROVIDER_ID, BETNEX_ID] : [PROVIDER_ID];
     const url = new URL(req.url);
     const category = url.searchParams.get("category");
     const search = url.searchParams.get("search")?.trim().slice(0, 60);
@@ -29,10 +34,10 @@ export async function GET(req: Request) {
     const rows = db
       .prepare(
         `SELECT id, title, providerName, category, imageUrl, currencies FROM ProviderGame
-         WHERE provider = ? AND isEnabled = 1 AND isAvailable = 1
+         WHERE provider IN (${providers.map(() => "?").join(",")}) AND isEnabled = 1 AND isAvailable = 1
          ORDER BY providerName ASC, title ASC`
       )
-      .all(PROVIDER_ID) as Row[];
+      .all(...providers) as Row[];
 
     let games = rows.filter((r) => {
       try {

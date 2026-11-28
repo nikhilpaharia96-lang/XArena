@@ -162,6 +162,7 @@ model User {
   reviewedDepositRequests DepositRequest[] @relation("DepositRequestReviewer")
   withdrawRequests WithdrawRequest[]
   bankAccounts     BankAccount[]
+  providerPlayers  ProviderPlayer[]
   participations   TournamentParticipant[]
   matchResults     MatchResult[]
   notifications    Notification[]
@@ -542,6 +543,17 @@ model AuditLog {
 // src/server/db/schema.sql. Provider-agnostic via the `provider` column.
 // Money is integer paise, like the rest of the schema.
 // ---------------------------------------------------------------------------
+
+model ProviderPlayer {
+  provider  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  login     String
+  createdAt DateTime
+
+  @@id([provider, userId])
+  @@unique([provider, login])
+}
 
 model ProviderGame {
   id             String   @id @default(cuid())

@@ -13,6 +13,7 @@ import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
 import { formatDateTime, formatPaiseExact } from "@/lib/format";
 import { categoryLabel } from "@/components/games/provider-games-section";
+import { BetnexPanel } from "@/components/admin/betnex-panel";
 import {
   useAsTechGames,
   useAsTechLogs,
@@ -189,7 +190,7 @@ function LogsTab({ type }: { type: "callbacks" | "requests" }) {
   );
 }
 
-export default function AdminProviderPage() {
+function AsTechPanel() {
   const { data: s, isLoading } = useAsTechStatus();
   const test = useTestConnection();
   const sync = useSyncGames();
@@ -275,6 +276,31 @@ export default function AdminProviderPage() {
           {tab === "Request logs" && <LogsTab type="requests" />}
         </Card>
       </div>
+    </div>
+  );
+}
+
+const PROVIDERS = ["AS Tech", "BETNEX"] as const;
+
+export default function AdminProviderPage() {
+  const [provider, setProvider] = useState<(typeof PROVIDERS)[number]>("AS Tech");
+  return (
+    <div className="space-y-6">
+      <div role="tablist" aria-label="Game provider" className="inline-flex rounded-xl bg-surface-2 border border-white/10 p-0.5 text-sm font-semibold">
+        {PROVIDERS.map((p) => (
+          <button
+            key={p}
+            type="button"
+            role="tab"
+            aria-selected={provider === p}
+            onClick={() => setProvider(p)}
+            className={cn("rounded-lg px-4 py-1.5 transition-colors", provider === p ? "bg-cobalt text-white" : "text-white/60")}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+      {provider === "AS Tech" ? <AsTechPanel /> : <BetnexPanel />}
     </div>
   );
 }
