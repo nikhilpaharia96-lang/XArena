@@ -144,6 +144,12 @@ const bkey = ["admin", "betnex", "status"];
 
 export const useBetnexStatus = () => useQuery<BetnexStatus>({ queryKey: bkey, queryFn: () => api.get("/api/admin/providers/betnex") });
 
+export interface ServerIp { ip: string | null; source: string | null; error?: string; checkedAt: string }
+
+/** This server's public outbound IP (what providers see). Not cached: it can change after a deploy. */
+export const useServerIp = () =>
+  useQuery<ServerIp>({ queryKey: ["admin", "server-ip"], queryFn: () => api.get("/api/admin/providers/betnex/server-ip"), staleTime: 0, gcTime: 0, retry: false, refetchOnWindowFocus: false });
+
 export function useBetnexTest() {
   const qc = useQueryClient();
   return useMutation({

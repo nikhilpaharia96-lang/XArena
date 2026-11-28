@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/lib/toast-store";
 import { ApiClientError } from "@/lib/api-client";
 import { formatDateTime } from "@/lib/format";
-import { useBetnexEnable, useBetnexStatus, useBetnexSync, useBetnexTest } from "@/hooks/use-provider-admin";
+import { useBetnexEnable, useBetnexStatus, useBetnexSync, useBetnexTest, useServerIp } from "@/hooks/use-provider-admin";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -36,6 +36,7 @@ export function BetnexPanel() {
   const test = useBetnexTest();
   const sync = useBetnexSync();
   const enable = useBetnexEnable();
+  const serverIp = useServerIp();
   const [filter, setFilter] = useState("");
 
   const providers = useMemo(() => {
@@ -83,6 +84,29 @@ export function BetnexPanel() {
         <Skeleton className="h-64 rounded-2xl" />
       ) : (
         <>
+          <Card className="p-4 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-bold text-white text-sm">Server IP (outbound)</h2>
+              <Button variant="secondary" size="sm" loading={serverIp.isFetching} onClick={() => serverIp.refetch()}>
+                <RefreshCw className="h-3.5 w-3.5" /> Check again
+              </Button>
+            </div>
+            {serverIp.isLoading ? (
+              <Skeleton className="h-9 w-48 rounded-lg" />
+            ) : serverIp.data?.ip ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <code className="rounded-lg bg-surface-2 border border-white/10 px-3 py-1.5 text-base font-mono font-bold text-white">{serverIp.data.ip}</code>
+                <Button variant="secondary" size="sm" onClick={() => copy(serverIp.data!.ip!)}><Copy className="h-3.5 w-3.5" /> Copy</Button>
+              </div>
+            ) : (
+              <p className="text-sm text-crimson">{serverIp.data?.error ?? "Couldn't detect the server IP. Try again."}</p>
+            )}
+            <p className="text-xs text-white/50">
+              This is the address BETNEX sees when we call its API. Enter it in the IP Address field on the BETNEX dashboard.
+              On Railway Hobby it can change after any deploy or restart. If game list or launch suddenly fails, check this again and update the IP on BETNEX.
+            </p>
+          </Card>
+
           {s.notes.length > 0 && (
             <Card className="p-4 space-y-2 border-gold/30">
               <div className="flex items-center gap-2 text-gold text-sm font-bold"><TriangleAlert className="h-4 w-4" /> Before you go live</div>
